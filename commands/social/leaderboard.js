@@ -16,7 +16,7 @@ module.exports = {
                     { name: 'VEX Balance', value: 'vexBalance' },
                     { name: 'Bank Balance', value: 'bankBalance' },
                     { name: 'Total Earned', value: 'totalEarned' },
-                    { name: 'Total Gambled', value: 'totalGambled' },
+                    { name: 'Total Entertainment Played', value: 'totalGambled' },
                     { name: 'Total Invested', value: 'totalInvested' },
                     { name: 'Games Played', value: 'gamesPlayed' },
                     { name: 'Trades Completed', value: 'tradesCompleted' }
@@ -62,7 +62,7 @@ module.exports = {
             vexBalance: 'VEX Balance',
             bankBalance: 'Bank Balance',
             totalEarned: 'Total Earned',
-            totalGambled: 'Total Gambled',
+            totalGambled: 'Total Entertainment Played',
             totalInvested: 'Total Invested',
             gamesPlayed: 'Games Played',
             tradesCompleted: 'Trades Completed'

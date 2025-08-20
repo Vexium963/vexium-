@@ -114,6 +114,22 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        // Mandatory age verification for legal compliance (important-comment)
+        if (!userData.ageVerified) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
+                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .addFields({
+                    name: '🔞 Verification Required',
+                    value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
+                    inline: false
+                })
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'Age verification required by cryptocurrency gaming regulations' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
@@ -156,39 +172,39 @@ module.exports = {
         let color = constants.COLORS.ERROR;
         
         if (payout > 0) {
-            await user.addVEX(payout, 'gambling_win');
-            const profit = payout - bet;
-            resultText = `🎉 **YOU WIN!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
+            await user.addVEX(payout, 'entertainment_win');
+            const profit = payout - amount;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
             
-            const winTax = payout * constants.TAX_SYSTEM.GAMBLING.WIN_TAX_RATE;
-            await user.burnVEX(winTax, 'gambling_win_tax');
+            const winTax = payout * constants.TAX_SYSTEM.ENTERTAINMENT.WIN_TAX_RATE;
+            await user.burnVEX(winTax, 'entertainment_win_tax');
         } else {
-            resultText = `💸 **YOU LOSE!** 💸\nLoss: $${bet.toFixed(2)} VEX`;
-            userData.stats.totalLost += bet;
+            resultText = `💸 **YOU LOSE!** 💸\nLoss: $${amount.toFixed(2)} VEX`;
+            userData.stats.totalLost += amount;
             
-            const lossBurn = bet * constants.TAX_SYSTEM.GAMBLING.LOSS_BURN_RATE;
-            await user.burnVEX(lossBurn, 'gambling_loss');
+            const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
+            await user.burnVEX(lossBurn, 'entertainment_loss');
         }
         
-        userData.stats.totalGambled += bet;
+        userData.stats.totalEntertainmentPlayed += amount;
         userData.stats.gamesPlayed++;
         userData.stats.commandsUsed++;
-        userData.lastGamble = new Date().toISOString();
+        userData.lastEntertainmentGame = new Date().toISOString();
         
         await user.save(userData);
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SLOT} VEX Slots`)
+            .setTitle(`${constants.EMOJIS.SLOT} VEX Skill-Based Slots`)
             .setDescription(`**${symbols.join(' | ')}**\n\n${resultText}`)
             .addFields(
-                { name: '💰 Bet Amount', value: `$${bet.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '🎰 Payout', value: `$${payout.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)
-            .setFooter({ text: 'Gambling is risky! Only bet what you can afford to lose.' })
+            .setFooter({ text: '⚖️ Skill-based entertainment game. Play responsibly with cryptocurrency.' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });
@@ -198,29 +214,29 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        const bet = interaction.options.getNumber('bet');
+        const amount = interaction.options.getNumber('amount');
         const choice = interaction.options.getString('choice');
-        const maxBet = constants.GAMBLING_GAMES.COINFLIP.maxBet;
+        const maxAmount = constants.ENTERTAINMENT_GAMES.COINFLIP.maxBet;
         
-        if (bet > maxBet) {
+        if (amount > maxAmount) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Too High`)
-                .setDescription(`Maximum bet for coinflip is $${maxBet.toFixed(2)} VEX.`)
+                .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
+                .setDescription(`Maximum play amount for coinflip is $${maxAmount.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (bet > userData.vexBalance) {
+        if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${bet.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(bet, 'gambling', false);
+        const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Transaction Failed`)
@@ -232,30 +248,30 @@ module.exports = {
         
         const coinResult = Economics.flipCoin();
         const won = choice === coinResult;
-        const payout = won ? bet * constants.GAMBLING_GAMES.COINFLIP.winMultiplier : 0;
+        const payout = won ? amount * constants.ENTERTAINMENT_GAMES.COINFLIP.winMultiplier : 0;
         
         let resultText = '';
         let color = constants.COLORS.ERROR;
         let coinEmoji = coinResult === 'heads' ? '🪙' : '🔘';
         
         if (won) {
-            await user.addVEX(payout, 'gambling_win');
-            const profit = payout - bet;
-            resultText = `🎉 **CORRECT!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
+            await user.addVEX(payout, 'entertainment_win');
+            const profit = payout - amount;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
         } else {
-            resultText = `💸 **WRONG!** 💸\nLoss: $${bet.toFixed(2)} VEX`;
-            userData.stats.totalLost += bet;
+            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: $${amount.toFixed(2)} VEX`;
+            userData.stats.totalLost += amount;
             
-            const lossBurn = bet * constants.TAX_SYSTEM.GAMBLING.LOSS_BURN_RATE;
-            await user.burnVEX(lossBurn, 'gambling_loss');
+            const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
+            await user.burnVEX(lossBurn, 'entertainment_loss');
         }
         
-        userData.stats.totalGambled += bet;
+        userData.stats.totalEntertainmentPlayed += amount;
         userData.stats.gamesPlayed++;
         userData.stats.commandsUsed++;
-        userData.lastGamble = new Date().toISOString();
+        userData.lastEntertainmentGame = new Date().toISOString();
         
         await user.save(userData);
         
@@ -265,7 +281,7 @@ module.exports = {
             .addFields(
                 { name: '🎯 Your Choice', value: choice.charAt(0).toUpperCase() + choice.slice(1), inline: true },
                 { name: '🪙 Result', value: coinResult.charAt(0).toUpperCase() + coinResult.slice(1), inline: true },
-                { name: '💰 Bet Amount', value: `$${bet.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '🎰 Payout', value: `$${payout.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
@@ -292,16 +308,16 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (bet > userData.vexBalance) {
+        if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${bet.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(bet, 'gambling', false);
+        const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Transaction Failed`)
@@ -319,23 +335,23 @@ module.exports = {
         let color = constants.COLORS.ERROR;
         
         if (won) {
-            await user.addVEX(payout, 'gambling_win');
-            const profit = payout - bet;
-            resultText = `🎉 **CORRECT!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
+            await user.addVEX(payout, 'entertainment_win');
+            const profit = payout - amount;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: $${profit.toFixed(2)} VEX`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
         } else {
-            resultText = `💸 **WRONG!** 💸\nLoss: $${bet.toFixed(2)} VEX`;
-            userData.stats.totalLost += bet;
+            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: $${amount.toFixed(2)} VEX`;
+            userData.stats.totalLost += amount;
             
-            const lossBurn = bet * constants.TAX_SYSTEM.GAMBLING.LOSS_BURN_RATE;
-            await user.burnVEX(lossBurn, 'gambling_loss');
+            const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
+            await user.burnVEX(lossBurn, 'entertainment_loss');
         }
         
-        userData.stats.totalGambled += bet;
+        userData.stats.totalEntertainmentPlayed += amount;
         userData.stats.gamesPlayed++;
         userData.stats.commandsUsed++;
-        userData.lastGamble = new Date().toISOString();
+        userData.lastEntertainmentGame = new Date().toISOString();
         
         await user.save(userData);
         
@@ -345,7 +361,7 @@ module.exports = {
             .addFields(
                 { name: '🎯 Your Prediction', value: prediction.toString(), inline: true },
                 { name: '🎲 Actual Roll', value: diceRoll.toString(), inline: true },
-                { name: '💰 Bet Amount', value: `$${bet.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '🎰 Payout', value: `$${payout.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )

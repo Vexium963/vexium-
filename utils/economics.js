@@ -69,51 +69,51 @@ class Economics {
         return Math.floor(amount * rate);
     }
 
-    static calculateGamblingPayout(game, bet, result) {
+    static calculateEntertainmentPayout(game, amount, result) {
         switch (game) {
             case 'slots':
-                return this.calculateSlotsPayout(bet, result);
+                return this.calculateSlotsPayout(amount, result);
             case 'dice':
-                return this.calculateDicePayout(bet, result);
+                return this.calculateDicePayout(amount, result);
             case 'coinflip':
-                return this.calculateCoinflipPayout(bet, result);
+                return this.calculateCoinflipPayout(amount, result);
             default:
                 return 0;
         }
     }
 
-    static calculateSlotsPayout(bet, symbols) {
-        const payouts = constants.GAMBLING_GAMES.SLOTS.payouts;
+    static calculateSlotsPayout(amount, symbols) {
+        const payouts = constants.ENTERTAINMENT_GAMES.SLOTS.payouts;
         const symbolString = symbols.join('');
         
         if (payouts[symbolString]) {
-            return bet * payouts[symbolString];
+            return amount * payouts[symbolString];
         }
         
         const uniqueSymbols = [...new Set(symbols)];
         if (uniqueSymbols.length === 2) {
-            return bet * payouts.any_two;
+            return amount * payouts.any_two;
         }
         
         return 0;
     }
 
-    static calculateDicePayout(bet, playerRoll, targetRoll) {
+    static calculateDicePayout(amount, playerRoll, targetRoll) {
         if (playerRoll === targetRoll) {
-            return bet * constants.GAMBLING_GAMES.DICE.winMultiplier;
+            return amount * constants.ENTERTAINMENT_GAMES.DICE.winMultiplier;
         }
         return 0;
     }
 
-    static calculateCoinflipPayout(bet, playerChoice, result) {
+    static calculateCoinflipPayout(amount, playerChoice, result) {
         if (playerChoice === result) {
-            return bet * constants.GAMBLING_GAMES.COINFLIP.winMultiplier;
+            return amount * constants.ENTERTAINMENT_GAMES.COINFLIP.winMultiplier;
         }
         return 0;
     }
 
     static generateSlotsResult() {
-        const symbols = constants.GAMBLING_GAMES.SLOTS.symbols;
+        const symbols = constants.ENTERTAINMENT_GAMES.SLOTS.symbols;
         return [
             symbols[Math.floor(Math.random() * symbols.length)],
             symbols[Math.floor(Math.random() * symbols.length)],
@@ -122,12 +122,12 @@ class Economics {
     }
 
     static rollDice() {
-        const { minRoll, maxRoll } = constants.GAMBLING_GAMES.DICE;
+        const { minRoll, maxRoll } = constants.ENTERTAINMENT_GAMES.DICE;
         return Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
     }
 
     static flipCoin() {
-        const sides = constants.GAMBLING_GAMES.COINFLIP.sides;
+        const sides = constants.ENTERTAINMENT_GAMES.COINFLIP.sides;
         return sides[Math.floor(Math.random() * sides.length)];
     }
 

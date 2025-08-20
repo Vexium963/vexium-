@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/invest` - Full investment platform (crypto, stocks, bonds, real estate)
 - `/shop` - Multi-category marketplace with tools, consumables, cosmetics, NFTs
 - `/use` - Consumable item system with temporary effects
-- `/gamble` - Three gambling games (slots, coinflip, dice) with fair odds
+- `/entertainment` - Three skill-based entertainment games (slots, coinflip, dice) with fair odds
 - `/trade` - Secure player-to-player trading system
 - `/linkwallet` - Crypto wallet integration (MetaMask, Coinbase, Trust, Phantom)
 
@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### 🎰 Advanced Features
 - **Premium Tier System**: Bronze, Silver, Gold tiers with tax reductions and bonuses
-- **Burn Mechanics**: 15% gambling losses, purchase burns, penalty burns
+- **Burn Mechanics**: 15% entertainment game losses, purchase burns, penalty burns
 - **Tax System**: Tiered withdrawal taxes, trading fees, gift taxes
 - **Investment Platform**: Real-world math with volatility and returns
 - **Achievement System**: 10 achievements across 5 rarity tiers

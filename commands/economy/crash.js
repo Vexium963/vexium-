@@ -157,7 +157,7 @@ module.exports = {
         const winnings = game.betAmount * game.currentMultiplier;
         await user.addVEX(winnings, 'crash_win');
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.GAMBLING.HOUSE_EDGE;
+        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'crash_house_edge');
         
         userData.stats.crashGames = (userData.stats.crashGames || 0) + 1;
@@ -195,7 +195,7 @@ module.exports = {
         const user = new User(game.userId);
         const userData = await user.load();
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.GAMBLING.HOUSE_EDGE;
+        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'crash_house_edge');
         
         userData.stats.crashGames = (userData.stats.crashGames || 0) + 1;

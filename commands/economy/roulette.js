@@ -94,7 +94,7 @@ module.exports = {
             await user.addVEX(winnings, 'roulette_win');
         }
         
-        const burnAmount = betAmount * constants.TAX_SYSTEM.GAMBLING.HOUSE_EDGE;
+        const burnAmount = betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'roulette_house_edge');
         
         userData.stats.rouletteSpins = (userData.stats.rouletteSpins || 0) + 1;

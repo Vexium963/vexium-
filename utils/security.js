@@ -144,7 +144,7 @@ class Security {
             case 'large_transaction':
                 data.score += 5;
                 break;
-            case 'gambling_spree':
+            case 'entertainment_spree':
                 data.score += 15;
                 break;
             case 'multiple_trades':

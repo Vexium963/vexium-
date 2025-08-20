@@ -29,7 +29,7 @@ class Progression {
             case 'millionaire':
                 return userData.networth >= 1000000;
             
-            case 'gambler':
+            case 'entertainment_player':
                 return userData.stats.gamesPlayed >= 50;
             
             case 'trader':

@@ -20,7 +20,7 @@ module.exports = {
                     value: '• **USD-Pegged VEX Tokens** - Real value economy\n' +
                            '• **Advanced Banking** - Earn interest on deposits\n' +
                            '• **Investment Platform** - Crypto, stocks, bonds, real estate\n' +
-                           '• **Gambling Games** - Slots, coinflip, dice with fair odds\n' +
+                           '• **Entertainment Games** - Skill-based slots, coinflip, dice (21+ verified)\n' +
                            '• **Social Features** - Profiles, gifts, leaderboards\n' +
                            '• **Premium Tiers** - Reduced taxes and exclusive perks',
                     inline: false

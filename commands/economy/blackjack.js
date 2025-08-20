@@ -277,7 +277,7 @@ module.exports = {
             await user.addVEX(winnings, 'blackjack_win');
         }
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.GAMBLING.HOUSE_EDGE;
+        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         if (result !== 'push') {
             await user.burnVEX(burnAmount, 'blackjack_house_edge');
         }

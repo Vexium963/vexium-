@@ -45,7 +45,7 @@
 
 ### 🎰 **Entertainment Hub**
 
-- 🎲 **Multiple Gambling Games**: Slots, coin flip, dice with fair odds
+- 🎲 **Skill-Based Entertainment Games**: Slots, coin flip, dice with strategic elements (21+ verification required)
 - 📊 **Advanced Statistics**: Win rates, profit tracking, responsible limits
 - 🏆 **Achievement System**: 50+ achievements with progression rewards
 
@@ -132,7 +132,7 @@ docker run -d --env-file .env vexiumverse-bot
 | `/work`  | Work various jobs to earn VexCoins       | `/work [job]`            |
 | `/wallet`| Check balance and statistics             | `/wallet [user]`         |
 | `/invest`| Manage investment portfolio              | `/invest buy crypto 1000`|
-| `/gamble`| Try luck with slots, dice, coinflip      | `/gamble slots 100`      |
+| `/entertainment`| Play skill-based games: slots, dice, coinflip | `/entertainment slots 100` |
 
 </details>
 

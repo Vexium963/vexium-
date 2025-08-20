@@ -89,7 +89,7 @@ class DatabaseMigration {
                     userData.stats = {
                         totalEarned: 0,
                         totalSpent: 0,
-                        totalGambled: 0,
+                        totalEntertainmentPlayed: 0,
                         totalWon: 0,
                         totalLost: 0,
                         commandsUsed: 0,

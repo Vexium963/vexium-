@@ -278,7 +278,7 @@ module.exports = {
         const allUsers = await User.getLeaderboard('networth', 1000);
         const totalUsers = allUsers.length;
         const totalVEX = allUsers.reduce((sum, user) => sum + (user.networth || 0), 0);
-        const totalGambled = allUsers.reduce((sum, user) => sum + (user.stats?.totalGambled || 0), 0);
+        const totalEntertainmentPlayed = allUsers.reduce((sum, user) => sum + (user.stats?.totalGambled || 0), 0);
         const totalInvested = allUsers.reduce((sum, user) => sum + (user.stats?.totalInvested || 0), 0);
         const activeUsers = allUsers.filter(user => 
             new Date(user.lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -294,7 +294,7 @@ module.exports = {
                 { name: '🟢 Active Users (7d)', value: activeUsers.toString(), inline: true },
                 { name: '🏛️ Servers', value: interaction.client.guilds.cache.size.toString(), inline: true },
                 { name: '💰 Total VEX in Circulation', value: `$${totalVEX.toFixed(2)}`, inline: true },
-                { name: '🎰 Total Gambled', value: `$${totalGambled.toFixed(2)}`, inline: true },
+                { name: '🎮 Total Entertainment Games', value: `$${totalEntertainmentPlayed.toFixed(2)}`, inline: true },
                 { name: '📈 Total Invested', value: `$${totalInvested.toFixed(2)}`, inline: true },
                 { name: '🏛️ Treasury Balance', value: `$${treasuryData.balance.toFixed(2)}`, inline: true },
                 { name: '⏰ Bot Uptime', value: this.formatUptime(interaction.client.uptime), inline: true },

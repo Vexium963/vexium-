@@ -38,7 +38,7 @@ module.exports = {
             .setDescription(`**The Ultimate Discord Economy with Real USD-Pegged VEX Tokens**\n\n` +
                 `You've been given **$${constants.VEX_TOKEN.STARTING_BALANCE.toFixed(2)} VEX** to start your journey!\n\n` +
                 `${constants.EMOJIS.VEX} **VEX Token**: 1 VEX = $1 USD (pegged)\n` +
-                `${constants.EMOJIS.MONEY} **Earn Real Value**: Work, invest, trade, and gamble\n` +
+                `${constants.EMOJIS.MONEY} **Earn Real Value**: Work, invest, trade, and play skill-based entertainment games\n` +
                 `${constants.EMOJIS.BANK} **Banking System**: Deposit for interest and security\n` +
                 `${constants.EMOJIS.CHART} **Investments**: Crypto, stocks, bonds, real estate\n` +
                 `${constants.EMOJIS.TROPHY} **Achievements**: Unlock rewards and bonuses\n` +
@@ -67,7 +67,7 @@ module.exports = {
                 .setTitle(`${constants.EMOJIS.INFO} Getting Started Guide`)
                 .setDescription('Here are the essential commands to begin earning VEX:')
                 .addFields(
-                    { name: '💰 Economy', value: '`/daily` `/work` `/invest` `/gamble`', inline: true },
+                    { name: '💰 Economy', value: '`/daily` `/work` `/invest` `/entertainment`', inline: true },
                     { name: '🏦 Banking', value: '`/deposit` `/withdraw` `/bank`', inline: true },
                     { name: '👥 Social', value: '`/profile` `/gift` `/leaderboard`', inline: true },
                     { name: '🛍️ Shopping', value: '`/shop` `/use` `/trade`', inline: true },

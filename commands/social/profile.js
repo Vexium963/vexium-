@@ -45,7 +45,7 @@ module.exports = {
                             { name: 'Busy', value: 'Busy' },
                             { name: 'Investing', value: 'Investing' },
                             { name: 'Trading', value: 'Trading' },
-                            { name: 'Gambling', value: 'Gambling' }
+                            { name: 'Playing Games', value: 'Playing Games' }
                         ))),
     
     async execute(interaction) {
@@ -247,7 +247,7 @@ module.exports = {
             'Busy': '🔴',
             'Investing': '📈',
             'Trading': '🤝',
-            'Gambling': '🎲'
+            'Playing Games': '🎮'
         };
         
         const embed = new EmbedBuilder()

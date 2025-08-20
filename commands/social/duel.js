@@ -15,8 +15,8 @@ module.exports = {
                         .setDescription('Player to challenge')
                         .setRequired(true))
                 .addNumberOption(option =>
-                    option.setName('wager')
-                        .setDescription('VEX amount to wager')
+                    option.setName('prize_amount')
+                        .setDescription('VEX amount to compete for')
                         .setRequired(true)
                         .setMinValue(1))
                 .addStringOption(option =>
@@ -84,7 +84,7 @@ module.exports = {
         const userData = await user.load();
         
         const opponent = interaction.options.getUser('opponent');
-        const wager = interaction.options.getNumber('wager');
+        const prizeAmount = interaction.options.getNumber('prize_amount');
         const duelType = interaction.options.getString('type') || 'rps';
         
         if (opponent.id === interaction.user.id) {
@@ -105,10 +105,10 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (wager > userData.vexBalance) {
+        if (prizeAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${wager.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${prizeAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -117,10 +117,10 @@ module.exports = {
         const opponentUser = new User(opponent.id);
         const opponentData = await opponentUser.load();
         
-        if (wager > opponentData.vexBalance) {
+        if (prizeAmount > opponentData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Opponent Insufficient Funds`)
-                .setDescription(`**${opponent.username}** doesn't have enough VEX for this wager.`)
+                .setDescription(`**${opponent.username}** doesn't have enough VEX for this competition.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -131,7 +131,7 @@ module.exports = {
             id: duelId,
             challenger: interaction.user.id,
             opponent: opponent.id,
-            wager,
+            prizeAmount,
             type: duelType,
             status: 'pending',
             createdAt: Date.now(),
@@ -157,7 +157,7 @@ module.exports = {
             .setDescription(`You've challenged **${opponent.username}** to a duel!`)
             .addFields(
                 { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
-                { name: '💰 Wager', value: `$${wager.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Prize Pool', value: `$${prizeAmount.toFixed(2)} VEX`, inline: true },
                 { name: '🆔 Duel ID', value: duelId, inline: true },
                 { name: '⏰ Expires', value: `<t:${Math.floor(duel.expiresAt / 1000)}:R>`, inline: true }
             )
@@ -174,7 +174,7 @@ module.exports = {
                 .setDescription(`**${interaction.user.username}** has challenged you to a duel!`)
                 .addFields(
                     { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
-                    { name: '💰 Wager', value: `$${wager.toFixed(2)} VEX`, inline: true },
+                    { name: '💰 Prize Pool', value: `$${prizeAmount.toFixed(2)} VEX`, inline: true },
                     { name: '🆔 Duel ID', value: duelId, inline: true }
                 )
                 .setColor(constants.COLORS.WARNING)
@@ -221,10 +221,10 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (duel.wager > userData.vexBalance) {
+        if (duel.prizeAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${duel.wager.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${duel.prizeAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -233,10 +233,10 @@ module.exports = {
         const challenger = new User(duel.challenger);
         const challengerData = await challenger.load();
         
-        if (duel.wager > challengerData.vexBalance) {
+        if (duel.prizeAmount > challengerData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Challenger Insufficient Funds`)
-                .setDescription('The challenger no longer has enough VEX for this duel.')
+                .setDescription('The challenger no longer has enough VEX for this competition.')
                 .setColor(constants.COLORS.ERROR);
             
             this.deleteDuel(duelId);
@@ -305,7 +305,7 @@ module.exports = {
                 const timeLeft = this.formatTimeLeft(duel.expiresAt - Date.now());
                 
                 return `**${duel.id}** - ${otherPlayer}: <@${isChallenger ? duel.opponent : duel.challenger}>\n` +
-                       `Type: ${duel.type} | Wager: $${duel.wager.toFixed(2)} VEX | Expires: ${timeLeft}`;
+                       `Type: ${duel.type} | Prize: $${duel.prizeAmount.toFixed(2)} VEX | Expires: ${timeLeft}`;
             }).join('\n\n');
             
             embed.addFields({
@@ -388,8 +388,8 @@ module.exports = {
         const challengerData = await challenger.load();
         const opponentData = await opponent.load();
         
-        await challenger.removeVEX(duel.wager, 'duel_wager', false);
-        await opponent.removeVEX(duel.wager, 'duel_wager', false);
+        await challenger.removeVEX(duel.prizeAmount, 'duel_entry', false);
+        await opponent.removeVEX(duel.prizeAmount, 'duel_entry', false);
         
         const result = this.playDuelGame(duel.type);
         const winner = result.winner === 'challenger' ? challenger : opponent;
@@ -397,7 +397,7 @@ module.exports = {
         const winnerData = result.winner === 'challenger' ? challengerData : opponentData;
         const loserData = result.winner === 'challenger' ? opponentData : challengerData;
         
-        const totalPot = duel.wager * 2;
+        const totalPot = duel.prizeAmount * 2;
         const houseEdge = totalPot * 0.05;
         const winnings = totalPot - houseEdge;
         
@@ -406,8 +406,8 @@ module.exports = {
         
         winnerData.stats.duelsWon = (winnerData.stats.duelsWon || 0) + 1;
         loserData.stats.duelsLost = (loserData.stats.duelsLost || 0) + 1;
-        winnerData.stats.duelEarnings = (winnerData.stats.duelEarnings || 0) + (winnings - duel.wager);
-        loserData.stats.duelEarnings = (loserData.stats.duelEarnings || 0) - duel.wager;
+        winnerData.stats.duelEarnings = (winnerData.stats.duelEarnings || 0) + (winnings - duel.prizeAmount);
+        loserData.stats.duelEarnings = (loserData.stats.duelEarnings || 0) - duel.prizeAmount;
         
         await challenger.save(challengerData);
         await opponent.save(opponentData);

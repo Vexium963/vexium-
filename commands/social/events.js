@@ -352,13 +352,13 @@ module.exports = {
             {
                 id: 'lucky_streak',
                 name: 'Lucky Streak',
-                description: 'Win 10 gambling games in a row',
+                description: 'Win 10 skill-based entertainment games in a row',
                 type: 'Challenge',
                 icon: '🎲',
                 participants: 892,
                 endTime: Date.now() + (3 * 24 * 60 * 60 * 1000),
                 target: 10,
-                objective: 'Win consecutive gambling games',
+                objective: 'Win consecutive skill-based entertainment games',
                 rewards: '$250 VEX + Lucky Charm',
                 rewardAmount: 250
             }

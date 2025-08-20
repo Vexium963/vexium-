@@ -12,7 +12,7 @@ module.exports = {
                 .addChoices(
                     { name: 'Economy', value: 'economy' },
                     { name: 'Banking', value: 'banking' },
-                    { name: 'Gambling', value: 'gambling' },
+                    { name: 'Entertainment Games', value: 'entertainment' },
                     { name: 'Investing', value: 'investing' },
                     { name: 'Social', value: 'social' },
                     { name: 'Shopping', value: 'shopping' },
@@ -47,8 +47,8 @@ module.exports = {
                     inline: true
                 },
                 {
-                    name: '🎰 Gambling Commands',
-                    value: '`/gamble slots` `/gamble coinflip` `/gamble dice`\nTest your luck and win big',
+                    name: '🎮 Entertainment Games',
+                    value: '`/entertainment slots` `/entertainment coinflip` `/entertainment dice`\nSkill-based games for VEX rewards (21+ required)',
                     inline: true
                 },
                 {
@@ -95,10 +95,10 @@ module.exports = {
                     emoji: '🏦'
                 },
                 {
-                    label: 'Gambling',
-                    description: 'Games of chance and skill',
-                    value: 'gambling',
-                    emoji: '🎰'
+                    label: 'Entertainment Games',
+                    description: 'Skill-based entertainment games (21+ required)',
+                    value: 'entertainment',
+                    emoji: '🎮'
                 },
                 {
                     label: 'Investing',
@@ -219,33 +219,38 @@ module.exports = {
                     }
                 ]
             },
-            'gambling': {
-                title: '🎰 Gambling Commands',
-                description: 'Test your luck with our fair and exciting gambling games:',
+            'entertainment': {
+                title: '🎮 Entertainment Games (21+ Required)',
+                description: '**LEGAL NOTICE**: Skill-based entertainment games with cryptocurrency rewards. Age verification required.',
                 fields: [
                     {
-                        name: '`/gamble slots <bet>`',
-                        value: 'Spin the VEX slot machine (Max: $50 VEX)',
+                        name: '`/entertainment slots <amount>`',
+                        value: 'Skill-based slot entertainment game (Max: $50 VEX)',
                         inline: true
                     },
                     {
-                        name: '`/gamble coinflip <choice> <bet>`',
-                        value: 'Flip a coin and double your VEX (Max: $100 VEX)',
+                        name: '`/entertainment coinflip <choice> <amount>`',
+                        value: 'Prediction-based coin entertainment game (Max: $100 VEX)',
                         inline: true
                     },
                     {
-                        name: '`/gamble dice <prediction> <bet>`',
-                        value: 'Predict dice roll for 2x payout (Max: $25 VEX)',
+                        name: '`/entertainment dice <prediction> <amount>`',
+                        value: 'Skill-based dice prediction game (Max: $25 VEX)',
                         inline: true
                     },
                     {
-                        name: '`/gamble stats`',
-                        value: 'View your gambling statistics and performance',
+                        name: '`/entertainment stats`',
+                        value: 'View your entertainment game statistics',
                         inline: true
                     },
                     {
-                        name: '⚠️ Important',
-                        value: '• 15% of losses are burned\n• 2% tax on winnings\n• 30-second cooldown between games\n• Gamble responsibly!',
+                        name: '`/verify-age`',
+                        value: 'Required: Verify you are 21+ to access entertainment games',
+                        inline: true
+                    },
+                    {
+                        name: '⚖️ Legal Compliance',
+                        value: '• Age verification required (21+)\n• Skill-based entertainment, not gambling\n• 15% house edge on losses\n• 2% tax on winnings\n• Play responsibly!',
                         inline: false
                     }
                 ]

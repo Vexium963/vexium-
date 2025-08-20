@@ -120,7 +120,7 @@ module.exports = {
                 withdrawalTaxReduction: 0.01,
                 dailyBonus: 1.25,
                 workBonus: 1.15,
-                gamblingLossReduction: 0.05
+                entertainmentLossReduction: 0.05
             },
             badge: '🥉'
         },
@@ -131,7 +131,7 @@ module.exports = {
                 withdrawalTaxReduction: 0.02,
                 dailyBonus: 1.50,
                 workBonus: 1.25,
-                gamblingLossReduction: 0.10,
+                entertainmentLossReduction: 0.10,
                 exclusiveItems: true
             },
             badge: '🥈'
@@ -143,7 +143,7 @@ module.exports = {
                 withdrawalTaxReduction: 0.03,
                 dailyBonus: 2.00,
                 workBonus: 1.50,
-                gamblingLossReduction: 0.15,
+                entertainmentLossReduction: 0.15,
                 exclusiveItems: true,
                 prioritySupport: true
             },
@@ -228,7 +228,7 @@ module.exports = {
             luck_potion: { 
                 name: 'Fortune Elixir', 
                 price: 2.00, 
-                description: 'Increases gambling win rate by 10% for 1 hour', 
+                description: 'Increases entertainment game win rate by 10% for 1 hour', 
                 effect: 'luck_boost', 
                 value: 0.1,
                 burnRate: 0.15
@@ -347,7 +347,7 @@ module.exports = {
         { id: 'first_steps', name: 'First Steps', description: 'Welcome to VexiumVerse!', reward: 1.00, icon: '👶', rarity: 'common' },
         { id: 'worker', name: 'Hard Worker', description: 'Complete 10 work sessions', reward: 5.00, icon: '⚒️', rarity: 'common' },
         { id: 'millionaire', name: 'VEX Millionaire', description: 'Reach $1,000 VEX networth', reward: 100.00, icon: '💰', rarity: 'legendary' },
-        { id: 'gambler', name: 'High Roller', description: 'Play 50 gambling games', reward: 10.00, icon: '🎲', rarity: 'uncommon' },
+        { id: 'entertainer', name: 'High Roller', description: 'Play 50 skill-based entertainment games', reward: 10.00, icon: '🎲', rarity: 'uncommon' },
         { id: 'trader', name: 'Master Trader', description: 'Complete 25 trades', reward: 20.00, icon: '🤝', rarity: 'rare' },
         { id: 'generous', name: 'Philanthropist', description: 'Send 100 gifts', reward: 50.00, icon: '🎁', rarity: 'epic' },
         { id: 'level_master', name: 'Level Legend', description: 'Reach level 50', reward: 150.00, icon: '🏆', rarity: 'legendary' },

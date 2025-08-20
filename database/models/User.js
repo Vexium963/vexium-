@@ -27,7 +27,7 @@ class User {
             lastDaily: null,
             dailyStreak: 0,
             lastWork: null,
-            lastGamble: null,
+            lastEntertainmentGame: null,
             lastWithdraw: null,
             job: null,
             jobLevel: 1,
@@ -54,7 +54,7 @@ class User {
             stats: {
                 totalEarned: 0.00,
                 totalSpent: 0.00,
-                totalGambled: 0.00,
+                totalEntertainmentPlayed: 0.00,
                 totalWon: 0.00,
                 totalLost: 0.00,
                 totalInvested: 0.00,
@@ -412,8 +412,8 @@ class User {
                         return (b.bankBalance || 0) - (a.bankBalance || 0);
                     case 'totalEarned':
                         return (b.stats?.totalEarned || 0) - (a.stats?.totalEarned || 0);
-                    case 'totalGambled':
-                        return (b.stats?.totalGambled || 0) - (a.stats?.totalGambled || 0);
+                    case 'totalEntertainmentPlayed':
+                        return (b.stats?.totalEntertainmentPlayed || 0) - (a.stats?.totalEntertainmentPlayed || 0);
                     case 'totalInvested':
                         return (b.stats?.totalInvested || 0) - (a.stats?.totalInvested || 0);
                     default:
