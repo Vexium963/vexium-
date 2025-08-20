@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 
@@ -95,11 +95,70 @@ module.exports = {
             });
         }
         
+        const categorySelect = new StringSelectMenuBuilder()
+            .setCustomId('leaderboard_category_select')
+            .setPlaceholder('📊 Switch leaderboard category')
+            .addOptions([
+                { label: 'Net Worth', description: 'Total VEX value owned', value: 'networth', emoji: '💰' },
+                { label: 'Level', description: 'User experience level', value: 'level', emoji: '🎯' },
+                { label: 'VEX Balance', description: 'Current wallet balance', value: 'vexBalance', emoji: '💳' },
+                { label: 'Bank Balance', description: 'Banked VEX amount', value: 'bankBalance', emoji: '🏦' },
+                { label: 'Total Earned', description: 'Lifetime VEX earned', value: 'totalEarned', emoji: '📈' },
+                { label: 'Entertainment Played', description: 'VEX spent on games', value: 'totalEntertainmentPlayed', emoji: '🎮' },
+                { label: 'Total Invested', description: 'Investment portfolio value', value: 'totalInvested', emoji: '📊' },
+                { label: 'Games Played', description: 'Entertainment games count', value: 'gamesPlayed', emoji: '🎲' },
+                { label: 'Trades Completed', description: 'Successful trade count', value: 'tradesCompleted', emoji: '🤝' }
+            ]);
+
+        const navigationButtons = new ActionRowBuilder();
         if (totalPages > 1) {
-            embed.setFooter({ text: `Page ${page}/${totalPages} • Use /leaderboard category:${category} page:${page + 1} for next page` });
+            navigationButtons.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`leaderboard_page_${category}_${Math.max(1, page - 1)}`)
+                    .setLabel('◀️ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(page === 1),
+                new ButtonBuilder()
+                    .setCustomId(`leaderboard_page_info`)
+                    .setLabel(`Page ${page}/${totalPages}`)
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId(`leaderboard_page_${category}_${Math.min(totalPages, page + 1)}`)
+                    .setLabel('Next ▶️')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(page === totalPages)
+            );
+        }
+
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`leaderboard_refresh_${category}_${page}`)
+                    .setLabel('🔄 Refresh')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('leaderboard_my_stats')
+                    .setLabel('📊 My Stats')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('leaderboard_top_10')
+                    .setLabel('🏆 Top 10')
+                    .setStyle(ButtonStyle.Success)
+            );
+
+        const components = [new ActionRowBuilder().addComponents(categorySelect), actionButtons];
+        if (totalPages > 1) {
+            components.splice(1, 0, navigationButtons);
+        }
+
+        if (totalPages > 1) {
+            embed.setFooter({ text: `Page ${page}/${totalPages} • Use the buttons below to navigate` });
+        } else {
+            embed.setFooter({ text: 'Select a different category to view other rankings' });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed], components });
         
         currentUserData.stats.commandsUsed++;
         await currentUser.save(currentUserData);

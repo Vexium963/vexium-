@@ -72,33 +72,99 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHOP} ${category.charAt(0).toUpperCase() + category.slice(1)} Shop`)
             .setDescription(`Browse ${category} available for purchase`)
-            .setColor(constants.COLORS.PRIMARY);
+            .setColor(constants.COLORS.PRIMARY)
+            .setThumbnail('https://cdn.discordapp.com/emojis/1234567890123456789.png');
+
+        const itemEntries = Object.entries(items);
+        const itemsPerPage = 5;
+        const totalPages = Math.ceil(itemEntries.length / itemsPerPage);
+        const currentPage = 1;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const pageItems = itemEntries.slice(startIndex, startIndex + itemsPerPage);
         
-        for (const [itemId, item] of Object.entries(items)) {
-            let fieldValue = `**Price**: $${item.price.toFixed(2)} VEX\n${item.description}`;
+        for (const [itemId, item] of pageItems) {
+            let fieldValue = `💰 **$${item.price.toFixed(2)} VEX**\n${item.description}`;
             
             if (item.effect) {
-                fieldValue += `\n**Effect**: ${item.effect}`;
+                fieldValue += `\n✨ **Effect**: ${item.effect}`;
             }
             
             if (item.burnRate) {
-                fieldValue += `\n**Burn Rate**: ${(item.burnRate * 100).toFixed(0)}%`;
+                fieldValue += `\n🔥 **Burn Rate**: ${(item.burnRate * 100).toFixed(0)}%`;
             }
             
             if (item.supply) {
-                fieldValue += `\n**Limited Supply**: ${item.supply} available`;
+                fieldValue += `\n📦 **Stock**: ${item.supply} remaining`;
             }
             
             embed.addFields({
-                name: `${item.name} (${itemId})`,
+                name: `${item.name}`,
                 value: fieldValue,
-                inline: false
+                inline: true
             });
         }
+
+        const navigationButtons = new ActionRowBuilder();
         
-        embed.setFooter({ text: 'Use /shop buy <item_id> to purchase' });
+        if (totalPages > 1) {
+            navigationButtons.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`shop_page_${category}_${currentPage - 1}`)
+                    .setLabel('◀️ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(currentPage === 1),
+                new ButtonBuilder()
+                    .setCustomId(`shop_page_info_${category}`)
+                    .setLabel(`Page ${currentPage}/${totalPages}`)
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId(`shop_page_${category}_${currentPage + 1}`)
+                    .setLabel('Next ▶️')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(currentPage === totalPages)
+            );
+        }
+
+        const quickBuySelect = new StringSelectMenuBuilder()
+            .setCustomId(`shop_quick_buy_${category}`)
+            .setPlaceholder('🛒 Quick purchase an item')
+            .addOptions(
+                pageItems.map(([itemId, item]) => ({
+                    label: item.name,
+                    description: `$${item.price.toFixed(2)} VEX - ${item.description.substring(0, 50)}...`,
+                    value: itemId,
+                    emoji: '🛍️'
+                }))
+            );
+
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('shop_back_categories')
+                    .setLabel('← Back to Categories')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('🏠'),
+                new ButtonBuilder()
+                    .setCustomId('shop_inventory')
+                    .setLabel('My Inventory')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('📦'),
+                new ButtonBuilder()
+                    .setCustomId(`shop_sort_${category}`)
+                    .setLabel('Sort Items')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('🔄')
+            );
+
+        const components = [new ActionRowBuilder().addComponents(quickBuySelect), actionButtons];
+        if (totalPages > 1) {
+            components.unshift(navigationButtons);
+        }
         
-        await interaction.reply({ embeds: [embed] });
+        embed.setFooter({ text: `Page ${currentPage}/${totalPages} • Select an item below to purchase` });
+        
+        await interaction.reply({ embeds: [embed], components });
     },
     
     async handleBuy(interaction) {
@@ -259,10 +325,64 @@ module.exports = {
                 }
             )
             .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'Use /shop browse <category> to view items' })
+            .setFooter({ text: 'Select a category below to browse items' })
             .setTimestamp();
+
+        const categorySelect = new StringSelectMenuBuilder()
+            .setCustomId('shop_category_select')
+            .setPlaceholder('🛍️ Choose a shop category')
+            .addOptions([
+                {
+                    label: 'Tools',
+                    description: 'Permanent upgrades and equipment',
+                    value: 'tools',
+                    emoji: '🔧'
+                },
+                {
+                    label: 'Consumables',
+                    description: 'Temporary boosts and effects',
+                    value: 'consumables',
+                    emoji: '⚡'
+                },
+                {
+                    label: 'Cosmetics',
+                    description: 'Profile customization items',
+                    value: 'cosmetics',
+                    emoji: '🎨'
+                },
+                {
+                    label: 'NFTs',
+                    description: 'Limited edition collectibles',
+                    value: 'nft',
+                    emoji: '🖼️'
+                }
+            ]);
+
+        const quickActionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('shop_inventory')
+                    .setLabel('My Inventory')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📦'),
+                new ButtonBuilder()
+                    .setCustomId('shop_featured')
+                    .setLabel('Featured Items')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('⭐'),
+                new ButtonBuilder()
+                    .setCustomId('shop_deals')
+                    .setLabel('Daily Deals')
+                    .setStyle(ButtonStyle.Success)
+                    .setEmoji('💰')
+            );
+
+        const selectRow = new ActionRowBuilder().addComponents(categorySelect);
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [selectRow, quickActionButtons] 
+        });
     },
     
     findItem(itemId) {

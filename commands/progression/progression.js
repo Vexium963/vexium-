@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const Progression = require('../../utils/progression');
@@ -99,18 +99,61 @@ module.exports = {
             { name: '💰 Net Worth', value: `$${userData.networth.toFixed(2)} VEX`, inline: true }
         );
         
+        const progressButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('progression_jobs')
+                    .setLabel('🔍 View All Jobs')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('progression_achievements')
+                    .setLabel('🏆 Achievements')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('progression_prestige')
+                    .setLabel('👑 Prestige Info')
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(!prestigeInfo.canPrestige)
+            );
+
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('progression_refresh')
+                    .setLabel('🔄 Refresh')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('progression_compare')
+                    .setLabel('📊 Compare Stats')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('progression_goals')
+                    .setLabel('🎯 Set Goals')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
         embed.setFooter({ text: 'Keep playing to unlock new features and higher-paying jobs!' });
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [progressButtons, actionButtons] 
+        });
         
         userData.stats.commandsUsed++;
         await user.save(userData);
     },
     
-    createProgressBar(progress, length = 10) {
+    createProgressBar(progress, length = 20) {
         const filled = Math.floor(progress * length);
         const empty = length - filled;
+        const percentage = Math.floor(progress * 100);
         
-        return '█'.repeat(filled) + '░'.repeat(empty) + ` ${Math.floor(progress * 100)}%`;
+        let progressEmoji = '🟩';
+        if (percentage < 25) progressEmoji = '🟥';
+        else if (percentage < 50) progressEmoji = '🟨';
+        else if (percentage < 75) progressEmoji = '🟧';
+        
+        const bar = '█'.repeat(filled) + '░'.repeat(empty);
+        return `${progressEmoji} ${bar} **${percentage}%**`;
     }
 };
