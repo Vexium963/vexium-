@@ -1,0 +1,182 @@
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const User = require('../../database/models/User');
+const constants = require('../../utils/constants');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('withdraw')
+        .setDescription('Withdraw VEX tokens from your bank account')
+        .addNumberOption(option =>
+            option.setName('amount')
+                .setDescription('Amount of VEX to withdraw')
+                .setRequired(true)
+                .setMinValue(0.01))
+        .addBooleanOption(option =>
+            option.setName('force')
+                .setDescription('Force withdraw locked deposits (with penalty)')
+                .setRequired(false)),
+    
+    cooldown: 30,
+    
+    async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const amount = interaction.options.getNumber('amount');
+        const force = interaction.options.getBoolean('force') || false;
+        
+        if (amount > userData.bankBalance) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.ERROR} Insufficient Bank Funds`)
+                .setDescription(`You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.`)
+                .setColor(constants.COLORS.ERROR);
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        const now = Date.now();
+        const lastWithdraw = userData.lastWithdraw ? new Date(userData.lastWithdraw).getTime() : 0;
+        const timeSinceLastWithdraw = now - lastWithdraw;
+        
+        if (timeSinceLastWithdraw < constants.COOLDOWNS.WITHDRAW) {
+            const timeLeft = constants.COOLDOWNS.WITHDRAW - timeSinceLastWithdraw;
+            const minutesLeft = Math.floor(timeLeft / (60 * 1000));
+            
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.COOLDOWN} Withdrawal Cooldown`)
+                .setDescription(`You can withdraw again in **${minutesLeft} minutes**.`)
+                .setColor(constants.COLORS.WARNING);
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        let availableAmount = 0;
+        let lockedAmount = 0;
+        let earlyWithdrawalPenalty = 0;
+        
+        if (userData.bankDeposits) {
+            for (const deposit of userData.bankDeposits) {
+                if (deposit.locked && deposit.unlockDate && new Date(deposit.unlockDate) > new Date()) {
+                    lockedAmount += deposit.amount;
+                    if (force) {
+                        earlyWithdrawalPenalty += deposit.amount * 0.10;
+                    }
+                } else {
+                    availableAmount += deposit.amount;
+                }
+            }
+        } else {
+            availableAmount = userData.bankBalance;
+        }
+        
+        if (amount > availableAmount && !force) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Funds Locked`)
+                .setDescription(`Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n$${lockedAmount.toFixed(2)} VEX is locked in term deposits.`)
+                .addFields(
+                    { name: '💡 Options', value: 'Use `force: true` to withdraw locked funds with 10% penalty', inline: false }
+                )
+                .setColor(constants.COLORS.WARNING);
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        if (amount > availableAmount + lockedAmount) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
+                .setDescription(`You don't have enough funds in your bank account.`)
+                .setColor(constants.COLORS.ERROR);
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        const taxResult = user.calculateTax(userData, amount, 'withdrawal');
+        const totalCost = amount + taxResult.taxAmount + earlyWithdrawalPenalty;
+        
+        if (totalCost > userData.bankBalance) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Fees`)
+                .setDescription(`Total cost including taxes and penalties: $${totalCost.toFixed(2)} VEX`)
+                .addFields(
+                    { name: '💰 Withdrawal', value: `$${amount.toFixed(2)}`, inline: true },
+                    { name: '💸 Tax', value: `$${taxResult.taxAmount.toFixed(2)}`, inline: true },
+                    { name: '⚠️ Penalty', value: `$${earlyWithdrawalPenalty.toFixed(2)}`, inline: true }
+                )
+                .setColor(constants.COLORS.ERROR);
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        userData.bankBalance -= totalCost;
+        userData.vexBalance += amount;
+        userData.lastWithdraw = new Date().toISOString();
+        userData.stats.totalWithdrawn += amount;
+        userData.stats.totalTaxesPaid += taxResult.taxAmount;
+        userData.stats.withdrawalCount++;
+        userData.stats.commandsUsed++;
+        
+        if (taxResult.taxAmount > 0) {
+            await user.addToTreasury(taxResult.taxAmount, 'withdrawal_tax');
+            user.logTax(userData, taxResult.taxAmount, 'withdrawal');
+        }
+        
+        if (earlyWithdrawalPenalty > 0) {
+            await user.addToTreasury(earlyWithdrawalPenalty, 'early_withdrawal_penalty');
+            user.logBurn(userData, earlyWithdrawalPenalty, 'early_withdrawal');
+        }
+        
+        if (userData.bankDeposits) {
+            let remainingAmount = totalCost;
+            userData.bankDeposits = userData.bankDeposits.filter(deposit => {
+                if (remainingAmount <= 0) return true;
+                
+                if (deposit.amount <= remainingAmount) {
+                    remainingAmount -= deposit.amount;
+                    return false;
+                } else {
+                    deposit.amount -= remainingAmount;
+                    remainingAmount = 0;
+                    return true;
+                }
+            });
+        }
+        
+        user.logTransaction(userData, 'withdrawal', amount, 'bank_withdrawal', taxResult.taxAmount);
+        
+        await user.save(userData);
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`${constants.EMOJIS.SUCCESS} Withdrawal Successful!`)
+            .setDescription(`You've withdrawn **$${amount.toFixed(2)} VEX** from your bank account!`)
+            .addFields(
+                { name: '💰 Withdrawn Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Tax Paid', value: `$${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Tax Rate', value: `${(taxResult.effectiveRate * 100).toFixed(2)}%`, inline: true },
+                { name: '💼 New Wallet Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '🏦 Remaining Bank Balance', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true }
+            )
+            .setColor(constants.COLORS.SUCCESS)
+            .setTimestamp();
+        
+        if (earlyWithdrawalPenalty > 0) {
+            embed.addFields({
+                name: '⚠️ Early Withdrawal Penalty',
+                value: `$${earlyWithdrawalPenalty.toFixed(2)} VEX (10%)`,
+                inline: true
+            });
+        }
+        
+        if (userData.premiumTier) {
+            const tier = constants.PREMIUM_TIERS[userData.premiumTier.toUpperCase()];
+            embed.addFields({
+                name: `${constants.EMOJIS.PREMIUM} Premium Benefit`,
+                value: `Tax reduced by ${(tier.benefits.withdrawalTaxReduction * 100).toFixed(1)}%`,
+                inline: false
+            });
+        }
+        
+        embed.setFooter({ text: 'Taxes support the VexiumVerse treasury and ecosystem' });
+        
+        await interaction.reply({ embeds: [embed] });
+    }
+};

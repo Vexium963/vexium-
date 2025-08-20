@@ -1,0 +1,63 @@
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const constants = require('../../utils/constants');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('ping')
+        .setDescription('Check bot latency and system status'),
+    
+    async execute(interaction) {
+        const sent = await interaction.reply({ 
+            content: `${constants.EMOJIS.LOADING} Pinging...`, 
+            fetchReply: true 
+        });
+        
+        const botLatency = sent.createdTimestamp - interaction.createdTimestamp;
+        const apiLatency = Math.round(interaction.client.ws.ping);
+        
+        let statusColor = constants.COLORS.SUCCESS;
+        let statusText = 'Excellent';
+        
+        if (botLatency > 200 || apiLatency > 200) {
+            statusColor = constants.COLORS.WARNING;
+            statusText = 'Good';
+        }
+        
+        if (botLatency > 500 || apiLatency > 500) {
+            statusColor = constants.COLORS.ERROR;
+            statusText = 'Poor';
+        }
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`${constants.EMOJIS.SUCCESS} VexiumVerse Status`)
+            .setDescription('Bot performance and connection status')
+            .addFields(
+                { name: '🤖 Bot Latency', value: `${botLatency}ms`, inline: true },
+                { name: '🌐 API Latency', value: `${apiLatency}ms`, inline: true },
+                { name: '📊 Status', value: statusText, inline: true },
+                { name: '⏰ Uptime', value: this.formatUptime(interaction.client.uptime), inline: true },
+                { name: '🏛️ Servers', value: interaction.client.guilds.cache.size.toString(), inline: true },
+                { name: '👥 Users', value: interaction.client.users.cache.size.toString(), inline: true }
+            )
+            .setColor(statusColor)
+            .setFooter({ text: 'VexiumVerse - Always Online' })
+            .setTimestamp();
+        
+        await interaction.editReply({ content: null, embeds: [embed] });
+    },
+    
+    formatUptime(uptime) {
+        const seconds = Math.floor(uptime / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        
+        if (days > 0) {
+            return `${days}d ${hours % 24}h ${minutes % 60}m`;
+        } else if (hours > 0) {
+            return `${hours}h ${minutes % 60}m`;
+        } else {
+            return `${minutes}m ${seconds % 60}s`;
+        }
+    }
+};
