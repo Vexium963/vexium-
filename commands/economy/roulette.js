@@ -7,13 +7,13 @@ module.exports = {
         .setName('roulette')
         .setDescription('Play skill-based European roulette entertainment game for VEX rewards (21+ verification required)')
         .addNumberOption(option =>
-            option.setName('bet')
-                .setDescription('Amount of VEX to bet')
+            option.setName('play_amount')
+                .setDescription('Amount of VEX to play with')
                 .setRequired(true)
                 .setMinValue(0.01))
         .addStringOption(option =>
-            option.setName('bet_type')
-                .setDescription('Type of bet to place')
+            option.setName('play_type')
+                .setDescription('Type of play to make')
                 .setRequired(true)
                 .addChoices(
                     { name: 'Red', value: 'red' },
@@ -26,7 +26,7 @@ module.exports = {
                 ))
         .addIntegerOption(option =>
             option.setName('number')
-                .setDescription('Specific number to bet on (0-36, required for single number bets)')
+                .setDescription('Specific number to play on (0-36, required for single number plays)')
                 .setRequired(false)
                 .setMinValue(0)
                 .setMaxValue(36)),
@@ -52,32 +52,32 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const betAmount = interaction.options.getNumber('bet');
-        const betType = interaction.options.getString('bet_type');
+        const playAmount = interaction.options.getNumber('play_amount');
+        const playType = interaction.options.getString('play_type');
         const number = interaction.options.getInteger('number');
         
-        if (betType === 'single' && number === null) {
+        if (playType === 'single' && number === null) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Number Required`)
-                .setDescription('You must specify a number (0-36) for single number bets.')
+                .setDescription('You must specify a number (0-36) for single number plays.')
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (betAmount > userData.vexBalance) {
+        if (playAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${betAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(betAmount, 'roulette_bet', false);
+        const result = await user.removeVEX(playAmount, 'roulette_play', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Failed`)
+                .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
                 .setDescription(result.reason)
                 .setColor(constants.COLORS.ERROR);
             
@@ -85,8 +85,8 @@ module.exports = {
         }
         
         const winningNumber = Math.floor(Math.random() * 37);
-        const isWin = this.checkWin(betType, number, winningNumber);
-        const payout = this.calculatePayout(betType, betAmount);
+        const isWin = this.checkWin(playType, number, winningNumber);
+        const payout = this.calculatePayout(playType, playAmount);
         
         let winnings = 0;
         if (isWin) {
@@ -94,7 +94,7 @@ module.exports = {
             await user.addVEX(winnings, 'roulette_win');
         }
         
-        const burnAmount = betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
+        const burnAmount = playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'roulette_house_edge');
         
         userData.stats.rouletteSpins = (userData.stats.rouletteSpins || 0) + 1;

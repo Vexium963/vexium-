@@ -103,7 +103,7 @@ module.exports = {
         }
         
         const amount = interaction.options.getNumber('amount');
-        const maxAmount = constants.ENTERTAINMENT_GAMES.SLOTS.maxBet;
+        const maxAmount = constants.ENTERTAINMENT_GAMES.SLOTS.maxPlayAmount;
         
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
@@ -216,7 +216,7 @@ module.exports = {
         
         const amount = interaction.options.getNumber('amount');
         const choice = interaction.options.getString('choice');
-        const maxAmount = constants.ENTERTAINMENT_GAMES.COINFLIP.maxBet;
+        const maxAmount = constants.ENTERTAINMENT_GAMES.COINFLIP.maxPlayAmount;
         
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
@@ -297,7 +297,7 @@ module.exports = {
         
         const amount = interaction.options.getNumber('amount');
         const prediction = interaction.options.getInteger('prediction');
-        const maxAmount = constants.ENTERTAINMENT_GAMES.DICE.maxBet;
+        const maxAmount = constants.ENTERTAINMENT_GAMES.DICE.maxPlayAmount;
         
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()

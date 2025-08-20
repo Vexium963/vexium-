@@ -7,7 +7,7 @@ module.exports = {
         .setName('blackjack')
         .setDescription('Play skill-based blackjack entertainment game for VEX rewards (21+ verification required)')
         .addNumberOption(option =>
-            option.setName('bet')
+            option.setName('play_amount')
                 .setDescription('Amount of VEX to play with')
                 .setRequired(true)
                 .setMinValue(0.01)),
@@ -33,28 +33,28 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const betAmount = interaction.options.getNumber('bet');
+        const playAmount = interaction.options.getNumber('play_amount');
         
-        if (betAmount > userData.vexBalance) {
+        if (playAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${betAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(betAmount, 'blackjack_bet', false);
+        const result = await user.removeVEX(playAmount, 'blackjack_play', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Failed`)
+                .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
                 .setDescription(result.reason)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const game = this.initializeGame(betAmount);
+        const game = this.initializeGame(playAmount);
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CARDS} Blackjack Game`)
@@ -63,7 +63,7 @@ module.exports = {
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${this.calculateHandValue(game.playerHand)}`, inline: true },
                 { name: '🏠 Dealer Hand', value: this.formatDealerHand(game.dealerHand), inline: true },
-                { name: '💰 Bet Amount', value: `$${betAmount.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Choose your action!' });
@@ -85,7 +85,7 @@ module.exports = {
             .setLabel('Double Down')
             .setStyle(ButtonStyle.Success)
             .setEmoji('💰')
-            .setDisabled(userData.vexBalance < betAmount);
+            .setDisabled(userData.vexBalance < playAmount);
         
         const row = new ActionRowBuilder().addComponents(hitButton, standButton, doubleButton);
         
@@ -94,7 +94,7 @@ module.exports = {
         await interaction.reply({ embeds: [embed], components: [row] });
     },
     
-    initializeGame(betAmount) {
+    initializeGame(playAmount) {
         const deck = this.createDeck();
         this.shuffleDeck(deck);
         
@@ -106,7 +106,7 @@ module.exports = {
             deck,
             playerHand,
             dealerHand,
-            betAmount,
+            playAmount,
             gameState: 'playing',
             doubled: false
         };
@@ -254,12 +254,12 @@ module.exports = {
                 break;
             case 'dealer_bust':
                 resultText = '🎉 Dealer busted! You win!';
-                winnings = game.betAmount * 2;
+                winnings = game.playAmount * 2;
                 color = constants.COLORS.SUCCESS;
                 break;
             case 'player_wins':
                 resultText = '🎉 You win!';
-                winnings = game.betAmount * 2;
+                winnings = game.playAmount * 2;
                 color = constants.COLORS.SUCCESS;
                 break;
             case 'dealer_wins':
@@ -268,7 +268,7 @@ module.exports = {
                 break;
             case 'push':
                 resultText = '🤝 Push! It\'s a tie.';
-                winnings = game.betAmount;
+                winnings = game.playAmount;
                 color = constants.COLORS.WARNING;
                 break;
         }
@@ -277,13 +277,13 @@ module.exports = {
             await user.addVEX(winnings, 'blackjack_win');
         }
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
+        const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         if (result !== 'push') {
             await user.burnVEX(burnAmount, 'blackjack_house_edge');
         }
         
         userData.stats.blackjackGames = (userData.stats.blackjackGames || 0) + 1;
-        if (winnings > game.betAmount) {
+        if (winnings > game.playAmount) {
             userData.stats.blackjackWins = (userData.stats.blackjackWins || 0) + 1;
         }
         userData.stats.commandsUsed++;
@@ -296,7 +296,7 @@ module.exports = {
             .addFields(
                 { name: '🃏 Your Hand', value: `${this.formatHand(game.playerHand)} (${playerValue})`, inline: true },
                 { name: '🏠 Dealer Hand', value: `${this.formatHand(game.dealerHand)} (${dealerValue})`, inline: true },
-                { name: '💰 Winnings', value: `$${(winnings - game.betAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Winnings', value: `$${(winnings - game.playAmount).toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)

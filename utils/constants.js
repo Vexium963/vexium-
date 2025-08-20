@@ -320,26 +320,26 @@ module.exports = {
                 'any_two': 2
             },
             houseBurn: 0.15,
-            maxBet: 50.00
+            maxPlayAmount: 50.00
         },
         DICE: {
             minRoll: 1,
             maxRoll: 6,
             winMultiplier: 2,
             houseBurn: 0.10,
-            maxBet: 25.00
+            maxPlayAmount: 25.00
         },
         COINFLIP: {
             sides: ['heads', 'tails'],
             winMultiplier: 1.95,
             houseBurn: 0.05,
-            maxBet: 100.00
+            maxPlayAmount: 100.00
         },
         BLACKJACK: {
             winMultiplier: 2,
             blackjackMultiplier: 2.5,
             houseBurn: 0.08,
-            maxBet: 75.00
+            maxPlayAmount: 75.00
         }
     },
 
@@ -392,7 +392,7 @@ module.exports = {
     },
 
     LIMITS: {
-        MAX_BET: 100.00,
+        MAX_PLAY_AMOUNT: 100.00,
         MAX_GIFT: 1000.00,
         MAX_TRADE: 10000.00,
         MAX_DAILY_ENTERTAINMENT: 500.00,

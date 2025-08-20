@@ -7,8 +7,8 @@ module.exports = {
         .setName('crash')
         .setDescription('Play the skill-based crash entertainment game - cash out before the multiplier crashes! (21+ verification required)')
         .addNumberOption(option =>
-            option.setName('bet')
-                .setDescription('Amount of VEX to bet')
+            option.setName('play_amount')
+                .setDescription('Amount of VEX to play with')
                 .setRequired(true)
                 .setMinValue(0.01)),
     
@@ -33,36 +33,36 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const betAmount = interaction.options.getNumber('bet');
+        const playAmount = interaction.options.getNumber('play_amount');
         
-        if (betAmount > userData.vexBalance) {
+        if (playAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${betAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(betAmount, 'crash_bet', false);
+        const result = await user.removeVEX(playAmount, 'crash_play', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Failed`)
+                .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
                 .setDescription(result.reason)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const game = this.initializeCrashGame(betAmount, interaction.user.id);
+        const game = this.initializeCrashGame(playAmount, interaction.user.id);
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CHART} Crash Game`)
             .setDescription('🚀 The rocket is taking off! Cash out before it crashes!')
             .addFields(
-                { name: '💰 Bet Amount', value: `$${betAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Current Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💎 Potential Winnings', value: `$${(betAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true }
+                { name: '💎 Potential Winnings', value: `$${(playAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Cash out before the crash to win!' });
@@ -82,13 +82,13 @@ module.exports = {
         this.startCrashSequence(interaction, game);
     },
     
-    initializeCrashGame(betAmount, userId) {
+    initializeCrashGame(playAmount, userId) {
         const crashPoint = this.generateCrashPoint();
         
         return {
             gameId: this.generateGameId(),
             userId,
-            betAmount,
+            playAmount,
             currentMultiplier: 1.00,
             crashPoint,
             gameState: 'running',

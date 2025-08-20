@@ -176,17 +176,17 @@ class Economics {
         return amount.toLocaleString();
     }
 
-    static validateBet(amount, userBalance, gameType = 'general') {
+    static validatePlayAmount(amount, userBalance, gameType = 'general') {
         if (amount <= 0) {
-            return { valid: false, reason: 'Bet amount must be positive' };
+            return { valid: false, reason: 'Play amount must be positive' };
         }
         
         if (amount > userBalance) {
             return { valid: false, reason: 'Insufficient funds' };
         }
         
-        if (amount > constants.LIMITS.MAX_BET) {
-            return { valid: false, reason: `Maximum bet is ${this.formatMoney(constants.LIMITS.MAX_BET)}` };
+        if (amount > constants.LIMITS.MAX_PLAY_AMOUNT) {
+            return { valid: false, reason: `Maximum play amount is ${this.formatMoney(constants.LIMITS.MAX_PLAY_AMOUNT)}` };
         }
         
         return { valid: true };
