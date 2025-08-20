@@ -154,10 +154,10 @@ module.exports = {
         const user = new User(game.userId);
         const userData = await user.load();
         
-        const winnings = game.betAmount * game.currentMultiplier;
+        const winnings = game.playAmount * game.currentMultiplier;
         await user.addVEX(winnings, 'crash_win');
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
+        const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'crash_house_edge');
         
         userData.stats.crashGames = (userData.stats.crashGames || 0) + 1;
@@ -171,11 +171,11 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Cashed Out!`)
             .setDescription(`🎉 You successfully cashed out at ${game.currentMultiplier.toFixed(2)}x!`)
             .addFields(
-                { name: '💰 Bet Amount', value: `$${game.betAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Cash Out Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
                 { name: '💎 Winnings', value: `$${winnings.toFixed(2)} VEX`, inline: true },
                 { name: '💸 House Edge', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Net Profit', value: `$${(winnings - game.betAmount - burnAmount).toFixed(2)} VEX`, inline: true },
+                { name: '📊 Net Profit', value: `$${(winnings - game.playAmount - burnAmount).toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -195,7 +195,7 @@ module.exports = {
         const user = new User(game.userId);
         const userData = await user.load();
         
-        const burnAmount = game.betAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
+        const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'crash_house_edge');
         
         userData.stats.crashGames = (userData.stats.crashGames || 0) + 1;
@@ -207,10 +207,10 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.ERROR} Crashed!`)
             .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!`)
             .addFields(
-                { name: '💰 Bet Amount', value: `$${game.betAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💥 Crash Point', value: `${game.crashPoint.toFixed(2)}x`, inline: true },
                 { name: '📈 Your Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💸 Lost', value: `$${game.betAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Lost', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.ERROR)
