@@ -295,14 +295,14 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        const bet = interaction.options.getNumber('bet');
+        const amount = interaction.options.getNumber('amount');
         const prediction = interaction.options.getInteger('prediction');
-        const maxBet = constants.GAMBLING_GAMES.DICE.maxBet;
+        const maxAmount = constants.ENTERTAINMENT_GAMES.DICE.maxBet;
         
-        if (bet > maxBet) {
+        if (amount > maxAmount) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Too High`)
-                .setDescription(`Maximum bet for dice is $${maxBet.toFixed(2)} VEX.`)
+                .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
+                .setDescription(`Maximum play amount for dice is $${maxAmount.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -329,7 +329,7 @@ module.exports = {
         
         const diceRoll = Economics.rollDice();
         const won = prediction === diceRoll;
-        const payout = won ? bet * constants.GAMBLING_GAMES.DICE.winMultiplier : 0;
+        const payout = won ? amount * constants.ENTERTAINMENT_GAMES.DICE.winMultiplier : 0;
         
         let resultText = '';
         let color = constants.COLORS.ERROR;
@@ -377,8 +377,8 @@ module.exports = {
         
         if (userData.stats.gamesPlayed === 0) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.DICE} Gambling Statistics`)
-                .setDescription('You haven\'t played any gambling games yet!')
+                .setTitle(`${constants.EMOJIS.DICE} Entertainment Game Statistics`)
+                .setDescription('You haven\'t played any entertainment games yet!')
                 .addFields(
                     { name: '🎰 Available Games', value: 'Slots, Coinflip, Dice', inline: false }
                 )
@@ -392,18 +392,18 @@ module.exports = {
             (userData.stats.totalWon / (userData.stats.totalWon + userData.stats.totalLost)) * 100 : 0;
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.DICE} Your Gambling Statistics`)
-            .setDescription('Your complete gambling history and performance')
+            .setTitle(`${constants.EMOJIS.DICE} Your Entertainment Game Statistics`)
+            .setDescription('Your complete skill-based entertainment game performance')
             .addFields(
                 { name: '🎮 Games Played', value: userData.stats.gamesPlayed.toString(), inline: true },
-                { name: '💰 Total Gambled', value: `$${userData.stats.totalGambled.toFixed(2)}`, inline: true },
+                { name: '💰 Total Entertainment Played', value: `$${userData.stats.totalEntertainmentPlayed.toFixed(2)}`, inline: true },
                 { name: '🏆 Total Won', value: `$${userData.stats.totalWon.toFixed(2)}`, inline: true },
                 { name: '💸 Total Lost', value: `$${userData.stats.totalLost.toFixed(2)}`, inline: true },
                 { name: '📊 Net Profit/Loss', value: `${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`, inline: true },
                 { name: '🎯 Win Rate', value: `${winRate.toFixed(1)}%`, inline: true }
             )
             .setColor(totalProfit >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
-            .setFooter({ text: 'Remember: Gambling is risky and should be done responsibly!' })
+            .setFooter({ text: '⚖️ Skill-based entertainment games. Play responsibly with cryptocurrency.' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

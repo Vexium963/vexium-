@@ -384,7 +384,7 @@ module.exports = {
     COOLDOWNS: {
         WORK: 3600000,
         DAILY: 86400000,
-        GAMBLE: 30000,
+        ENTERTAINMENT: 30000,
         TRADE: 300000,
         GIFT: 60000,
         INVEST: 300000,
@@ -395,7 +395,7 @@ module.exports = {
         MAX_BET: 100.00,
         MAX_GIFT: 1000.00,
         MAX_TRADE: 10000.00,
-        MAX_DAILY_GAMBLE: 500.00,
+        MAX_DAILY_ENTERTAINMENT: 500.00,
         MAX_INVENTORY_STACK: 999,
         MAX_WITHDRAWAL: 10000.00,
         MIN_WITHDRAWAL: 1.00
@@ -420,7 +420,7 @@ module.exports = {
         'wallet',
         'bank',
         'totalEarned',
-        'totalGambled',
+        'totalEntertainmentPlayed',
         'totalInvested',
         'commandsUsed',
         'gamesPlayed',
@@ -428,7 +428,7 @@ module.exports = {
     ],
 
     BURN_EVENTS: [
-        'gambling_loss',
+        'entertainment_loss',
         'item_purchase',
         'cosmetic_purchase',
         'failed_trade',

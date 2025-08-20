@@ -278,7 +278,7 @@ module.exports = {
         const allUsers = await User.getLeaderboard('networth', 1000);
         const totalUsers = allUsers.length;
         const totalVEX = allUsers.reduce((sum, user) => sum + (user.networth || 0), 0);
-        const totalEntertainmentPlayed = allUsers.reduce((sum, user) => sum + (user.stats?.totalGambled || 0), 0);
+        const totalEntertainmentPlayed = allUsers.reduce((sum, user) => sum + (user.stats?.totalEntertainmentPlayed || 0), 0);
         const totalInvested = allUsers.reduce((sum, user) => sum + (user.stats?.totalInvested || 0), 0);
         const activeUsers = allUsers.filter(user => 
             new Date(user.lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)

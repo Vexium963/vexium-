@@ -16,7 +16,7 @@ module.exports = {
                     { name: 'VEX Balance', value: 'vexBalance' },
                     { name: 'Bank Balance', value: 'bankBalance' },
                     { name: 'Total Earned', value: 'totalEarned' },
-                    { name: 'Total Entertainment Played', value: 'totalGambled' },
+                    { name: 'Total Entertainment Played', value: 'totalEntertainmentPlayed' },
                     { name: 'Total Invested', value: 'totalInvested' },
                     { name: 'Games Played', value: 'gamesPlayed' },
                     { name: 'Trades Completed', value: 'tradesCompleted' }
@@ -62,7 +62,7 @@ module.exports = {
             vexBalance: 'VEX Balance',
             bankBalance: 'Bank Balance',
             totalEarned: 'Total Earned',
-            totalGambled: 'Total Entertainment Played',
+            totalEntertainmentPlayed: 'Total Entertainment Played',
             totalInvested: 'Total Invested',
             gamesPlayed: 'Games Played',
             tradesCompleted: 'Trades Completed'
@@ -149,8 +149,8 @@ module.exports = {
                 return `$${userData.bankBalance.toFixed(2)} VEX`;
             case 'totalEarned':
                 return `$${(userData.stats?.totalEarned || 0).toFixed(2)} VEX`;
-            case 'totalGambled':
-                return `$${(userData.stats?.totalGambled || 0).toFixed(2)} VEX`;
+            case 'totalEntertainmentPlayed':
+                return `$${(userData.stats?.totalEntertainmentPlayed || 0).toFixed(2)} VEX`;
             case 'totalInvested':
                 return `$${(userData.stats?.totalInvested || 0).toFixed(2)} VEX`;
             case 'gamesPlayed':
