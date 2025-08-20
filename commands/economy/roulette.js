@@ -113,10 +113,10 @@ module.exports = {
             .setDescription(`The ball landed on **${winningNumber}** ${numberEmoji}`)
             .addFields(
                 { name: '🎯 Winning Number', value: `${winningNumber} (${numberColor})`, inline: true },
-                { name: '🎲 Your Bet', value: this.formatBet(betType, number), inline: true },
-                { name: '💰 Bet Amount', value: `$${betAmount.toFixed(2)} VEX`, inline: true },
+                { name: '🎲 Your Play', value: this.formatPlay(playType, number), inline: true },
+                { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '🏆 Result', value: isWin ? '✅ WIN!' : '❌ LOSE', inline: true },
-                { name: '💎 Winnings', value: `$${(winnings - betAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💎 Winnings', value: `$${(winnings - playAmount).toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(isWin ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
@@ -140,8 +140,8 @@ module.exports = {
         await interaction.reply({ embeds: [embed], components: [row] });
     },
     
-    checkWin(betType, number, winningNumber) {
-        switch (betType) {
+    checkWin(playType, number, winningNumber) {
+        switch (playType) {
             case 'red':
                 return this.isRed(winningNumber);
             case 'black':
@@ -161,7 +161,7 @@ module.exports = {
         }
     },
     
-    calculatePayout(betType, betAmount) {
+    calculatePayout(playType, playAmount) {
         const payouts = {
             red: 2,
             black: 2,
@@ -172,7 +172,7 @@ module.exports = {
             single: 36
         };
         
-        return betAmount * (payouts[betType] || 0);
+        return playAmount * (payouts[playType] || 0);
     },
     
     isRed(number) {
@@ -194,8 +194,8 @@ module.exports = {
         return this.isRed(number) ? '❤️' : '🖤';
     },
     
-    formatBet(betType, number) {
-        const betNames = {
+    formatPlay(playType, number) {
+        const playNames = {
             red: 'Red',
             black: 'Black',
             even: 'Even',
@@ -205,7 +205,7 @@ module.exports = {
             single: `Number ${number}`
         };
         
-        return betNames[betType] || 'Unknown';
+        return playNames[playType] || 'Unknown';
     },
     
     async handleStats(interaction) {
@@ -226,7 +226,7 @@ module.exports = {
                 { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
                 { name: '💰 Total Winnings', value: `$${(stats.rouletteWinnings || 0).toFixed(2)} VEX`, inline: true },
                 { name: '🔥 Current Streak', value: `${stats.rouletteStreak || 0}`, inline: true },
-                { name: '🎯 Favorite Bet', value: stats.rouletteFavoriteBet || 'None', inline: true }
+                { name: '🎯 Favorite Play', value: stats.rouletteFavoritePlay || 'None', inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL())
