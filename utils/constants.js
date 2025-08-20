@@ -43,7 +43,12 @@ module.exports = {
         TAX: '💸',
         TREASURY: '🏛️',
         NFT: '🖼️',
-        PREMIUM: '👑'
+        PREMIUM: '👑',
+        LOTTERY: '🎟️',
+        AUCTION: '🔨',
+        MINING: '⛏️',
+        STAKING: '🔒',
+        REFERRAL: '🤝'
     },
 
     VEX_TOKEN: {
@@ -76,6 +81,25 @@ module.exports = {
             ITEM_BURN_RATE: 0.10,
             COSMETIC_BURN_RATE: 0.20,
             NFT_BURN_RATE: 0.05
+        },
+        LOTTERY: {
+            BURN_RATE: 0.1
+        },
+        MINING: {
+            ENERGY_BURN_RATE: 0.2,
+            CLAIM_TAX_RATE: 0.05
+        },
+        STAKING: {
+            REWARD_TAX_RATE: 0.1
+        },
+        REFERRAL: {
+            REWARD_TAX_RATE: 0.05
+        },
+        POKER: {
+            RAKE_RATE: 0.1
+        },
+        GUILD: {
+            CREATION_BURN_RATE: 0.2
         }
     },
 
@@ -416,5 +440,149 @@ module.exports = {
         MAX_REFERRALS: 50,
         REFERRER_BONUS: 5.00,
         REFEREE_BONUS: 2.50
+    }
+};
+
+const REFERRAL = {
+    REFERRER_REWARD: 25.0, // VEX earned per successful referral
+    REFEREE_BONUS: 15.0, // VEX bonus for new user using referral code
+    MIN_CLAIM_AMOUNT: 10.0, // Minimum amount to claim referral rewards
+    MAX_LEVEL_FOR_REFERRAL: 5 // Max level to use referral codes
+};
+
+const POKER_TOURNAMENTS = {
+    MICRO: {
+        name: 'Micro Stakes',
+        buyIn: 10.0,
+        maxPlayers: 100,
+        skillLevel: 'Beginner'
+    },
+    LOW: {
+        name: 'Low Stakes',
+        buyIn: 50.0,
+        maxPlayers: 50,
+        skillLevel: 'Intermediate'
+    },
+    MID: {
+        name: 'Mid Stakes',
+        buyIn: 200.0,
+        maxPlayers: 25,
+        skillLevel: 'Advanced'
+    },
+    HIGH: {
+        name: 'High Stakes',
+        buyIn: 1000.0,
+        maxPlayers: 10,
+        skillLevel: 'Expert'
+    }
+};
+
+const GUILD = {
+    CREATION_COST: 500.0,
+    MAX_MEMBERS: 50,
+    MAX_OFFICERS: 5
+};
+
+const PRESTIGE = {
+    MIN_LEVEL: 50,
+    BASE_BONUS: 1000,
+    LEVEL_MULTIPLIER: 50,
+    PRESTIGE_MULTIPLIER: 500,
+    EARNING_BONUS: 0.05
+};
+
+const LOTTERY = {
+    TICKET_PRICE: 10.0,
+    BASE_JACKPOT: 5000,
+    MAX_TICKETS_PER_USER: 50,
+    DRAW_DAY: 0,
+    DRAW_HOUR: 20
+};
+
+const AUCTION = {
+    LISTING_FEE_RATE: 0.05,
+    MIN_LISTING_FEE: 1.0,
+    MIN_BID_INCREMENT: 0.01,
+    MAX_DURATION_HOURS: 72
+};
+
+const MINING = {
+    BASE_REWARD_RATE: 0.001,
+    MIN_CLAIM_AMOUNT: 0.01,
+    BLOCK_REWARD: 50,
+    AVERAGE_BLOCK_TIME: 10
+};
+
+const MINING_RIGS = {
+    CPU_BASIC: {
+        name: 'Basic CPU Miner',
+        hashRate: 1.0,
+        efficiency: 0.6,
+        energyCost: 5.0,
+        price: 100.0
+    },
+    CPU_ADVANCED: {
+        name: 'Advanced CPU Miner',
+        hashRate: 5.0,
+        efficiency: 0.75,
+        energyCost: 15.0,
+        price: 500.0
+    },
+    GPU_BASIC: {
+        name: 'GPU Miner',
+        hashRate: 25.0,
+        efficiency: 0.85,
+        energyCost: 50.0,
+        price: 2500.0
+    },
+    ASIC_BASIC: {
+        name: 'ASIC Miner',
+        hashRate: 100.0,
+        efficiency: 0.95,
+        energyCost: 150.0,
+        price: 10000.0
+    },
+    QUANTUM: {
+        name: 'Quantum Mining Rig',
+        hashRate: 500.0,
+        efficiency: 0.99,
+        energyCost: 500.0,
+        price: 100000.0
+    }
+};
+
+const STAKING = {
+    MIN_CLAIM_AMOUNT: 0.001,
+    EARLY_WITHDRAWAL_PENALTY: 0.1
+};
+
+const STAKING_POOLS = {
+    FLEXIBLE: {
+        name: 'Flexible Staking',
+        apy: 0.03,
+        lockPeriod: null,
+        minStake: 10.0,
+        riskLevel: 'Low'
+    },
+    THIRTY_DAYS: {
+        name: '30-Day Lock',
+        apy: 0.05,
+        lockPeriod: 30,
+        minStake: 50.0,
+        riskLevel: 'Low'
+    },
+    NINETY_DAYS: {
+        name: '90-Day Lock',
+        apy: 0.08,
+        lockPeriod: 90,
+        minStake: 100.0,
+        riskLevel: 'Medium'
+    },
+    ONE_YEAR: {
+        name: '365-Day Lock',
+        apy: 0.12,
+        lockPeriod: 365,
+        minStake: 500.0,
+        riskLevel: 'Medium'
     }
 };
