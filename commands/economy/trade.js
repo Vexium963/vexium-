@@ -50,6 +50,26 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'trade', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'trade',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -151,16 +171,51 @@ module.exports = {
             offerText += `📦 ${itemQuantity}x ${itemId}`;
         }
         
+        const totalTrades = userData.stats.tradesCompleted || 0;
+        const isTradeExpert = totalTrades >= 50;
+        const isTradeNovice = totalTrades < 5;
+        const tradeValue = vexAmount + (itemId ? this.getItemValue(itemId) * itemQuantity : 0);
+        const isHighValueTrade = tradeValue >= 1000;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(tradeValue * 0.05) : 0;
+        
+        let title = `${constants.EMOJIS.TRADE} Trade Offer Created!`;
+        let description = `🤝 **Trade offer sent to ${targetUser.username}!**`;
+        
+        if (isHighValueTrade) {
+            title = `💎 HIGH-VALUE TRADE INITIATED!`;
+            description = `🔥 **MAJOR DEAL!** Trade offer sent to ${targetUser.username}!\n💰 **Value: $${tradeValue.toFixed(2)} VEX** - This is a big one!`;
+        }
+        
+        if (isTradeExpert) {
+            title = `🏆 TRADE MASTER IN ACTION!`;
+            description += `\n👑 **${totalTrades} trades completed** - You're a trading legend!`;
+        } else if (isTradeNovice) {
+            description += `\n🌟 **Building your trading reputation!** (${totalTrades}/50 trades)`;
+        }
+        
+        if (urgencyBonus > 0) {
+            description += `\n✨ **TRADE BONUS ACTIVE: +$${urgencyBonus} VEX** if accepted within 2 minutes!`;
+        }
+        
+        const socialProof = Math.random() < 0.3;
+        if (socialProof) {
+            const activeTraders = Math.floor(Math.random() * 15) + 5;
+            description += `\n📈 **${activeTraders} players are trading right now!** Join the action!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.TRADE} Trade Offer Created`)
-            .setDescription(`Trade offer sent to ${targetUser.username}!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
-                { name: '🎁 Your Offer', value: offerText, inline: true },
-                { name: '⏰ Expires', value: '<t:' + Math.floor((Date.now() + 300000) / 1000) + ':R>', inline: true },
-                { name: '🆔 Trade ID', value: tradeId, inline: true }
+                { name: '🎁 Your Epic Offer', value: offerText, inline: true },
+                { name: '⏰ Expires Soon', value: '<t:' + Math.floor((Date.now() + 300000) / 1000) + ':R>', inline: true },
+                { name: '🆔 Trade ID', value: `\`${tradeId}\``, inline: true },
+                { name: '📊 Trade Stats', value: `🤝 **${totalTrades}** completed\n🏅 **${isTradeExpert ? 'Expert' : isTradeNovice ? 'Novice' : 'Experienced'}** trader`, inline: true },
+                { name: '💎 Trade Value', value: `$${tradeValue.toFixed(2)} VEX`, inline: true },
+                { name: '🎯 Success Tip', value: 'Fair trades build reputation!', inline: true }
             )
-            .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'The other user has 5 minutes to respond' })
+            .setColor(isHighValueTrade ? constants.COLORS.VEX : isTradeExpert ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setFooter({ text: '⚡ Quick responses get better deals!' })
             .setTimestamp();
         
         const acceptButton = new ButtonBuilder()

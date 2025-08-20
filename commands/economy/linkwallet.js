@@ -48,6 +48,26 @@ module.exports = {
                 .setDescription('Sync VEX balance with linked wallets (future feature)')),
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'linkwallet', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'linkwallet',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -116,14 +136,37 @@ module.exports = {
             phantom: '👻'
         };
         
+        const totalLinkedWallets = Object.keys(userData.linkedWallets).length + 1;
+        const isFirstWallet = totalLinkedWallets === 1;
+        const isMultiWallet = totalLinkedWallets >= 3;
+        const earlyAdopter = userData.stats.commandsUsed <= 10;
+        
+        let title = `${constants.EMOJIS.SUCCESS} Wallet Connected!`;
+        let description = `${walletEmojis[walletType]} **${walletType.charAt(0).toUpperCase() + walletType.slice(1)}** wallet linked successfully!`;
+        
+        if (isFirstWallet && earlyAdopter) {
+            title = `🎉 EARLY ADOPTER! First Wallet Linked!`;
+            description = `${walletEmojis[walletType]} **SMART MOVE!** Your first wallet is connected!\n💎 **Early adopter bonus: No fees!**`;
+        } else if (isMultiWallet) {
+            title = `🔥 CRYPTO MASTER! Multi-Wallet Setup!`;
+            description = `${walletEmojis[walletType]} **IMPRESSIVE!** ${totalLinkedWallets} wallets connected!\n👑 **You're a true crypto enthusiast!**`;
+        }
+        
+        const securityLevel = totalLinkedWallets >= 2 ? '🛡️ HIGH' : '⚠️ BASIC';
+        const diversificationBonus = isMultiWallet ? 'Active' : 'Inactive';
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Wallet Linked!`)
-            .setDescription(`${walletEmojis[walletType]} **${walletType.charAt(0).toUpperCase() + walletType.slice(1)}** wallet connected successfully!`)
+            .setTitle(title)
+            .setDescription(description + `\n\n🚀 **"Decentralization is the future!"**`)
             .addFields(
                 { name: '📍 Address', value: `\`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}\``, inline: true },
-                { name: '🔗 Status', value: 'Connected (Unverified)', inline: true }
+                { name: '🔗 Status', value: 'Connected (Unverified)', inline: true },
+                { name: '🛡️ Security Level', value: securityLevel, inline: true },
+                { name: '📊 Total Wallets', value: `${totalLinkedWallets} connected`, inline: true },
+                { name: '💎 Diversification', value: diversificationBonus, inline: true },
+                { name: '🎯 Next Step', value: 'Verify for bonuses!', inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isMultiWallet ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         if (isLateLink) {

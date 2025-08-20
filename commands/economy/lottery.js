@@ -30,6 +30,28 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'lottery',
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'lottery',
+                true
+            );
+        }
+        
         switch (subcommand) {
             case 'info':
                 return this.handleInfo(interaction);

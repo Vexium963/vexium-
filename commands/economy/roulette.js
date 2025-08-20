@@ -37,6 +37,10 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'roulette', true);
+        }
+        
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
@@ -88,10 +92,28 @@ module.exports = {
         const isWin = this.checkWin(playType, number, winningNumber);
         const payout = this.calculatePayout(playType, playAmount);
         
+        const currentStreak = userData.stats.rouletteStreak || 0;
+        const totalSpins = userData.stats.rouletteSpins || 0;
+        const winRate = totalSpins > 0 ? (userData.stats.rouletteWins || 0) / totalSpins : 0;
+        const isNearMiss = this.checkNearMiss(playType, number, winningNumber);
+        const hotStreak = currentStreak >= 3;
+        const jackpotChance = isWin && Math.random() < 0.08;
+        const comebackBonus = !isWin && currentStreak === 0 && totalSpins > 5 ? Math.floor(playAmount * 0.15) : 0;
+        
         let winnings = 0;
         if (isWin) {
             winnings = payout;
+            if (jackpotChance) {
+                const jackpotBonus = Math.floor(winnings * 0.4);
+                winnings += jackpotBonus;
+            }
             await user.addVEX(winnings, 'roulette_win');
+            userData.stats.rouletteStreak = currentStreak + 1;
+        } else {
+            userData.stats.rouletteStreak = 0;
+            if (comebackBonus > 0) {
+                await user.addVEX(comebackBonus, 'roulette_comeback');
+            }
         }
         
         const burnAmount = playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
@@ -100,6 +122,7 @@ module.exports = {
         userData.stats.rouletteSpins = (userData.stats.rouletteSpins || 0) + 1;
         if (isWin) {
             userData.stats.rouletteWins = (userData.stats.rouletteWins || 0) + 1;
+            userData.stats.rouletteWinnings = (userData.stats.rouletteWinnings || 0) + (winnings - playAmount);
         }
         userData.stats.commandsUsed++;
         

@@ -28,6 +28,10 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'history', true);
+        }
+        
         const type = interaction.options.getString('type') || 'transactions';
         const limit = interaction.options.getInteger('limit') || 10;
         
@@ -64,18 +68,53 @@ module.exports = {
         }
         
         if (records.length === 0) {
+            const motivationalMessages = [
+                "🚀 **Time to make history!** Start earning and spending to build your financial legacy!",
+                "💎 **Your journey begins now!** Every transaction tells a story of success!",
+                "⚡ **Ready to create wealth?** Your first transaction is just a command away!",
+                "🌟 **Future millionaire detected!** Start building your empire today!"
+            ];
+            
+            const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            
             const embed = new EmbedBuilder()
-                .setTitle(title)
-                .setDescription('No records found for this category.')
+                .setTitle(`${constants.EMOJIS.INFO} ${title}`)
+                .setDescription(`No records found yet!\n\n${randomMotivation}`)
+                .addFields({
+                    name: '💡 Quick Start Tips',
+                    value: '• Use `/daily` to earn your first VEX\n• Try `/work` to build consistent income\n• Use `/shop` to make your first purchase\n• Check `/invest` to multiply your wealth',
+                    inline: false
+                })
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
         }
         
+        const totalTransactions = records.length;
+        const isActiveTrader = totalTransactions >= 50;
+        const isFinancialGuru = totalTransactions >= 200;
+        const recentActivity = records.filter(r => Date.now() - r.timestamp < 7 * 24 * 60 * 60 * 1000).length;
+        const isActiveThisWeek = recentActivity >= 5;
+        
+        let enhancedTitle = title;
+        let enhancedDescription = description;
+        
+        if (isFinancialGuru) {
+            enhancedTitle = `👑 FINANCIAL LEGEND! ${title}`;
+            enhancedDescription = `💎 **INCREDIBLE!** You're a financial mastermind with ${totalTransactions} transactions!\n${description}`;
+        } else if (isActiveTrader) {
+            enhancedTitle = `🔥 ACTIVE TRADER! ${title}`;
+            enhancedDescription = `⚡ **IMPRESSIVE!** ${totalTransactions} transactions show your dedication!\n${description}`;
+        }
+        
+        if (isActiveThisWeek) {
+            enhancedDescription += `\n\n📈 **HOT STREAK!** ${recentActivity} transactions this week!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(description)
-            .setColor(constants.COLORS.PRIMARY);
+            .setTitle(enhancedTitle)
+            .setDescription(enhancedDescription)
+            .setColor(isFinancialGuru ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY);
         
         const recentRecords = records.slice(0, limit);
         

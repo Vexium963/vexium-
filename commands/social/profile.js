@@ -50,6 +50,22 @@ module.exports = {
                         ))),
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'profile',
+                { profileCustomization: true, socialEngagement: true }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'profile',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -82,8 +98,21 @@ module.exports = {
         
         const profileColor = userData.profile.color || constants.COLORS.PRIMARY;
         
+        const profileViews = userData.stats.profileViews || 0;
+        const isPopular = profileViews >= 100;
+        const recentActivity = Date.now() - (userData.lastActive || Date.now()) < 3600000; // 1 hour
+        const socialRank = this.calculateSocialRank(userData);
+        
+        let title = `${constants.EMOJIS.DIAMOND} ${targetUser.username}'s Profile`;
+        if (isPopular) {
+            title = `🌟 POPULAR PROFILE: ${targetUser.username}`;
+        }
+        if (userData.premiumTier) {
+            title = `👑 VIP PROFILE: ${targetUser.username}`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.DIAMOND} ${targetUser.username}'s Profile`)
+            .setTitle(title)
             .setColor(profileColor)
             .setTimestamp();
         
@@ -91,10 +120,14 @@ module.exports = {
             embed.setDescription(userData.profile.bio);
         }
         
+        const wealthRank = userData.networth >= 10000 ? '🐋 Whale' : userData.networth >= 1000 ? '🦈 Shark' : '🐟 Fish';
+        const levelProgress = this.calculateLevelProgress(userData);
+        const statusEmoji = this.getStatusEmoji(userData.profile.status || 'Active');
+        
         embed.addFields(
-            { name: '💰 Net Worth', value: `$${userData.networth.toFixed(2)} VEX`, inline: true },
-            { name: '🎯 Level', value: `${userData.level} (${userData.xp} XP)`, inline: true },
-            { name: '📊 Status', value: userData.profile.status || 'Active', inline: true }
+            { name: '💰 Net Worth', value: `$${userData.networth.toFixed(2)} VEX ${wealthRank}`, inline: true },
+            { name: '🎯 Level Progress', value: `${userData.level} ${levelProgress.bar}\n${levelProgress.percentage}% to next level`, inline: true },
+            { name: '📊 Status', value: `${statusEmoji} ${userData.profile.status || 'Active'}${recentActivity ? ' 🟢 ONLINE' : ''}`, inline: true }
         );
         
         if (userData.job) {

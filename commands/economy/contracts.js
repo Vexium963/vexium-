@@ -48,6 +48,23 @@ module.exports = {
         const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'contracts', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: (userData.stats.contractsCreated || 0) > 5,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'contracts',
+                behaviorContext
+            );
+        }
+        
         switch (subcommand) {
             case 'create':
                 await this.handleCreate(interaction, user, userData);

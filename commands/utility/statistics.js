@@ -38,6 +38,28 @@ module.exports = {
     cooldown: 15,
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                interaction.commandName,
+                true
+            );
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                interaction.commandName,
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {

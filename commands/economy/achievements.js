@@ -30,6 +30,26 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'achievements', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'achievements',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -53,12 +73,38 @@ module.exports = {
         const completedIds = userAchievements.map(a => a.id);
         
         const categories = ['economy', 'social', 'entertainment', 'progression', 'special'];
+        const completionRate = (completedIds.length / allAchievements.length) * 100;
+        const isAchievementHunter = completionRate >= 75;
+        const isCompletionist = completionRate >= 90;
+        const recentUnlocks = userAchievements.slice(-3);
+        const streakBonus = userData.dailyStreak >= 7 ? 1.5 : 1.0;
+        
+        let title = `${constants.EMOJIS.ACHIEVEMENTS} Achievement Hunter`;
+        let description = `🏆 **${completedIds.length}** out of **${allAchievements.length}** achievements unlocked!`;
+        
+        if (isCompletionist) {
+            title = `👑 COMPLETIONIST LEGEND!`;
+            description = `🏆 **INCREDIBLE!** ${completedIds.length}/${allAchievements.length} achievements!\n💎 **You're in the top 1% of players!**`;
+        } else if (isAchievementHunter) {
+            title = `🔥 ACHIEVEMENT MASTER!`;
+            description = `🏆 **AMAZING PROGRESS!** ${completedIds.length}/${allAchievements.length} achievements!\n⭐ **You're almost a completionist!**`;
+        }
+        
+        const progressBar = '█'.repeat(Math.floor(completionRate / 5)) + '░'.repeat(20 - Math.floor(completionRate / 5));
+        const nextMilestone = Math.ceil(completedIds.length / 10) * 10;
+        const toNextMilestone = nextMilestone - completedIds.length;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.ACHIEVEMENTS} VexiumVerse Achievements`)
-            .setDescription(`Track your progress across all achievement categories!\n\n**Completed**: ${completedIds.length}/${allAchievements.length}`)
-            .setColor(constants.COLORS.PRIMARY)
+            .setTitle(title)
+            .setDescription(description + `\n\n🎯 **"Collect them all and become legendary!"**`)
+            .addFields({
+                name: '📊 Completion Progress',
+                value: `${progressBar} **${completionRate.toFixed(1)}%**\n🎯 **Next Milestone:** ${toNextMilestone} achievements to ${nextMilestone}\n🔥 **Streak Bonus:** ${streakBonus > 1 ? `+${((streakBonus - 1) * 100).toFixed(0)}%` : 'None'}`,
+                inline: false
+            })
+            .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL())
-            .setFooter({ text: 'Use buttons to filter by category' });
+            .setFooter({ text: `🎮 ${completedIds.length >= 10 ? 'Achievement Master' : 'Rising Hunter'} | Use buttons to explore categories` });
         
         for (const category of categories) {
             const categoryAchievements = allAchievements.filter(a => a.category === category);

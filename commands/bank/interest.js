@@ -22,6 +22,10 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'interest', true);
+        }
+        
         const amount = interaction.options.getNumber('amount');
         const days = interaction.options.getInteger('days') || 30;
         
@@ -32,33 +36,54 @@ module.exports = {
             premiumBonus = rates.PREMIUM_BONUS;
         }
         
+        const totalSavings = userData.bankBalance || 0;
+        const isWhale = totalSavings >= 50000;
+        const isSaver = totalSavings >= 5000;
+        const calculationStreak = userData.stats.calculationsUsed || 0;
+        const isAnalyst = calculationStreak >= 20;
+        
         const calculations = [
             {
                 name: 'No Lock',
                 rate: rates.DAILY + premiumBonus,
-                term: 'No minimum term'
+                term: 'No minimum term',
+                emoji: '⚡'
             },
             {
                 name: '1 Week Lock',
                 rate: rates.WEEKLY + premiumBonus,
-                term: 'Locked for 7 days'
+                term: 'Locked for 7 days',
+                emoji: '📅'
             },
             {
                 name: '1 Month Lock',
                 rate: rates.MONTHLY + premiumBonus,
-                term: 'Locked for 30 days'
+                term: 'Locked for 30 days',
+                emoji: '📈'
             },
             {
                 name: '1 Year Lock',
                 rate: rates.YEARLY + premiumBonus,
-                term: 'Locked for 365 days'
+                term: 'Locked for 365 days',
+                emoji: '💎'
             }
         ];
         
+        let title = `${constants.EMOJIS.CHART} Smart Money Calculator`;
+        let description = `💰 **Interest projections for $${amount.toFixed(2)} VEX** over **${days} days**`;
+        
+        if (isWhale) {
+            title = `🐋 WHALE INVESTOR CALCULATOR!`;
+            description = `💎 **MASSIVE WEALTH PROJECTION!** $${amount.toFixed(2)} VEX over **${days} days**\n👑 **Elite investor status detected!**`;
+        } else if (isAnalyst) {
+            title = `🧠 FINANCIAL ANALYST MODE!`;
+            description = `📊 **EXPERT ANALYSIS!** $${amount.toFixed(2)} VEX over **${days} days**\n⭐ **You're a calculation master!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHART} Interest Calculator`)
-            .setDescription(`Interest projections for **$${amount.toFixed(2)} VEX** over **${days} days**`)
-            .setColor(constants.COLORS.PRIMARY);
+            .setTitle(title)
+            .setDescription(description + `\n\n🎯 **"Compound interest is the 8th wonder of the world!"**`)
+            .setColor(isWhale ? constants.COLORS.VEX : constants.COLORS.PRIMARY);
         
         for (const calc of calculations) {
             const dailyInterest = amount * calc.rate;

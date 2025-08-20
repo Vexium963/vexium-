@@ -69,6 +69,21 @@ module.exports = {
     cooldown: 30,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'pets',
+                { petCollection: userData.pets?.length || 0, engagement: 'high' }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'pets', true);
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {

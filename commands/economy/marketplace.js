@@ -63,6 +63,28 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'marketplace',
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'marketplace',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -80,14 +102,36 @@ module.exports = {
     },
     
     async handleBrowse(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         const category = interaction.options.getString('category') || 'all';
         const listings = this.getMarketplaceListings(category);
         
+        const totalTransactions = userData.stats.itemsPurchased || 0;
+        const isActiveTrader = totalTransactions >= 10;
+        const marketActivity = Math.floor(Math.random() * 50) + 20; // Simulate market activity
+        const hotDeals = listings.filter(l => Math.random() > 0.7);
+        const flashSale = Math.random() > 0.8;
+        
+        let title = `${constants.EMOJIS.MARKETPLACE} VexiumVerse Marketplace`;
+        let description = '🛒 **Buy and sell with the community!**';
+        
+        if (flashSale) {
+            title = `🔥 FLASH SALE ACTIVE! Marketplace`;
+            description = '⚡ **LIMITED TIME DEALS!** Prices won\'t last long!';
+        }
+        
+        if (isActiveTrader) {
+            title = `💎 VIP TRADER ACCESS - Marketplace`;
+            description = '👑 **Welcome back, trading legend!** Exclusive deals await!';
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.MARKETPLACE} VexiumVerse Marketplace`)
-            .setDescription('Buy and sell items, services, and assets with the community!')
-            .setColor(constants.COLORS.MARKETPLACE)
-            .setFooter({ text: 'Use /marketplace buy <listing_id> to purchase items' })
+            .setTitle(title)
+            .setDescription(description + `\n\n📊 **${marketActivity} players active** | 🔥 **${hotDeals.length} hot deals**`)
+            .setColor(flashSale ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.MARKETPLACE)
+            .setFooter({ text: `💡 Pro tip: ${isActiveTrader ? 'You get priority on rare items!' : 'Buy low, sell high!'}` })
             .setTimestamp();
         
         if (listings.length === 0) {

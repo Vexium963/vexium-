@@ -54,6 +54,21 @@ module.exports = {
     cooldown: 3,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'friends',
+                { socialActivity: true, friendsCount: userData.friends?.list?.length || 0 }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'friends', true);
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -131,16 +146,42 @@ module.exports = {
         await user.save(userData);
         await targetUserData.save(targetData);
         
+        const totalFriends = userData.friends.list.length;
+        const totalRequests = userData.friends.requests.sent.length;
+        const isSocialButterfly = totalFriends >= 10;
+        const isNetworker = totalRequests >= 5;
+        
+        let title = `${constants.EMOJIS.SUCCESS} Friend Request Sent!`;
+        let description = `🤝 **Connection initiated!** Request sent to **${targetUser.username}**!`;
+        
+        if (isSocialButterfly) {
+            title = `🦋 SOCIAL BUTTERFLY! Friend Request Sent!`;
+            description = `🌟 **AMAZING NETWORKING!** Request sent to **${targetUser.username}**!\n👑 **You're building an incredible social empire!**`;
+        }
+        
+        const socialTips = [
+            "💡 **Tip:** Active friends boost your daily rewards!",
+            "🎯 **Tip:** Friends can gift you rare items!",
+            "⚡ **Tip:** Social connections unlock exclusive features!",
+            "🚀 **Tip:** Popular players get priority in events!"
+        ];
+        
+        const randomTip = socialTips[Math.floor(Math.random() * socialTips.length)];
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Friend Request Sent!`)
-            .setDescription(`Friend request sent to **${targetUser.username}**!`)
+            .setTitle(title)
+            .setDescription(description + `\n\n${randomTip}`)
             .addFields(
-                { name: '👤 User', value: targetUser.username, inline: true },
-                { name: '📤 Status', value: 'Request Sent', inline: true }
+                { name: '👤 Target', value: `${targetUser.username} ${Math.random() > 0.5 ? '📈 Rising Star' : '⭐ Active Player'}`, inline: true },
+                { name: '📤 Status', value: 'Request Sent ✨', inline: true },
+                { name: '👥 Your Network', value: `${totalFriends} friends | ${totalRequests} pending`, inline: true },
+                { name: '🏅 Social Level', value: isSocialButterfly ? '🦋 Social Butterfly' : totalFriends >= 5 ? '⭐ Networker' : '🌟 Growing', inline: true },
+                { name: '🎯 Next Milestone', value: totalFriends < 5 ? '5 friends (Networker)' : totalFriends < 10 ? '10 friends (Social Butterfly)' : '25 friends (Social Legend)', inline: true },
+                { name: '💫 Social Boost', value: `+${Math.min(totalFriends * 2, 20)}% friend bonuses`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isSocialButterfly ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setThumbnail(targetUser.displayAvatarURL())
-            .setFooter({ text: 'They will be notified of your friend request.' })
+            .setFooter({ text: '🔔 They\'ll be notified instantly! Social connections = success!' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

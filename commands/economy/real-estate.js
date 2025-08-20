@@ -46,6 +46,28 @@ module.exports = {
     cooldown: 30,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                interaction.commandName,
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                interaction.commandName,
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -65,16 +87,44 @@ module.exports = {
     },
     
     async handleMarket(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const availableProperties = this.getAvailableProperties();
         
+        const marketTrend = Math.random() > 0.6 ? 'bullish' : 'bearish';
+        const hotProperty = availableProperties[Math.floor(Math.random() * availableProperties.length)];
+        const isFlashSale = Math.random() < 0.2;
+        const userPortfolioValue = (userData.realEstate || []).reduce((sum, p) => sum + p.price, 0);
+        const isWhale = userPortfolioValue >= 100000;
+        
+        let title = `${constants.EMOJIS.REAL_ESTATE} VexiumVerse Real Estate Market`;
+        let description = '🏠 **BUILD YOUR PROPERTY EMPIRE!** Passive income awaits!';
+        
+        if (isFlashSale) {
+            title = `🔥 FLASH SALE! Real Estate Market`;
+            description = '⚡ **LIMITED TIME!** 15% off select properties! Act fast!';
+        }
+        
+        if (isWhale) {
+            title = `🐋 WHALE INVESTOR! Premium Real Estate Market`;
+            description = '👑 **ELITE ACCESS!** Exclusive properties for top investors!';
+        }
+        
+        const marketEmoji = marketTrend === 'bullish' ? '📈' : '📉';
+        const marketMessage = marketTrend === 'bullish' ? 'PERFECT TIMING! Prices rising!' : 'BUY THE DIP! Great deals available!';
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.REAL_ESTATE} VexiumVerse Real Estate Market`)
-            .setDescription('Invest in virtual properties for passive rental income!')
+            .setTitle(title)
+            .setDescription(description + `\n\n${marketEmoji} **Market Status:** ${marketMessage}`)
             .addFields(
-                { name: '🏘️ Market Overview', value: `**${availableProperties.length}** properties available\n**Market Status**: Active\n**Average ROI**: 12-25% annually`, inline: false }
+                { 
+                    name: '🏘️ Market Intelligence', 
+                    value: `**${availableProperties.length}** prime properties available\n🔥 **Hot Property:** ${hotProperty.name}\n📊 **Average ROI:** 12-25% annually\n💰 **Your Portfolio:** $${userPortfolioValue.toFixed(0)} VEX`, 
+                    inline: false 
+                }
             )
-            .setColor(constants.COLORS.REAL_ESTATE)
-            .setFooter({ text: 'Properties generate passive income every 24 hours' })
+            .setColor(isFlashSale ? constants.COLORS.VEX : constants.COLORS.REAL_ESTATE)
+            .setFooter({ text: isFlashSale ? '⚡ Flash sale ends soon! Properties generate 24/7 income' : 'Properties generate passive income every 24 hours' })
             .setTimestamp();
         
         for (const property of availableProperties.slice(0, 8)) {

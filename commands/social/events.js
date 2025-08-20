@@ -38,6 +38,28 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                interaction.commandName,
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                interaction.commandName,
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -55,12 +77,30 @@ module.exports = {
     },
     
     async handleActive(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const activeEvents = this.getActiveEvents();
         
+        const totalParticipants = activeEvents.reduce((sum, event) => sum + event.participants, 0);
+        const urgentEvents = activeEvents.filter(event => (event.endTime - Date.now()) < (24 * 60 * 60 * 1000));
+        const isEventVeteran = (userData.stats?.eventsCompleted || 0) >= 5;
+        
+        let title = `${constants.EMOJIS.STAR} 🔥 LIVE EVENTS - ${totalParticipants.toLocaleString()} PLAYERS COMPETING!`;
+        let description = '⚡ **MASSIVE REWARDS AVAILABLE!** Join thousands of players in epic challenges!';
+        
+        if (urgentEvents.length > 0) {
+            title = `🚨 URGENT! ${urgentEvents.length} Events Ending Soon!`;
+            description = '⏰ **LAST CHANCE!** These events end in less than 24 hours - don\'t miss out!';
+        }
+        
+        if (isEventVeteran) {
+            description += `\n👑 **VETERAN DETECTED!** You get priority access to exclusive rewards!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.STAR} Active Community Events`)
-            .setDescription('Join exciting events and earn exclusive rewards!')
-            .setColor(constants.COLORS.PRIMARY);
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(urgentEvents.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX);
         
         if (activeEvents.length === 0) {
             embed.setDescription('No active events right now. Check back soon for new events!');

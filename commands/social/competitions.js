@@ -38,6 +38,28 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'competitions',
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'competitions',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -55,12 +77,34 @@ module.exports = {
     },
     
     async handleActive(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const activeCompetitions = this.getActiveCompetitions();
         
+        const totalParticipants = activeCompetitions.reduce((sum, comp) => sum + comp.participants, 0);
+        const isCompetitive = (userData.stats?.competitionsJoined || 0) >= 5;
+        const hasWins = (userData.stats?.competitionWins || 0) > 0;
+        const urgencyCount = activeCompetitions.filter(comp => 
+            (comp.registrationEnd - Date.now()) < (24 * 60 * 60 * 1000)
+        ).length;
+        
+        let title = `${constants.EMOJIS.TROPHY} LIVE TOURNAMENTS!`;
+        let description = `🔥 **${totalParticipants} players competing RIGHT NOW!**\n⚡ **Join the battle and claim your glory!**`;
+        
+        if (urgencyCount > 0) {
+            title = `🚨 URGENT: ${urgencyCount} Tournaments Closing Soon!`;
+            description = `⏰ **LAST CHANCE!** ${urgencyCount} tournaments closing within 24 hours!\n💎 **Don't miss out on massive prize pools!**`;
+        }
+        
+        if (isCompetitive) {
+            title = `👑 CHAMPION'S ARENA - Active Tournaments`;
+            description = `🏆 **Welcome back, competitor!** ${hasWins ? 'Defend your legacy!' : 'Time to claim your first victory!'}\n🔥 **${totalParticipants} rivals await your challenge!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.TROPHY} Active Competitions`)
-            .setDescription('Join competitive tournaments and prove your skills!')
-            .setColor(constants.COLORS.GOLD);
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(urgencyCount > 0 ? constants.COLORS.ERROR : isCompetitive ? constants.COLORS.VEX : constants.COLORS.GOLD);
         
         if (activeCompetitions.length === 0) {
             embed.setDescription('No active competitions right now. Check back soon for new tournaments!');

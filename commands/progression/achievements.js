@@ -18,6 +18,10 @@ module.exports = {
         const user = new User(targetUser.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine && isOwnAchievements) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'achievements', true);
+        }
+        
         if (!isOwnAchievements && userData.settings.privacy === 'private') {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)
@@ -29,12 +33,36 @@ module.exports = {
         
         const unlockedAchievements = userData.achievements || [];
         const totalAchievements = constants.ACHIEVEMENTS.length;
-        const completionRate = (unlockedAchievements.length / totalAchievements * 100).toFixed(1);
+        const completionRate = (unlockedAchievements.length / totalAchievements * 100);
+        const isAchievementHunter = completionRate >= 75;
+        const isCompletionist = completionRate >= 90;
+        const recentUnlocks = unlockedAchievements.slice(-3);
+        
+        let title = `${constants.EMOJIS.TROPHY} ${isOwnAchievements ? 'Your' : targetUser.username + "'s"} Achievement Collection`;
+        let description = `🏆 **${unlockedAchievements.length}** out of **${totalAchievements}** achievements unlocked!`;
+        
+        if (isOwnAchievements) {
+            if (isCompletionist) {
+                title = `👑 COMPLETIONIST LEGEND!`;
+                description = `🏆 **INCREDIBLE!** ${unlockedAchievements.length}/${totalAchievements} achievements!\n💎 **You're in the top 1% of players!**`;
+            } else if (isAchievementHunter) {
+                title = `🔥 ACHIEVEMENT MASTER!`;
+                description = `🏆 **AMAZING PROGRESS!** ${unlockedAchievements.length}/${totalAchievements} achievements!\n⭐ **You're almost a completionist!**`;
+            }
+            
+            const dailyAchievementBonus = Math.random() < 0.3;
+            if (dailyAchievementBonus && completionRate < 100) {
+                description += `\n\n🔥 **TODAY ONLY:** Double XP for achievement unlocks!`;
+            }
+        }
+        
+        const progressBar = '█'.repeat(Math.floor(completionRate / 5)) + '░'.repeat(20 - Math.floor(completionRate / 5));
+        description += `\n\n📊 ${progressBar} **${completionRate.toFixed(1)}%**`;
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.TROPHY} ${isOwnAchievements ? 'Your' : targetUser.username + "'s"} Achievements`)
-            .setDescription(`**${unlockedAchievements.length}/${totalAchievements}** achievements unlocked (${completionRate}%)`)
-            .setColor(constants.COLORS.GOLD)
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
             .setThumbnail(targetUser.displayAvatarURL())
             .setTimestamp();
         

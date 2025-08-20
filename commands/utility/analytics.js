@@ -30,19 +30,59 @@ module.exports = {
     cooldown: 30,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
+        
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'analytics',
+                { analyticsType: subcommand, dataHungry: true }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'analytics',
+                true
+            );
+        }
+        
+        const analyticsUsed = (userData.stats.analyticsUsed || 0) + 1;
+        userData.stats.analyticsUsed = analyticsUsed;
+        
+        let achievementUnlocked = null;
+        if (analyticsUsed === 1) {
+            achievementUnlocked = { name: 'Data Explorer', description: 'First analytics view!' };
+        } else if (analyticsUsed === 10) {
+            achievementUnlocked = { name: 'Analytics Master', description: 'Power user of data!' };
+        } else if (analyticsUsed === 50) {
+            achievementUnlocked = { name: 'Data Scientist', description: 'Analytics legend!' };
+        }
+        
+        if (achievementUnlocked) {
+            userData.achievements = userData.achievements || [];
+            if (!userData.achievements.some(a => a.name === achievementUnlocked.name)) {
+                userData.achievements.push(achievementUnlocked);
+            }
+        }
+        
+        userData.stats.commandsUsed++;
+        await user.save(userData);
         
         switch (subcommand) {
             case 'overview':
-                return this.handleOverview(interaction);
+                return this.handleOverview(interaction, achievementUnlocked);
             case 'economy':
-                return this.handleEconomy(interaction);
+                return this.handleEconomy(interaction, achievementUnlocked);
             case 'entertainment':
-                return this.handleEntertainment(interaction);
+                return this.handleEntertainment(interaction, achievementUnlocked);
             case 'social':
-                return this.handleSocial(interaction);
+                return this.handleSocial(interaction, achievementUnlocked);
             case 'export':
-                return this.handleExport(interaction);
+                return this.handleExport(interaction, achievementUnlocked);
         }
     },
     

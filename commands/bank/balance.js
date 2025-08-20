@@ -11,15 +11,45 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'bank', true);
+        }
+        
+        const totalWealth = userData.bankBalance + userData.vexBalance;
+        const isWealthy = totalWealth >= 10000;
+        const isMillionaire = totalWealth >= 100000;
+        const savingsRate = userData.bankBalance / Math.max(totalWealth, 1);
+        const isSmartSaver = savingsRate >= 0.5;
+        
+        const wealthGrowth = userData.stats.wealthGrowthRate || 0;
+        const nextMilestone = Math.ceil(totalWealth / 10000) * 10000;
+        const progressToMilestone = (totalWealth / nextMilestone) * 100;
+        const progressBar = '█'.repeat(Math.floor(progressToMilestone / 5)) + '░'.repeat(20 - Math.floor(progressToMilestone / 5));
+        
+        let title = `${constants.EMOJIS.BANK} Your Financial Empire`;
+        let description = '💰 **Complete overview of your VexiumVerse wealth**';
+        
+        if (isMillionaire) {
+            title = `👑 MILLIONAIRE STATUS! Your Empire`;
+            description = '💎 **LEGENDARY WEALTH!** You\'ve achieved millionaire status!\n🏆 **You\'re in the top 0.1% of all players!**';
+        } else if (isWealthy) {
+            title = `💎 WEALTH MASTER! Your Empire`;
+            description = '🚀 **IMPRESSIVE PORTFOLIO!** You\'re building serious wealth!\n⭐ **Keep climbing to millionaire status!**';
+        }
+        
+        if (isSmartSaver) {
+            description += `\n🧠 **SMART SAVER DETECTED!** ${(savingsRate * 100).toFixed(0)}% savings rate!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.BANK} Your Bank Account`)
-            .setDescription('Complete overview of your VexiumVerse banking')
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
-                { name: '💰 Total Bank Balance', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true },
-                { name: '💼 Wallet Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Combined Total', value: `$${(userData.bankBalance + userData.vexBalance).toFixed(2)} VEX`, inline: true }
+                { name: '🏦 Bank Vault', value: `$${userData.bankBalance.toFixed(2)} VEX ${userData.bankBalance >= 50000 ? '🐋' : userData.bankBalance >= 10000 ? '🦈' : '🐟'}`, inline: true },
+                { name: '💼 Active Wallet', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Total Empire', value: `$${totalWealth.toFixed(2)} VEX`, inline: true }
             )
-            .setColor(constants.COLORS.VEX)
+            .setColor(isMillionaire ? constants.COLORS.VEX : isWealthy ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setTimestamp();
         
         if (userData.bankDeposits && userData.bankDeposits.length > 0) {

@@ -58,17 +58,52 @@ module.exports = {
     cooldown: 30,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'banking', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(interaction.user.id, 'banking', behaviorContext);
+        }
+        
         const subcommand = interaction.options.getSubcommand();
+        
+        const netWorth = userData.networth || 0;
+        const isWhale = netWorth >= 50000;
+        const isRising = (userData.stats.bankingStreak || 0) >= 3;
+        
+        let motivationalMessage = '';
+        if (isWhale) {
+            motivationalMessage = '🐋 **FINANCIAL WHALE DETECTED!** Your empire grows stronger!';
+        } else if (isRising) {
+            motivationalMessage = '🚀 **FINANCIAL MOMENTUM!** You\'re building serious wealth!';
+        } else if (netWorth >= 1000) {
+            motivationalMessage = '💎 **WEALTH BUILDER!** Every decision shapes your empire!';
+        } else {
+            motivationalMessage = '🌟 **FUTURE MILLIONAIRE!** Your journey to wealth starts here!';
+        }
+        
+        userData.stats.bankingStreak = (userData.stats.bankingStreak || 0) + 1;
+        userData.stats.commandsUsed++;
+        await user.save(userData);
         
         switch (subcommand) {
             case 'loan':
-                return this.handleLoan(interaction);
+                return this.handleLoan(interaction, motivationalMessage);
             case 'credit':
-                return this.handleCredit(interaction);
+                return this.handleCredit(interaction, motivationalMessage);
             case 'savings':
-                return this.handleSavings(interaction);
+                return this.handleSavings(interaction, motivationalMessage);
             case 'financial-advisor':
-                return this.handleFinancialAdvisor(interaction);
+                return this.handleFinancialAdvisor(interaction, motivationalMessage);
         }
     },
     

@@ -17,17 +17,42 @@ module.exports = {
                 )),
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'report',
+                true
+            );
+        }
+        
         const reportType = interaction.options.getString('type');
+        
+        const User = require('../../database/models/User');
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const reportsSubmitted = userData.stats.reportsSubmitted || 0;
+        const isCommunityHelper = reportsSubmitted >= 5;
+        const isLegendaryContributor = reportsSubmitted >= 20;
+        
+        let modalTitle = this.getReportTitle(reportType);
+        if (isLegendaryContributor) {
+            modalTitle = `👑 LEGENDARY CONTRIBUTOR - ${this.getReportTitle(reportType)}`;
+        } else if (isCommunityHelper) {
+            modalTitle = `⭐ COMMUNITY HERO - ${this.getReportTitle(reportType)}`;
+        }
         
         const modal = new ModalBuilder()
             .setCustomId(`report_${reportType}_${interaction.user.id}`)
-            .setTitle(`${this.getReportTitle(reportType)}`);
+            .setTitle(modalTitle);
         
         const titleInput = new TextInputBuilder()
             .setCustomId('report_title')
             .setLabel('Title')
             .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Brief description of your report')
+            .setPlaceholder(isCommunityHelper ? 
+                '🔥 Your expertise matters! Brief description...' : 
+                'Brief description of your report')
             .setRequired(true)
             .setMaxLength(100);
         
@@ -35,7 +60,8 @@ module.exports = {
             .setCustomId('report_description')
             .setLabel('Detailed Description')
             .setStyle(TextInputStyle.Paragraph)
-            .setPlaceholder(this.getPlaceholder(reportType))
+            .setPlaceholder(this.getPlaceholder(reportType) + 
+                (isCommunityHelper ? '\n\n💎 Your detailed reports help make VexiumVerse better!' : ''))
             .setRequired(true)
             .setMaxLength(1000);
         
@@ -44,8 +70,8 @@ module.exports = {
             .setLabel(reportType === 'bug' ? 'Steps to Reproduce' : 'Additional Information')
             .setStyle(TextInputStyle.Paragraph)
             .setPlaceholder(reportType === 'bug' ? 
-                '1. First step\n2. Second step\n3. Bug occurs' : 
-                'Any additional context or information')
+                '1. First step\n2. Second step\n3. Bug occurs\n\n🎯 Detailed steps help us fix faster!' : 
+                'Any additional context or information\n\n✨ Every detail helps improve the experience!')
             .setRequired(false)
             .setMaxLength(500);
         

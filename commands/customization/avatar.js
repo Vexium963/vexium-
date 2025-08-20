@@ -30,6 +30,23 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'avatar', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'avatar',
+                behaviorContext
+            );
+        }
+        
         switch (subcommand) {
             case 'frames':
                 return this.handleFrames(interaction);
@@ -51,10 +68,35 @@ module.exports = {
             { id: 'ice', name: 'Ice Frame', price: 50.00, description: 'Cool ice crystal effects', emoji: '❄️' }
         ];
         
+        const ownedFrames = frames.filter(f => userData.inventory[`avatar_frame_${f.id}`] || f.id === 'none').length;
+        const totalFrames = frames.length;
+        const collectionProgress = (ownedFrames / totalFrames) * 100;
+        const isCollector = collectionProgress >= 75;
+        const isCompletionist = collectionProgress >= 100;
+        
+        let title = `${constants.EMOJIS.NFT} Avatar Frame Collection`;
+        let description = '✨ **Transform your identity!** Choose from exclusive avatar frames!';
+        
+        if (isCompletionist) {
+            title = `👑 FRAME MASTER! Complete Collection`;
+            description = '🏆 **LEGENDARY COLLECTOR!** You own every single frame!\n💎 **Ultimate customization unlocked!**';
+        } else if (isCollector) {
+            title = `🔥 FRAME COLLECTOR! Almost Complete`;
+            description = '⭐ **AMAZING COLLECTION!** You\'re almost a completionist!\n🎯 **Just a few more frames to legendary status!**';
+        }
+        
+        const progressBar = '█'.repeat(Math.floor(collectionProgress / 5)) + '░'.repeat(20 - Math.floor(collectionProgress / 5));
+        const flashSale = Math.random() < 0.3;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.NFT} Avatar Frames`)
-            .setDescription('Customize your profile with stunning avatar frames!')
-            .setColor(constants.COLORS.PRIMARY)
+            .setTitle(title)
+            .setDescription(description + (flashSale ? '\n\n🔥 **FLASH SALE ACTIVE!** Limited time discounts!' : ''))
+            .addFields({
+                name: '📊 Collection Progress',
+                value: `${progressBar} **${collectionProgress.toFixed(1)}%**\n🎨 **${ownedFrames}**/${totalFrames} frames owned`,
+                inline: false
+            })
+            .setColor(isCompletionist ? constants.COLORS.VEX : isCollector ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
             .setTimestamp();
         

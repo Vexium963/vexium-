@@ -34,27 +34,34 @@ module.exports = {
         if (!this.isAdmin(interaction.user.id)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Access Denied`)
-                .setDescription('You do not have permission to view logs.')
+                .setDescription('🚫 **ADMIN ONLY!** You need legendary admin powers to access the system logs!\n\n💡 **Tip:** Become a trusted community member to unlock special privileges!')
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'admin_logs', true);
         }
         
         const logType = interaction.options.getString('type');
         const limit = interaction.options.getInteger('limit') || 20;
         const filterUser = interaction.options.getUser('user');
         
+        const adminLevel = this.getAdminLevel(interaction.user.id);
+        const isSystemMaster = adminLevel === 'master';
+        
         switch (logType) {
             case 'treasury':
-                return this.handleTreasuryLogs(interaction, limit);
+                return this.handleTreasuryLogs(interaction, limit, isSystemMaster);
             case 'transactions':
-                return this.handleTransactionLogs(interaction, limit, filterUser);
+                return this.handleTransactionLogs(interaction, limit, filterUser, isSystemMaster);
             case 'security':
-                return this.handleSecurityLogs(interaction, limit);
+                return this.handleSecurityLogs(interaction, limit, isSystemMaster);
             case 'errors':
-                return this.handleErrorLogs(interaction, limit);
+                return this.handleErrorLogs(interaction, limit, isSystemMaster);
             case 'burns':
-                return this.handleBurnLogs(interaction, limit, filterUser);
+                return this.handleBurnLogs(interaction, limit, filterUser, isSystemMaster);
         }
     },
     

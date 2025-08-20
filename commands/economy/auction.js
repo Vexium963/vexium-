@@ -50,6 +50,28 @@ module.exports = {
     cooldown: 3,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'auction',
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'auction',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -66,20 +88,47 @@ module.exports = {
     
     async handleList(interaction) {
         const auctions = this.getActiveAuctions();
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const hotAuctions = auctions.filter(a => a.bids.length >= 3);
+        const endingSoon = auctions.filter(a => (a.endTime - Date.now()) < 3600000); // 1 hour
+        const userParticipation = auctions.filter(a => a.bids.some(b => b.bidderId === interaction.user.id));
         
         if (auctions.length === 0) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.AUCTION} Active Auctions`)
-                .setDescription('No active auctions right now. Be the first to create one!')
-                .setColor(constants.COLORS.INFO);
+                .setTitle(`${constants.EMOJIS.AUCTION} 🔥 AUCTION HOUSE - EMPTY!`)
+                .setDescription('💎 **GOLDEN OPPORTUNITY!** No active auctions right now!\n🚀 **BE THE FIRST** to create one and dominate the market!')
+                .addFields({
+                    name: '💡 Pro Tip',
+                    value: '🎯 **First movers get the most attention!** Create an auction now and watch the bidding wars begin!',
+                    inline: false
+                })
+                .setColor(constants.COLORS.VEX);
             
             return interaction.reply({ embeds: [embed] });
         }
         
+        let title = `${constants.EMOJIS.AUCTION} 🔥 AUCTION HOUSE - ${auctions.length} LIVE AUCTIONS!`;
+        let description = `💰 **${auctions.length} auction${auctions.length > 1 ? 's' : ''} with MASSIVE potential!**`;
+        
+        if (hotAuctions.length > 0) {
+            title = `🔥 BIDDING WARS IN PROGRESS! ${auctions.length} Live Auctions!`;
+            description = `⚡ **${hotAuctions.length} HOT AUCTIONS** with multiple bidders!\n💎 **Competition is FIERCE!** Don't miss out!`;
+        }
+        
+        if (endingSoon.length > 0) {
+            description += `\n⏰ **URGENT: ${endingSoon.length} auction${endingSoon.length > 1 ? 's' : ''} ending within 1 hour!**`;
+        }
+        
+        if (userParticipation.length > 0) {
+            description += `\n🎯 **You're actively bidding on ${userParticipation.length} auction${userParticipation.length > 1 ? 's' : ''}!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.AUCTION} Active Auctions`)
-            .setDescription(`${auctions.length} auction${auctions.length > 1 ? 's' : ''} currently active`)
-            .setColor(constants.COLORS.PRIMARY);
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(hotAuctions.length > 0 ? constants.COLORS.VEX : constants.COLORS.PRIMARY);
         
         for (const auction of auctions.slice(0, 5)) {
             const timeLeft = auction.endTime - Date.now();

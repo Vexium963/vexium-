@@ -72,16 +72,36 @@ module.exports = {
                 .setDescription('View bot statistics')),
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'admin',
+                true
+            );
+        }
+        
         if (!this.isAdmin(interaction.user.id)) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Access Denied`)
-                .setDescription('You do not have permission to use admin commands.')
-                .setColor(constants.COLORS.ERROR);
+                .setTitle(`${constants.EMOJIS.ERROR} 🚫 ADMIN ACCESS REQUIRED`)
+                .setDescription('⚠️ **RESTRICTED AREA!** Only VexiumVerse administrators can access these powerful commands.\n\n💡 **Tip:** Regular users can use `/help` to see available commands!')
+                .setColor(constants.COLORS.ERROR)
+                .addFields({
+                    name: '🔐 Security Notice',
+                    value: 'This incident has been logged for security purposes.',
+                    inline: false
+                });
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();
+        const adminLevel = this.getAdminLevel(interaction.user.id);
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`👑 ADMIN COMMAND CENTER`)
+            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.`)
+            .setColor(constants.COLORS.VEX)
+            .setTimestamp();
         
         switch (subcommand) {
             case 'balance':
@@ -135,16 +155,29 @@ module.exports = {
                 break;
         }
         
+        const isLargeAmount = amount >= 10000;
+        const impactLevel = isLargeAmount ? 'MASSIVE' : amount >= 1000 ? 'MAJOR' : 'STANDARD';
+        
+        let title = `${constants.EMOJIS.SUCCESS} Balance Modified`;
+        let description = `✅ Successfully ${action}ed VEX for ${targetUser.username}`;
+        
+        if (isLargeAmount) {
+            title = `💎 MASSIVE BALANCE CHANGE!`;
+            description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed $${amount.toFixed(2)} VEX for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Balance Modified`)
-            .setDescription(`Successfully ${action}ed VEX for ${targetUser.username}`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
-                { name: '👤 User', value: targetUser.username, inline: true },
-                { name: '⚙️ Action', value: action.charAt(0).toUpperCase() + action.slice(1), inline: true },
-                { name: '💰 Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 New Balance', value: `$${newBalance.toFixed(2)} VEX`, inline: true }
+                { name: '👤 Target User', value: `${targetUser.username} (<@${targetUser.id}>)`, inline: true },
+                { name: '⚙️ Admin Action', value: `${action.charAt(0).toUpperCase() + action.slice(1)} ${impactLevel}`, inline: true },
+                { name: '💰 Amount Changed', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `$${newBalance.toFixed(2)} VEX`, inline: true },
+                { name: '🎯 Impact Level', value: `${impactLevel} ${isLargeAmount ? '🚀' : '⭐'}`, inline: true },
+                { name: '⏰ Executed By', value: `<@${interaction.user.id}>`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isLargeAmount ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

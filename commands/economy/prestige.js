@@ -19,6 +19,22 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'prestige',
+                { highStakes: true, majorDecision: true }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'prestige',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -34,10 +50,24 @@ module.exports = {
         const userData = await user.load();
         
         const prestigeData = this.calculatePrestigeRewards(userData);
+        const totalPrestiges = userData.stats?.totalPrestige || 0;
+        const isPrestigeLegend = totalPrestiges >= 5;
+        const isFirstTime = totalPrestiges === 0;
+        
+        let title = `${constants.EMOJIS.CROWN} Prestige System`;
+        let description = '🔄 **ULTIMATE POWER MOVE!** Reset your level for MASSIVE bonuses!';
+        
+        if (isFirstTime && prestigeData.canPrestige) {
+            title = `👑 LEGENDARY PRESTIGE AWAITS!`;
+            description = '🚀 **FIRST PRESTIGE AVAILABLE!** Join the elite ranks of prestige players!\n💎 **This is where legends are born!**';
+        } else if (isPrestigeLegend) {
+            title = `🌟 PRESTIGE MASTER STATUS!`;
+            description = `💎 **PRESTIGE LEGEND!** You've prestiged ${totalPrestiges} times!\n👑 **You're in the top 1% of all players!**`;
+        }
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CROWN} Prestige System`)
-            .setDescription('Reset your level to gain massive bonuses and exclusive perks!')
+            .setTitle(title)
+            .setDescription(description)
             .setColor(prestigeData.canPrestige ? constants.COLORS.GOLD : constants.COLORS.WARNING)
             .setThumbnail(interaction.user.displayAvatarURL());
         

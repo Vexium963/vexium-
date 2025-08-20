@@ -38,6 +38,23 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'quests', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'quests',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -63,12 +80,32 @@ module.exports = {
         const activeQuests = this.getActiveQuests(userData);
         const completedCount = activeQuests.filter(q => q.completed).length;
         const totalRewards = activeQuests.reduce((sum, q) => sum + (q.completed && !q.claimed ? q.reward : 0), 0);
+        const questStreak = userData.stats.questStreak || 0;
+        const isQuestMaster = (userData.stats.questsCompleted || 0) >= 50;
+        const hasUrgentQuests = activeQuests.some(q => q.completed && !q.claimed);
+        
+        let title = `${constants.EMOJIS.QUESTS} Epic Quest Board`;
+        let description = `🎯 **Complete quests to unlock legendary rewards!**\n\n📊 **Progress**: ${completedCount}/${activeQuests.length} completed`;
+        
+        if (isQuestMaster) {
+            title = `👑 QUEST MASTER'S BOARD`;
+            description = `💎 **LEGENDARY ADVENTURER!** You've mastered the art of questing!\n\n🏆 **Progress**: ${completedCount}/${activeQuests.length} completed`;
+        }
+        
+        if (hasUrgentQuests) {
+            title = `🔥 URGENT! Rewards Ready!`;
+            description = `⚡ **CLAIM YOUR REWARDS NOW!** Don't let them expire!\n\n💰 **$${totalRewards.toFixed(2)} VEX** waiting for you!`;
+        }
+        
+        if (questStreak >= 7) {
+            description += `\n🔥 **QUEST STREAK: ${questStreak} days!** You're unstoppable!`;
+        }
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.QUESTS} Active Quests`)
-            .setDescription(`Complete quests to earn VEX, XP, and exclusive rewards!\n\n**Progress**: ${completedCount}/${activeQuests.length} completed`)
-            .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'New quests become available as you progress' })
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(hasUrgentQuests ? constants.COLORS.VEX : isQuestMaster ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setFooter({ text: 'New legendary quests unlock as you level up!' })
             .setTimestamp();
         
         if (activeQuests.length === 0) {

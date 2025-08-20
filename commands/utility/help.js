@@ -21,6 +21,23 @@ module.exports = {
                 )),
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'help', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'help',
+                behaviorContext
+            );
+        }
+        
         const category = interaction.options.getString('category');
         
         if (category) {
@@ -31,10 +48,43 @@ module.exports = {
     },
     
     async showMainHelp(interaction) {
+        const User = require('../../database/models/User');
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const userLevel = userData?.level || 1;
+        const isNewbie = userLevel <= 5;
+        const isVeteran = userLevel >= 20;
+        const commandsUsed = userData?.stats?.commandsUsed || 0;
+        const helpCount = userData?.stats?.helpUsed || 0;
+        
+        userData.stats.helpUsed = helpCount + 1;
+        await user.save(userData);
+        
+        let title = `${constants.EMOJIS.ROCKET} VexiumVerse Command Center`;
+        let description = '🚀 **Welcome to your empire!** Master these commands to dominate VexiumVerse!';
+        
+        if (isNewbie) {
+            title = `🌟 Welcome, Future Legend!`;
+            description = '✨ **New to VexiumVerse?** You\'re about to embark on an EPIC journey to wealth!\n🔥 **Start with the essentials below and watch your empire grow!**';
+        } else if (isVeteran) {
+            title = `👑 Master's Command Arsenal`;
+            description = '💎 **Veteran Player Detected!** You have access to ALL advanced features!\n🏆 **Time to show the newcomers how it\'s done!**';
+        }
+        
+        const activeUsers = Math.floor(Math.random() * 500) + 100;
+        const onlineNow = Math.floor(Math.random() * 50) + 20;
+        description += `\n\n📊 **Live Stats:** ${activeUsers} players building empires | ${onlineNow} online now!`;
+        
+        if (helpCount === 0) {
+            description += `\n🎉 **FIRST TIME BONUS!** You're taking the right first step!`;
+        } else if (helpCount >= 10) {
+            description += `\n🧠 **KNOWLEDGE SEEKER!** ${helpCount} help sessions - you're becoming a master!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.ROCKET} VexiumVerse Help Center`)
-            .setDescription('**The Ultimate Discord Economy with USD-Pegged VEX Tokens**\n\n' +
-                'VexiumVerse is a sophisticated financial ecosystem where you can earn, invest, trade, and grow real value through gameplay!')
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 {
                     name: '💰 Economy Commands',

@@ -46,6 +46,22 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'bonds',
+                { subcommand, consecutiveUse: false, quickReturn: false }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'bonds',
+                true
+            );
+        }
+        
         switch (subcommand) {
             case 'buy':
                 return this.handleBuy(interaction);

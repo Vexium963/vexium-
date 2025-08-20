@@ -34,6 +34,22 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'referral',
+                { socialAction: true, viralPotential: true }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'referral',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -62,10 +78,30 @@ module.exports = {
             pendingRewards: 0
         };
         
+        const totalReferrals = referralStats.referrals.length;
+        const isInfluencer = totalReferrals >= 10;
+        const isViral = totalReferrals >= 25;
+        const nextTier = this.getRewardTiers().find(tier => tier.referrals > totalReferrals);
+        const progressToNext = nextTier ? (totalReferrals / nextTier.referrals) * 100 : 100;
+        
+        let title = `${constants.EMOJIS.REFERRAL} Your Referral Empire`;
+        let description = '🚀 **Build your network and earn massive rewards!**';
+        
+        if (isViral) {
+            title = `🔥 VIRAL SENSATION! Referral Empire`;
+            description = '👑 **LEGENDARY INFLUENCER!** You\'re spreading VexiumVerse like wildfire!';
+        } else if (isInfluencer) {
+            title = `⭐ INFLUENCER STATUS! Referral Empire`;
+            description = '💎 **AMAZING NETWORK!** You\'re building an incredible community!';
+        }
+        
+        const urgencyMessage = Math.random() < 0.3 ? '\n⚡ **LIMITED TIME:** Double rewards this week!' : '';
+        const socialProof = totalReferrals > 0 ? `\n🌟 **${totalReferrals} friends joined because of you!**` : '';
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.REFERRAL} Your Referral Program`)
-            .setDescription('Invite friends to VexiumVerse and earn rewards together!')
-            .setColor(constants.COLORS.PRIMARY)
+            .setTitle(title)
+            .setDescription(description + socialProof + urgencyMessage)
+            .setColor(isViral ? constants.COLORS.VEX : isInfluencer ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL());
         
         if (!referralStats.code) {

@@ -26,6 +26,18 @@ module.exports = {
         const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.psychologyEngine) {
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'notifications',
+                { consecutiveUse: false, quickReturn: false, timeSinceLastUse: Date.now() }
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'notifications', true);
+        }
+        
         switch (subcommand) {
             case 'settings':
                 await this.handleSettings(interaction, user, userData);

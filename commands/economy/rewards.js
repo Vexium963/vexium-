@@ -26,6 +26,19 @@ module.exports = {
         const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'rewards', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: userData.stats.rewardsClaimed >= 5,
+                quickReturn: false,
+                timeSinceLastUse: Date.now() - (userData.lastRewardCheck || 0)
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(interaction.user.id, 'rewards', behaviorContext);
+        }
+        
         switch (subcommand) {
             case 'claim':
                 await this.handleClaim(interaction, user, userData);
@@ -37,6 +50,9 @@ module.exports = {
                 await this.handleHistory(interaction, user, userData);
                 break;
         }
+        
+        userData.lastRewardCheck = Date.now();
+        await user.save(userData);
     },
     
     async handleClaim(interaction, user, userData) {

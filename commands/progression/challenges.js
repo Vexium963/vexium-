@@ -30,6 +30,28 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                interaction.commandName,
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                interaction.commandName,
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -52,11 +74,31 @@ module.exports = {
         const completedCount = dailyChallenges.filter(c => c.completed).length;
         const totalRewards = dailyChallenges.reduce((sum, c) => sum + (c.completed && !c.claimed ? c.reward : 0), 0);
         
+        const completionRate = (completedCount / dailyChallenges.length) * 100;
+        const isChallengeMaster = completionRate >= 75;
+        const hasUnclaimed = totalRewards > 0;
+        const streakBonus = userData.stats.challengeStreak >= 7 ? 1.5 : 1.0;
+        
+        let title = `${constants.EMOJIS.CHALLENGES} Daily Challenge Arena`;
+        let description = `🎯 **Complete challenges to dominate the leaderboard!**\n\n📊 **Progress**: ${completedCount}/${dailyChallenges.length} completed (${completionRate.toFixed(1)}%)`;
+        
+        if (isChallengeMaster) {
+            title = `🔥 CHALLENGE DOMINATOR!`;
+            description = `👑 **INCREDIBLE!** You're crushing ${completionRate.toFixed(1)}% of today's challenges!\n🏆 **You're in the top 5% of challenge completers!**`;
+        }
+        
+        if (hasUnclaimed) {
+            description += `\n\n💰 **URGENT:** $${totalRewards.toFixed(2)} VEX waiting to be claimed!`;
+        }
+        
+        const timeLeft = this.getTimeUntilMidnight();
+        const urgencyMessage = timeLeft < 3 ? '⚠️ **HURRY!** Challenges reset soon!' : `⏰ **${timeLeft}h remaining** to complete!`;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHALLENGES} Daily Challenges`)
-            .setDescription(`Complete challenges to earn bonus VEX and XP!\n\n**Progress**: ${completedCount}/${dailyChallenges.length} completed`)
-            .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'Challenges reset daily at midnight UTC • Claim rewards before reset!' })
+            .setTitle(title)
+            .setDescription(description + `\n\n${urgencyMessage}`)
+            .setColor(isChallengeMaster ? constants.COLORS.VEX : hasUnclaimed ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setFooter({ text: 'Daily challenges = Daily rewards! Don\'t miss out!' })
             .setTimestamp();
         
         for (const challenge of dailyChallenges) {

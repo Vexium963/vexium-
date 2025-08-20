@@ -57,6 +57,26 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'tournaments', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'tournaments',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -74,17 +94,39 @@ module.exports = {
     },
     
     async handleActive(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const activeTournaments = this.getActiveTournaments();
         
+        const totalPrizePool = activeTournaments.reduce((sum, t) => sum + (t.entryFee * t.participants.length), 0);
+        const isCompetitor = (userData.stats.tournamentsJoined || 0) >= 5;
+        const isChampion = (userData.stats.tournamentsWon || 0) >= 3;
+        const hotTournament = activeTournaments.find(t => t.participants.length >= t.maxPlayers * 0.8);
+        
+        let title = `${constants.EMOJIS.TOURNAMENT} Tournament Arena`;
+        let description = `🏆 **COMPETE FOR GLORY!** ${activeTournaments.length} tournaments active!\n💰 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+        
+        if (isChampion) {
+            title = `👑 CHAMPION'S ARENA!`;
+            description = `🏆 **WELCOME BACK, CHAMPION!** ${activeTournaments.length} tournaments await your dominance!\n💎 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+        } else if (isCompetitor) {
+            title = `🔥 COMPETITOR'S BATTLEGROUND!`;
+            description = `🏆 **SEASONED WARRIOR!** ${activeTournaments.length} tournaments ready for battle!\n💰 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+        }
+        
+        if (hotTournament) {
+            description += `\n🔥 **HOT TOURNAMENT:** ${hotTournament.name} is almost full!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.TOURNAMENT} Active Tournaments`)
-            .setDescription('Join skill-based entertainment tournaments for prizes and glory!')
+            .setTitle(title)
+            .setDescription(description + `\n\n⚡ **"Champions are made in tournaments!"**`)
             .addFields(
                 { name: '⚖️ Legal Notice', value: 'All tournaments feature skill-based entertainment games, not gambling', inline: false },
                 { name: '🔞 Age Requirement', value: 'Must be 21+ and age verified to participate', inline: true },
                 { name: '🏆 Prize Structure', value: 'Winners receive VEX tokens and exclusive achievements', inline: true }
             )
-            .setColor(constants.COLORS.TOURNAMENT)
+            .setColor(isChampion ? constants.COLORS.VEX : constants.COLORS.TOURNAMENT)
             .setFooter({ text: 'Tournament results are based on skill and strategy, not chance' })
             .setTimestamp();
         

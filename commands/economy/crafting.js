@@ -60,6 +60,31 @@ module.exports = {
     cooldown: 15,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'crafting',
+                behaviorContext
+            );
+        }
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(
+                interaction.user.id,
+                'crafting',
+                true
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -84,11 +109,36 @@ module.exports = {
         const workshopLevel = userData.workshopLevel || 1;
         const availableRecipes = this.getAvailableRecipes(workshopLevel, category);
         
+        const craftingStreak = userData.stats.craftingStreak || 0;
+        const totalCrafted = userData.stats.itemsCrafted || 0;
+        const isMaster = totalCrafted >= 100;
+        const isArtisan = totalCrafted >= 50;
+        const flashSale = Math.random() < 0.2; // 20% chance for flash sale
+        
+        let title = `${constants.EMOJIS.CRAFTING} Master Craftsman's Workshop`;
+        let description = `🔥 **CREATE LEGENDARY ITEMS!** Transform materials into power!\n\n**Workshop Level**: ${workshopLevel} ${workshopLevel >= 3 ? '👑' : ''}`;
+        
+        if (isMaster) {
+            title = `👑 LEGENDARY CRAFTMASTER'S FORGE!`;
+            description = `💎 **MASTER ARTISAN DETECTED!** ${totalCrafted} items crafted!\n🏆 **You're in the elite 1% of crafters!**\n\n**Workshop Level**: ${workshopLevel} 👑`;
+        } else if (isArtisan) {
+            title = `⚡ EXPERT ARTISAN'S WORKSHOP!`;
+            description = `🔥 **SKILLED CRAFTSMAN!** ${totalCrafted} items forged!\n⭐ **You're becoming legendary!**\n\n**Workshop Level**: ${workshopLevel} ⭐`;
+        }
+        
+        if (flashSale) {
+            description += `\n\n🚨 **FLASH SALE ACTIVE!** 25% off all crafting costs for the next hour! ⏰`;
+        }
+        
+        if (craftingStreak >= 5) {
+            description += `\n🔥 **CRAFTING STREAK: ${craftingStreak} days!** You're on fire!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CRAFTING} Crafting Recipes`)
-            .setDescription(`Create powerful items using materials and VEX!\n\n**Workshop Level**: ${workshopLevel}`)
-            .setColor(constants.COLORS.CRAFTING)
-            .setFooter({ text: 'Upgrade your workshop to unlock more recipes' })
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(isMaster ? constants.COLORS.VEX : isArtisan ? constants.COLORS.SUCCESS : constants.COLORS.CRAFTING)
+            .setFooter({ text: flashSale ? '⚡ Flash Sale Active! Craft now for maximum savings!' : 'Upgrade your workshop to unlock legendary recipes' })
             .setTimestamp();
         
         if (availableRecipes.length === 0) {

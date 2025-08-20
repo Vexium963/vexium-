@@ -30,15 +30,28 @@ module.exports = {
         const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'settings', true);
+        }
+        
+        const settingsUsage = userData.stats.settingsOptimized || 0;
+        const isSettingsPro = settingsUsage >= 10;
+        const isFirstTime = settingsUsage === 0;
+        
+        if (isFirstTime) {
+            userData.stats.settingsOptimized = 1;
+            await user.save(userData);
+        }
+        
         switch (subcommand) {
             case 'view':
-                await this.handleView(interaction, user, userData);
+                await this.handleView(interaction, user, userData, isSettingsPro, isFirstTime);
                 break;
             case 'privacy':
-                await this.handlePrivacy(interaction, user, userData);
+                await this.handlePrivacy(interaction, user, userData, isSettingsPro);
                 break;
             case 'display':
-                await this.handleDisplay(interaction, user, userData);
+                await this.handleDisplay(interaction, user, userData, isSettingsPro);
                 break;
             case 'reset':
                 await this.handleReset(interaction, user, userData);
@@ -46,18 +59,34 @@ module.exports = {
         }
     },
     
-    async handleView(interaction, user, userData) {
+    async handleView(interaction, user, userData, isSettingsPro, isFirstTime) {
         const settings = userData.settings || this.getDefaultSettings();
+        const optimizationScore = this.calculateOptimizationScore(settings);
+        const settingsUsage = userData.stats.settingsOptimized || 0;
+        
+        let title = `${constants.EMOJIS.SETTINGS} Your Control Center`;
+        let description = '⚙️ **Master your VexiumVerse experience!**';
+        
+        if (isFirstTime) {
+            title = `🌟 Welcome to Settings!`;
+            description = '✨ **NEW FEATURE UNLOCKED!** Customize your empire to perfection!';
+        } else if (isSettingsPro) {
+            title = `👑 Settings Master Dashboard`;
+            description = '💎 **OPTIMIZATION EXPERT!** Your setup is legendary!';
+        }
+        
+        const progressBar = '█'.repeat(Math.floor(optimizationScore / 5)) + '░'.repeat(20 - Math.floor(optimizationScore / 5));
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SETTINGS} Your Settings`)
-            .setDescription('Current configuration for your VexiumVerse experience')
+            .setTitle(title)
+            .setDescription(description + `\n\n📊 **Optimization Score:** ${progressBar} ${optimizationScore}%`)
             .addFields(
-                { name: '🔒 Privacy Settings', value: this.formatPrivacySettings(settings.privacy), inline: false },
-                { name: '🎨 Display Settings', value: this.formatDisplaySettings(settings.display), inline: false },
-                { name: '🔔 Notification Settings', value: this.formatNotificationSettings(settings.notifications), inline: false }
+                { name: '🔒 Privacy Fortress', value: this.formatPrivacySettings(settings.privacy) + '\n💡 *Control your digital footprint*', inline: false },
+                { name: '🎨 Visual Experience', value: this.formatDisplaySettings(settings.display) + '\n🎯 *Personalize your interface*', inline: false },
+                { name: '🔔 Smart Notifications', value: this.formatNotificationSettings(settings.notifications) + '\n⚡ *Stay informed, stay ahead*', inline: false },
+                { name: '📈 Your Progress', value: `🎛️ **Settings Optimized:** ${settingsUsage} times\n🏆 **Status:** ${isSettingsPro ? '👑 Master' : settingsUsage >= 5 ? '⭐ Expert' : '🌟 Learning'}\n💡 **Tip:** ${this.getOptimizationTip(optimizationScore)}`, inline: false }
             )
-            .setColor(constants.COLORS.PRIMARY)
+            .setColor(isSettingsPro ? constants.COLORS.VEX : isFirstTime ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setTimestamp();
         
         const buttons = [

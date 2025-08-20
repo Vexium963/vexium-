@@ -34,21 +34,42 @@ module.exports = {
     cooldown: 15,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'leaderboards', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                competitiveSpirit: true
+            };
+            
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'leaderboards',
+                behaviorContext
+            );
+        }
         
         switch (subcommand) {
             case 'global':
-                return this.handleGlobal(interaction);
+                return this.handleGlobal(interaction, userData);
             case 'wealth':
-                return this.handleWealth(interaction);
+                return this.handleWealth(interaction, userData);
             case 'entertainment':
-                return this.handleEntertainment(interaction);
+                return this.handleEntertainment(interaction, userData);
             case 'social':
-                return this.handleSocial(interaction);
+                return this.handleSocial(interaction, userData);
             case 'achievements':
-                return this.handleAchievements(interaction);
+                return this.handleAchievements(interaction, userData);
             case 'streaks':
-                return this.handleStreaks(interaction);
+                return this.handleStreaks(interaction, userData);
         }
     },
     

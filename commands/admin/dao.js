@@ -65,7 +65,26 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'dao', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'dao',
+                behaviorContext
+            );
+        }
         
         switch (subcommand) {
             case 'proposals':
@@ -99,11 +118,27 @@ module.exports = {
             return interaction.reply({ embeds: [embed] });
         }
         
+        const totalVoters = activeProposals.reduce((sum, p) => sum + p.voters.length, 0);
+        const urgentProposals = activeProposals.filter(p => new Date(p.endsAt) - Date.now() < 24 * 60 * 60 * 1000);
+        const isGovernanceElite = userData.stats?.daoVotes >= 10;
+        
+        let title = `${constants.EMOJIS.DAO} 🔥 GOVERNANCE POWER!`;
+        let description = `⚡ **${activeProposals.length} ACTIVE PROPOSALS** need your voice!\n👥 **${totalVoters} community members** are participating!`;
+        
+        if (urgentProposals.length > 0) {
+            title = `🚨 URGENT! DAO Proposals Closing Soon!`;
+            description = `⏰ **${urgentProposals.length} proposals** end in 24 hours!\n🔥 **DON'T MISS YOUR CHANCE TO SHAPE THE FUTURE!**\n👥 **${totalVoters} voters** are already participating!`;
+        }
+        
+        if (isGovernanceElite) {
+            description += `\n👑 **GOVERNANCE ELITE STATUS** - You're a democracy champion!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.DAO} Active DAO Proposals`)
-            .setDescription(`**${activeProposals.length}** proposals need your vote!`)
-            .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'Use /dao vote <proposal_id> <choice> to participate' });
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(urgentProposals.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX)
+            .setFooter({ text: '🗳️ Your vote shapes VexiumVerse! Every voice matters!' });
         
         for (const proposal of activeProposals.slice(0, 5)) {
             const totalVotes = proposal.votes.yes + proposal.votes.no + proposal.votes.abstain;
