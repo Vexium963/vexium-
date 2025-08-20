@@ -117,17 +117,55 @@ module.exports = {
         
         await user.save(userData);
         
+        const workStreak = userData.stats.workStreak || 0;
+        const isProductiveDay = workStreak >= 5;
+        const bonusChance = Math.random();
+        const gotBonus = bonusChance < (isProductiveDay ? 0.25 : 0.15);
+        const bonusAmount = gotBonus ? Math.floor(vexEarned * 0.3) : 0;
+        
+        let title = `${constants.EMOJIS.WORK} Work Complete!`;
+        let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **$${vexEarned.toFixed(2)} VEX** earned!`;
+        
+        if (gotBonus) {
+            title = `🎉 EXCEPTIONAL PERFORMANCE!`;
+            description += `\n✨ **PERFORMANCE BONUS: +$${bonusAmount} VEX!**`;
+            await user.addVEX(bonusAmount, 'performance_bonus');
+        }
+        
+        if (workStreak >= 10) {
+            title = `🔥 WORK MACHINE! ${workStreak} Days Strong!`;
+            description += `\n🏆 **PRODUCTIVITY LEGEND STATUS!**`;
+        }
+        
+        const jobProgress = (userData.jobXp || 0) / ((userData.jobLevel + 1) * 500);
+        const progressBar = '█'.repeat(Math.floor(jobProgress * 15)) + '░'.repeat(15 - Math.floor(jobProgress * 15));
+        
+        const motivationalMessages = [
+            "🚀 You're building an empire!",
+            "💎 Every VEX brings you closer to wealth!",
+            "⚡ Your dedication is paying off!",
+            "🌟 Success is in your hands!",
+            "🔥 Keep grinding, legend!"
+        ];
+        
+        const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.updateChallengeProgress(interaction.user.id, 'work', 1);
+        }
+        
         const workEmbed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.WORK} Work Complete!`)
-            .setDescription(`You worked as a **${jobData.name}** and earned VEX!`)
+            .setTitle(title)
+            .setDescription(description + `\n\n${randomMotivation}`)
             .addFields(
-                { name: '💰 VEX Earned', value: `$${vexEarned.toFixed(2)}`, inline: true },
-                { name: '📊 New Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
-                { name: '🎯 XP Gained', value: `+${xpGained} XP`, inline: true },
-                { name: '💼 Job Level', value: `${userData.jobLevel} (${userData.jobXp}/${(userData.jobLevel + 1) * 500} XP)`, inline: true },
+                { name: '💼 Career', value: `${jobData.name} (Level ${userData.jobLevel})`, inline: true },
+                { name: '💰 Total Earned', value: `$${(vexEarned + bonusAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Job Progress', value: `${progressBar} ${Math.floor(jobProgress * 100)}%`, inline: false },
+                { name: '🔥 Work Streak', value: `${workStreak} days ${workStreak >= 10 ? '👑' : ''}`, inline: true },
                 { name: '⏰ Next Work', value: `<t:${Math.floor((now + workCooldown) / 1000)}:R>`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(gotBonus ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         if (userData.premiumTier) {

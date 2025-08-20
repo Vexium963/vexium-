@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const CanvasRenderer = require('../../utils/canvasRenderer');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -84,7 +85,6 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DIAMOND} ${targetUser.username}'s Profile`)
             .setColor(profileColor)
-            .setThumbnail(targetUser.displayAvatarURL({ size: 256 }))
             .setTimestamp();
         
         if (userData.profile.bio) {
@@ -155,7 +155,49 @@ module.exports = {
         const joinDate = new Date(userData.createdAt).toLocaleDateString();
         embed.setFooter({ text: `VexiumVerse member since ${joinDate}` });
         
-        await interaction.reply({ embeds: [embed] });
+        const components = [];
+        if (isOwnProfile) {
+            const actionRow = new ActionRowBuilder();
+            actionRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`profile_edit_${interaction.user.id}`)
+                    .setLabel('Edit Profile')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('✏️'),
+                new ButtonBuilder()
+                    .setCustomId(`profile_share_${interaction.user.id}`)
+                    .setLabel('Share Profile')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📤'),
+                new ButtonBuilder()
+                    .setCustomId(`profile_achievements_${interaction.user.id}`)
+                    .setLabel('View Achievements')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('🏆')
+            );
+            components.push(actionRow);
+        }
+        
+        try {
+            const canvasRenderer = new CanvasRenderer();
+            const profileBuffer = await canvasRenderer.createProfileCard(userData, targetUser);
+            const attachment = new AttachmentBuilder(profileBuffer, { name: 'profile-card.png' });
+            
+            embed.setImage('attachment://profile-card.png');
+            
+            await interaction.reply({ 
+                embeds: [embed], 
+                files: [attachment],
+                components: components.length > 0 ? components : undefined
+            });
+        } catch (error) {
+            console.warn('Canvas rendering failed, using fallback:', error);
+            embed.setThumbnail(targetUser.displayAvatarURL({ size: 256 }));
+            await interaction.reply({ 
+                embeds: [embed],
+                components: components.length > 0 ? components : undefined
+            });
+        }
         
         if (isOwnProfile) {
             userData.stats.commandsUsed++;

@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const CanvasRenderer = require('../../utils/canvasRenderer');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -53,6 +54,8 @@ module.exports = {
     },
     
     async handleBrowse(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const category = interaction.options.getString('category');
         
         if (!category) {
@@ -68,103 +71,28 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        
-        const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SHOP} ${category.charAt(0).toUpperCase() + category.slice(1)} Shop`)
-            .setDescription(`Browse ${category} available for purchase`)
-            .setColor(constants.COLORS.PRIMARY)
-            .setThumbnail('https://cdn.discordapp.com/emojis/1234567890123456789.png');
 
-        const itemEntries = Object.entries(items);
-        const itemsPerPage = 5;
-        const totalPages = Math.ceil(itemEntries.length / itemsPerPage);
-        const currentPage = 1;
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const pageItems = itemEntries.slice(startIndex, startIndex + itemsPerPage);
+        const dailyDeals = this.getDailyDeals(Object.entries(items).map(([id, item]) => ({ id, ...item })));
+        const featuredItems = this.getFeaturedItems(Object.entries(items).map(([id, item]) => ({ id, ...item })), userData);
+        const limitedOffers = this.getLimitedTimeOffers(Object.entries(items).map(([id, item]) => ({ id, ...item })));
         
-        for (const [itemId, item] of pageItems) {
-            let fieldValue = `💰 **$${item.price.toFixed(2)} VEX**\n${item.description}`;
-            
-            if (item.effect) {
-                fieldValue += `\n✨ **Effect**: ${item.effect}`;
-            }
-            
-            if (item.burnRate) {
-                fieldValue += `\n🔥 **Burn Rate**: ${(item.burnRate * 100).toFixed(0)}%`;
-            }
-            
-            if (item.supply) {
-                fieldValue += `\n📦 **Stock**: ${item.supply} remaining`;
-            }
-            
-            embed.addFields({
-                name: `${item.name}`,
-                value: fieldValue,
-                inline: true
-            });
-        }
-
-        const navigationButtons = new ActionRowBuilder();
+        const embed = this.createPsychologicalShopEmbed(items, category, userData, dailyDeals, featuredItems, limitedOffers);
+        const components = this.createAdvancedShopComponents(items, category, interaction.user.id, userData);
         
-        if (totalPages > 1) {
-            navigationButtons.addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`shop_page_${category}_${currentPage - 1}`)
-                    .setLabel('◀️ Previous')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(currentPage === 1),
-                new ButtonBuilder()
-                    .setCustomId(`shop_page_info_${category}`)
-                    .setLabel(`Page ${currentPage}/${totalPages}`)
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(true),
-                new ButtonBuilder()
-                    .setCustomId(`shop_page_${category}_${currentPage + 1}`)
-                    .setLabel('Next ▶️')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(currentPage === totalPages)
+        try {
+            const canvasRenderer = new CanvasRenderer();
+            const progressBuffer = await canvasRenderer.createProgressCard(
+                `🛍️ Shopping Spree Progress`,
+                Math.min(userData.stats.itemsPurchased || 0, 50) / 50,
+                constants.COLORS.VEX
             );
+            const attachment = new AttachmentBuilder(progressBuffer, { name: 'shop-progress.png' });
+            
+            await interaction.reply({ embeds: [embed], components, files: [attachment] });
+        } catch (error) {
+            console.warn('Canvas rendering failed, using fallback:', error);
+            await interaction.reply({ embeds: [embed], components });
         }
-
-        const quickBuySelect = new StringSelectMenuBuilder()
-            .setCustomId(`shop_quick_buy_${category}`)
-            .setPlaceholder('🛒 Quick purchase an item')
-            .addOptions(
-                pageItems.map(([itemId, item]) => ({
-                    label: item.name,
-                    description: `$${item.price.toFixed(2)} VEX - ${item.description.substring(0, 50)}...`,
-                    value: itemId,
-                    emoji: '🛍️'
-                }))
-            );
-
-        const actionButtons = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('shop_back_categories')
-                    .setLabel('← Back to Categories')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('🏠'),
-                new ButtonBuilder()
-                    .setCustomId('shop_inventory')
-                    .setLabel('My Inventory')
-                    .setStyle(ButtonStyle.Primary)
-                    .setEmoji('📦'),
-                new ButtonBuilder()
-                    .setCustomId(`shop_sort_${category}`)
-                    .setLabel('Sort Items')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setEmoji('🔄')
-            );
-
-        const components = [new ActionRowBuilder().addComponents(quickBuySelect), actionButtons];
-        if (totalPages > 1) {
-            components.unshift(navigationButtons);
-        }
-        
-        embed.setFooter({ text: `Page ${currentPage}/${totalPages} • Select an item below to purchase` });
-        
-        await interaction.reply({ embeds: [embed], components });
     },
     
     async handleBuy(interaction) {
@@ -401,5 +329,253 @@ module.exports = {
             }
         }
         return null;
+    },
+
+    createPsychologicalShopEmbed(items, category, userData, dailyDeals, featuredItems, limitedOffers) {
+        const itemEntries = Object.entries(items);
+        const itemsPerPage = 5;
+        const totalPages = Math.ceil(itemEntries.length / itemsPerPage);
+        const currentPage = 1;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const pageItems = itemEntries.slice(startIndex, startIndex + itemsPerPage);
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`${constants.EMOJIS.SHOP} VexiumVerse Marketplace - ${category.charAt(0).toUpperCase() + category.slice(1)}`)
+            .setDescription(`💰 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** Don't miss out!`)
+            .setColor(constants.COLORS.VEX)
+            .setTimestamp();
+
+        if (limitedOffers.length > 0) {
+            const timeLeft = this.getTimeUntilMidnight();
+            embed.addFields({
+                name: '⏰ FLASH SALE - ENDS IN ' + timeLeft,
+                value: limitedOffers.map(item => `🔥 **${item.name}** - ~~$${item.originalPrice}~~ **$${item.price.toFixed(2)} VEX** (${item.discount}% OFF!)`).join('\n'),
+                inline: false
+            });
+        }
+
+        if (featuredItems.length > 0) {
+            embed.addFields({
+                name: '⭐ RECOMMENDED FOR YOU',
+                value: featuredItems.map(item => `${this.getCategoryEmoji(category)} **${item.name}** - $${item.price.toFixed(2)} VEX\n*${item.personalizedReason}*`).join('\n\n'),
+                inline: false
+            });
+        }
+
+        let itemsText = '';
+        pageItems.forEach(([itemId, item], index) => {
+            const globalIndex = startIndex + index + 1;
+            const affordableEmoji = userData.vexBalance >= item.price ? '✅' : '❌';
+            const popularityEmoji = this.getPopularityIndicator(item);
+            
+            itemsText += `**${globalIndex}.** ${this.getCategoryEmoji(category)} **${item.name}** ${popularityEmoji}\n`;
+            itemsText += `💰 $${item.price.toFixed(2)} VEX ${affordableEmoji}\n`;
+            itemsText += `📝 *${item.description}*\n`;
+            
+            if (item.effect === 'work_boost') {
+                itemsText += `🚀 **+${(item.value * 100).toFixed(0)}% earnings boost!**\n`;
+            }
+            
+            itemsText += '\n';
+        });
+
+        embed.addFields({
+            name: `🛍️ Available Items (Page ${currentPage}/${totalPages})`,
+            value: itemsText || 'No items available',
+            inline: false
+        });
+
+        const purchaseStats = userData.stats.itemsPurchased || 0;
+        const nextMilestone = this.getNextPurchaseMilestone(purchaseStats);
+        
+        embed.addFields({
+            name: '📊 Your Shopping Progress',
+            value: `🛒 Items Purchased: **${purchaseStats}**\n🎯 Next Milestone: **${nextMilestone.count}** items (${nextMilestone.reward})\n💎 VIP Status: ${userData.premiumTier ? '👑 Active' : '❌ Inactive'}`,
+            inline: false
+        });
+
+        embed.setFooter({ 
+            text: `💡 Tip: VIP members get exclusive discounts! | Items refresh daily at midnight` 
+        });
+
+        return embed;
+    },
+
+    createAdvancedShopComponents(items, category, userId, userData) {
+        const components = [];
+        const itemEntries = Object.entries(items);
+        
+        if (itemEntries.length > 0) {
+            const selectMenu = new StringSelectMenuBuilder()
+                .setCustomId(`shop_select_${userId}`)
+                .setPlaceholder('🛍️ Choose an item to purchase (Quick Buy)')
+                .setMaxValues(1);
+            
+            const pageItems = itemEntries.slice(0, 5);
+            
+            pageItems.forEach(([itemId, item]) => {
+                const affordableEmoji = userData.vexBalance >= item.price ? '✅' : '❌';
+                const urgencyText = this.isLimitedOffer(item) ? ' ⏰ LIMITED!' : '';
+                
+                selectMenu.addOptions({
+                    label: `${item.name} - $${item.price.toFixed(2)} VEX ${affordableEmoji}${urgencyText}`,
+                    description: `${item.description.substring(0, 80)}...`,
+                    value: itemId,
+                    emoji: this.getCategoryEmoji(category)
+                });
+            });
+            
+            components.push(new ActionRowBuilder().addComponents(selectMenu));
+        }
+        
+        const quickActionsRow = new ActionRowBuilder();
+        quickActionsRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`shop_cart_${userId}`)
+                .setLabel('Shopping Cart')
+                .setStyle(ButtonStyle.Success)
+                .setEmoji('🛒'),
+            new ButtonBuilder()
+                .setCustomId(`shop_wishlist_${userId}`)
+                .setLabel('Wishlist')
+                .setStyle(ButtonStyle.Secondary)
+                .setEmoji('⭐'),
+            new ButtonBuilder()
+                .setCustomId(`shop_compare_${userId}`)
+                .setLabel('Compare Items')
+                .setStyle(ButtonStyle.Secondary)
+                .setEmoji('⚖️')
+        );
+        
+        components.push(quickActionsRow);
+        
+        const specialOffersRow = new ActionRowBuilder();
+        specialOffersRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`shop_flash_${userId}`)
+                .setLabel('⚡ Flash Deals')
+                .setStyle(ButtonStyle.Danger)
+                .setEmoji('🔥'),
+            new ButtonBuilder()
+                .setCustomId(`shop_bundle_${userId}`)
+                .setLabel('💎 Bundles')
+                .setStyle(ButtonStyle.Primary)
+                .setEmoji('📦'),
+            new ButtonBuilder()
+                .setCustomId(`shop_vip_${userId}`)
+                .setLabel('👑 VIP Exclusive')
+                .setStyle(ButtonStyle.Premium)
+                .setEmoji('⭐')
+        );
+        
+        components.push(specialOffersRow);
+        
+        return components;
+    },
+
+    getDailyDeals(items) {
+        const today = new Date().getDate();
+        const dealCount = 3;
+        const shuffled = items.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, dealCount).map(item => ({
+            ...item,
+            originalPrice: item.price,
+            price: item.price * 0.8,
+            discount: 20
+        }));
+    },
+
+    getFeaturedItems(items, userData) {
+        const recommendations = [];
+        
+        if (userData.level < 10) {
+            const beginnerItems = items.filter(item => item.price < 50);
+            if (beginnerItems.length > 0) {
+                recommendations.push({
+                    ...beginnerItems[0],
+                    personalizedReason: "Perfect for new players like you!"
+                });
+            }
+        }
+        
+        if (userData.stats.gamesPlayed > 20) {
+            const gamingItems = items.filter(item => item.effect === 'luck_boost');
+            if (gamingItems.length > 0) {
+                recommendations.push({
+                    ...gamingItems[0],
+                    personalizedReason: "Boost your gaming success rate!"
+                });
+            }
+        }
+        
+        if (userData.vexBalance > 100) {
+            const premiumItems = items.filter(item => item.category === 'cosmetics');
+            if (premiumItems.length > 0) {
+                recommendations.push({
+                    ...premiumItems[0],
+                    personalizedReason: "Show off your wealth with style!"
+                });
+            }
+        }
+        
+        return recommendations.slice(0, 2);
+    },
+
+    getLimitedTimeOffers(items) {
+        const hour = new Date().getHours();
+        if (hour >= 18 && hour <= 23) {
+            return items.slice(0, 2).map(item => ({
+                ...item,
+                originalPrice: item.price,
+                price: item.price * 0.75,
+                discount: 25
+            }));
+        }
+        return [];
+    },
+
+    getTimeUntilMidnight() {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        const diff = midnight - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m`;
+    },
+
+    getPopularityIndicator(item) {
+        const popularity = Math.random();
+        if (popularity > 0.8) return '🔥 HOT';
+        if (popularity > 0.6) return '📈 TRENDING';
+        if (popularity > 0.4) return '⭐ POPULAR';
+        return '';
+    },
+
+    getNextPurchaseMilestone(currentPurchases) {
+        const milestones = [
+            { count: 5, reward: 'Bronze Shopper Badge' },
+            { count: 15, reward: 'Silver Shopper Badge + 5% discount' },
+            { count: 30, reward: 'Gold Shopper Badge + 10% discount' },
+            { count: 50, reward: 'Diamond Shopper Badge + 15% discount' },
+            { count: 100, reward: 'Legendary Shopper Status + VIP perks' }
+        ];
+        
+        return milestones.find(m => m.count > currentPurchases) || { count: '∞', reward: 'Maximum level reached!' };
+    },
+
+    isLimitedOffer(item) {
+        const hour = new Date().getHours();
+        return (hour >= 18 && hour <= 23);
+    },
+
+    getCategoryEmoji(category) {
+        const emojis = {
+            tools: '🔧',
+            consumables: '🧪',
+            cosmetics: '✨',
+            nft: '🖼️'
+        };
+        return emojis[category] || '📦';
     }
 };

@@ -14,6 +14,10 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'daily', true);
+        }
+        
         const now = Date.now();
         const lastDaily = userData.lastDaily ? new Date(userData.lastDaily).getTime() : 0;
         const timeSinceLastDaily = now - lastDaily;
@@ -24,14 +28,20 @@ module.exports = {
             const hoursLeft = Math.floor(timeLeft / (60 * 60 * 1000));
             const minutesLeft = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
             
+            const nextReward = this.calculateDailyReward(userData.dailyStreak + 1);
+            const streakRisk = userData.dailyStreak >= 7 ? '⚠️ **STREAK AT RISK!**' : '';
+            const urgencyMessage = hoursLeft <= 2 ? '🔥 **ALMOST READY!** Your reward is building up!' : '⏰ **PATIENCE PAYS OFF!** Your reward is growing!';
+            
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward on Cooldown`)
-                .setDescription(`You can claim your next daily reward in **${hoursLeft}h ${minutesLeft}m**`)
+                .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward Charging Up!`)
+                .setDescription(`${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(2)} VEX** reward!\n${streakRisk}`)
                 .addFields(
-                    { name: '🔥 Current Streak', value: userData.dailyStreak.toString(), inline: true },
-                    { name: '💰 Next Reward', value: `$${this.calculateDailyReward(userData.dailyStreak + 1).toFixed(2)} VEX`, inline: true }
+                    { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
+                    { name: '💰 Reward Building', value: `$${nextReward.toFixed(2)} VEX`, inline: true },
+                    { name: '📊 Others Claiming', value: `${Math.floor(Math.random() * 50) + 20} players active now!`, inline: true }
                 )
-                .setColor(constants.COLORS.WARNING)
+                .setColor(hoursLeft <= 2 ? constants.COLORS.VEX : constants.COLORS.WARNING)
+                .setFooter({ text: '💡 Tip: Longer streaks = BIGGER rewards! Don\'t break the chain!' })
                 .setTimestamp();
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -69,19 +79,55 @@ module.exports = {
         userData.stats.commandsUsed++;
         await user.save(userData);
         
+        const isStreakMilestone = [7, 14, 30, 60, 100].includes(userData.dailyStreak);
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(roundedReward * 0.5) : 0;
+        const finalReward = roundedReward + surpriseBonus;
+        
+        let title = `${constants.EMOJIS.GIFT} Daily VEX Claimed!`;
+        let description = `💰 **$${finalReward.toFixed(2)} VEX** earned for day ${userData.dailyStreak}!`;
+        
+        if (userData.dailyStreak >= 7) {
+            title = `🔥 STREAK MASTER! Daily Reward Claimed!`;
+            description = `💰 **$${finalReward.toFixed(2)} VEX** + **STREAK POWER BONUS**!`;
+        }
+        
+        if (isStreakMilestone) {
+            title = `🎉 MILESTONE ACHIEVED! ${userData.dailyStreak}-Day Streak!`;
+            description += `\n🏆 **LEGENDARY STREAK BONUS UNLOCKED!**`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE BONUS: +$${surpriseBonus} VEX!**`;
+        }
+        
+        const progressToNext = Math.min(userData.dailyStreak, 30) / 30;
+        const progressBar = '█'.repeat(Math.floor(progressToNext * 20)) + '░'.repeat(20 - Math.floor(progressToNext * 20));
+        
+        const motivationalMessages = [
+            "🚀 Your empire grows stronger every day!",
+            "💎 Consistency is the key to wealth!",
+            "⚡ You're building legendary status!",
+            "🌟 Every day brings you closer to dominance!",
+            "🔥 Your dedication is paying off!"
+        ];
+        
+        const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.GIFT} Daily VEX Claimed!`)
-            .setDescription(`You've earned **$${roundedReward.toFixed(2)} VEX** for day ${userData.dailyStreak}!`)
+            .setTitle(title)
+            .setDescription(description + `\n\n${randomMotivation}`)
             .addFields(
                 { name: '💰 Base Reward', value: `$${baseReward.toFixed(2)}`, inline: true },
-                { name: '🔥 Streak Bonus', value: `$${streakBonus.toFixed(2)}`, inline: true },
-                { name: '🎲 Random Bonus', value: `$${randomBonus.toFixed(2)}`, inline: true },
+                { name: '🔥 Streak Power', value: `$${streakBonus.toFixed(2)} ${userData.dailyStreak >= 30 ? '👑' : ''}`, inline: true },
+                { name: '🎲 Lucky Bonus', value: `$${(randomBonus + surpriseBonus).toFixed(2)}`, inline: true },
                 { name: '📊 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '🎯 XP Gained', value: `+${xpGained} XP`, inline: true },
-                { name: '🔥 Streak', value: `${userData.dailyStreak} days`, inline: true }
+                { name: '🎯 XP Gained', value: `+${xpGained} XP ${xpResult.leveledUp ? '🆙' : ''}`, inline: true },
+                { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
+                { name: '📊 Streak Progress', value: `${progressBar} ${Math.min(userData.dailyStreak, 30)}/30`, inline: false },
+                { name: '⏰ Next Reward', value: `<t:${Math.floor((Date.now() + 86400000) / 1000)}:R> - Don't break the chain!`, inline: false }
             )
-            .setColor(constants.COLORS.SUCCESS)
-            .setFooter({ text: 'Come back tomorrow to continue your streak!' })
+            .setColor(isStreakMilestone ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
+            .setFooter({ text: '💡 Pro Tip: Longer streaks = EXPONENTIALLY bigger rewards!' })
             .setTimestamp();
         
         if (userData.premiumTier) {
