@@ -174,16 +174,16 @@ module.exports = {
         const totalTrades = userData.stats.tradesCompleted || 0;
         const isTradeExpert = totalTrades >= 50;
         const isTradeNovice = totalTrades < 5;
-        const tradeValue = vexAmount + (itemId ? this.getItemValue(itemId) * itemQuantity : 0);
-        const isHighValueTrade = tradeValue >= 1000;
-        const urgencyBonus = Math.random() < 0.2 ? Math.floor(tradeValue * 0.05) : 0;
+        const totalTradeValue = vexAmount + (itemId ? this.getItemValue(itemId) * itemQuantity : 0);
+        const isHighValueTrade = totalTradeValue >= 1000;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(totalTradeValue * 0.05) : 0;
         
         let title = `${constants.EMOJIS.TRADE} Trade Offer Created!`;
         let description = `🤝 **Trade offer sent to ${targetUser.username}!**`;
         
         if (isHighValueTrade) {
             title = `💎 HIGH-VALUE TRADE INITIATED!`;
-            description = `🔥 **MAJOR DEAL!** Trade offer sent to ${targetUser.username}!\n💰 **Value: $${tradeValue.toFixed(2)} VEX** - This is a big one!`;
+            description = `🔥 **MAJOR DEAL!** Trade offer sent to ${targetUser.username}!\n💰 **Value: $${totalTradeValue.toFixed(2)} VEX** - This is a big one!`;
         }
         
         if (isTradeExpert) {
@@ -211,7 +211,7 @@ module.exports = {
                 { name: '⏰ Expires Soon', value: '<t:' + Math.floor((Date.now() + 300000) / 1000) + ':R>', inline: true },
                 { name: '🆔 Trade ID', value: `\`${tradeId}\``, inline: true },
                 { name: '📊 Trade Stats', value: `🤝 **${totalTrades}** completed\n🏅 **${isTradeExpert ? 'Expert' : isTradeNovice ? 'Novice' : 'Experienced'}** trader`, inline: true },
-                { name: '💎 Trade Value', value: `$${tradeValue.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Trade Value', value: `$${totalTradeValue.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 Success Tip', value: 'Fair trades build reputation!', inline: true }
             )
             .setColor(isHighValueTrade ? constants.COLORS.VEX : isTradeExpert ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)

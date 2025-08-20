@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const constants = require('../utils/constants');
+const constants = require('../../utils/constants');
 
 class User {
     constructor(userId) {

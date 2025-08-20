@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crash')
-        .setDescription('Play the skill-based crash entertainment game - cash out before the multiplier crashes! (21+ verification required)')
+        .setDescription('Skill-based crash game - cash out before the multiplier crashes! (21+ verification required)')
         .addNumberOption(option =>
             option.setName('play_amount')
                 .setDescription('Amount of VEX to play with')
