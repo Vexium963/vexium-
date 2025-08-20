@@ -19,11 +19,22 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                highStakes: true,
+                majorDecision: true,
+                prestigeLevel: userData.prestige || 0
+            };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'prestige',
-                { highStakes: true, majorDecision: true }
+                behaviorContext
             );
         }
         
@@ -33,6 +44,17 @@ module.exports = {
                 'prestige',
                 true
             );
+        }
+        
+        const totalPrestiges = userData.stats?.totalPrestige || 0;
+        const isPrestigeLegend = totalPrestiges >= 5;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(userData.level * 50) : 0;
+        
+        if (urgencyBonus > 0) {
+            await interaction.followUp({
+                content: `✨ **SURPRISE PRESTIGE BONUS!** +$${urgencyBonus} VEX added to your prestige reward for being an active player!`,
+                ephemeral: true
+            });
         }
         
         const subcommand = interaction.options.getSubcommand();
@@ -54,16 +76,35 @@ module.exports = {
         const isPrestigeLegend = totalPrestiges >= 5;
         const isFirstTime = totalPrestiges === 0;
         
+        const activePrestigers = Math.floor(Math.random() * 25) + 5;
+        const recentPrestiges = Math.floor(Math.random() * 10) + 3;
+        const socialProof = Math.random() < 0.4;
+        
         let title = `${constants.EMOJIS.CROWN} Prestige System`;
         let description = '🔄 **ULTIMATE POWER MOVE!** Reset your level for MASSIVE bonuses!';
         
         if (isFirstTime && prestigeData.canPrestige) {
             title = `👑 LEGENDARY PRESTIGE AWAITS!`;
-            description = '🚀 **FIRST PRESTIGE AVAILABLE!** Join the elite ranks of prestige players!\n💎 **This is where legends are born!**';
+            description = '🚀 **FIRST PRESTIGE AVAILABLE!** Join the elite ranks of prestige players!\n💎 **This is where legends are born!**\n🔥 **FOMO ALERT:** Only the brave take this leap!';
         } else if (isPrestigeLegend) {
             title = `🌟 PRESTIGE MASTER STATUS!`;
-            description = `💎 **PRESTIGE LEGEND!** You've prestiged ${totalPrestiges} times!\n👑 **You're in the top 1% of all players!**`;
+            description = `💎 **PRESTIGE LEGEND!** You've prestiged ${totalPrestiges} times!\n👑 **You're in the top 1% of all players!**\n⚡ **ELITE STATUS:** Other players look up to you!`;
         }
+        
+        if (socialProof) {
+            description += `\n\n📊 **LIVE ACTIVITY:** ${activePrestigers} players considering prestige | ${recentPrestiges} prestiged today!`;
+        }
+        
+        const motivationalMessages = [
+            "🚀 Prestige is the ultimate flex in VexiumVerse!",
+            "💎 Only the elite dare to prestige - are you one of them?",
+            "⚡ Your prestige level shows your dedication to greatness!",
+            "🌟 Prestige players earn respect and massive bonuses!",
+            "🔥 The higher your prestige, the more legendary you become!"
+        ];
+        
+        const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        description += `\n\n${randomMotivation}`;
         
         const embed = new EmbedBuilder()
             .setTitle(title)

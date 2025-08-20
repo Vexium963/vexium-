@@ -38,6 +38,9 @@ module.exports = {
     cooldown: 15,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(
                 interaction.user.id,
@@ -50,7 +53,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                dataAnalysis: true,
+                progressTracking: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -58,6 +63,40 @@ module.exports = {
                 interaction.commandName,
                 behaviorContext
             );
+        }
+        
+        const statsUsage = userData.stats.statisticsViewed || 0;
+        const isDataNerd = statsUsage >= 20;
+        const isNewToStats = statsUsage < 3;
+        const recentAchievements = (userData.achievements || []).filter(a => 
+            Date.now() - new Date(a.unlockedAt || 0).getTime() < 86400000
+        ).length;
+        
+        userData.stats.statisticsViewed = statsUsage + 1;
+        userData.stats.commandsUsed++;
+        await user.save(userData);
+        
+        if (isNewToStats && Math.random() < 0.4) {
+            const bonusXP = 25;
+            await user.addXP(bonusXP, 'statistics_exploration');
+            
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.STAR} Data Explorer Bonus!`)
+                .setDescription(`🎉 **First-time statistics bonus!** Knowledge is power!\n✨ **+${bonusXP} XP** for exploring your data!`)
+                .setColor(constants.COLORS.SUCCESS)
+                .setFooter({ text: 'Understanding your progress accelerates growth!' });
+            
+            await interaction.followUp({ embeds: [bonusEmbed], ephemeral: true });
+        }
+        
+        if (recentAchievements > 0) {
+            const celebrationEmbed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.TROPHY} Fresh Achievements Detected!`)
+                .setDescription(`🔥 **${recentAchievements} new achievement${recentAchievements > 1 ? 's' : ''} in the last 24 hours!**\n🚀 **You're on fire!** Check your achievement stats below!`)
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: 'Achievement momentum = Exponential growth!' });
+            
+            await interaction.followUp({ embeds: [celebrationEmbed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();

@@ -66,11 +66,16 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                investmentActivity: true,
+                wealthBuilding: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -86,6 +91,25 @@ module.exports = {
                 interaction.commandName,
                 true
             );
+        }
+        
+        const totalInvestments = userData.stats.totalInvested || 0;
+        const isInvestmentNovice = totalInvestments < 100;
+        const isInvestmentExpert = totalInvestments >= 5000;
+        const portfolioValue = this.calculatePortfolioValue(userData);
+        const isHighRoller = portfolioValue >= 10000;
+        
+        if (isInvestmentNovice && Math.random() < 0.3) {
+            const bonusAmount = Math.floor(Math.random() * 50) + 25;
+            await user.addVEX(bonusAmount, 'investment_newbie_bonus');
+            
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`🎉 INVESTMENT NEWBIE BONUS!`)
+                .setDescription(`🌟 **Welcome to wealth building!** Here's $${bonusAmount} VEX to boost your first investments!\n💡 **Pro tip:** Diversify your portfolio for maximum returns!`)
+                .setColor(constants.COLORS.SUCCESS)
+                .setTimestamp();
+            
+            await interaction.followUp({ embeds: [bonusEmbed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();

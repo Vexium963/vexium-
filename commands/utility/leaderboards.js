@@ -57,6 +57,20 @@ module.exports = {
             );
         }
         
+        const leaderboardViews = userData.stats.leaderboardViews || 0;
+        const isCompetitive = leaderboardViews >= 10;
+        const recentRankChange = Math.random() < 0.3;
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(Math.random() * 50) + 10 : 0;
+        
+        userData.stats.leaderboardViews = leaderboardViews + 1;
+        userData.stats.commandsUsed++;
+        
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'leaderboard_engagement_bonus');
+        }
+        
+        await user.save(userData);
+        
         switch (subcommand) {
             case 'global':
                 return this.handleGlobal(interaction, userData);

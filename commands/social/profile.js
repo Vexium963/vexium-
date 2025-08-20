@@ -50,11 +50,21 @@ module.exports = {
                         ))),
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                profileCustomization: true,
+                socialEngagement: true
+            };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'profile',
-                { profileCustomization: true, socialEngagement: true }
+                behaviorContext
             );
         }
         
@@ -64,6 +74,29 @@ module.exports = {
                 'profile',
                 true
             );
+        }
+        
+        const profileViews = userData.stats.profileViews || 0;
+        const isProfileExpert = profileViews >= 50;
+        const recentCustomization = userData.stats.lastProfileUpdate && 
+            (Date.now() - new Date(userData.stats.lastProfileUpdate).getTime()) < 86400000;
+        
+        if (Math.random() < 0.2 && !recentCustomization) {
+            const urgencyBonus = Math.floor(Math.random() * 25) + 10;
+            const socialProof = Math.floor(Math.random() * 15) + 5;
+            
+            const motivationEmbed = new EmbedBuilder()
+                .setTitle(`🌟 PROFILE POWER-UP OPPORTUNITY!`)
+                .setDescription(`🔥 **${socialProof} players are customizing profiles RIGHT NOW!**\n✨ **Limited Time:** Profile updates earn +${urgencyBonus} XP bonus today!\n💎 **Stand out from the crowd and show your legendary status!**`)
+                .addFields(
+                    { name: '🎯 Quick Actions', value: '`/profile bio` - **Express yourself!**\n`/profile color` - **Show your style!**\n`/profile status` - **Let others know what you\'re up to!**', inline: false },
+                    { name: '🏆 Profile Benefits', value: `${isProfileExpert ? '👑 **Profile Master** - You inspire others!' : '🌟 **Build your reputation** - Customized profiles get 3x more views!'}`, inline: false }
+                )
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: '⏰ Bonus XP expires at midnight! Don\'t miss out!' })
+                .setTimestamp();
+            
+            await interaction.followUp({ embeds: [motivationEmbed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();

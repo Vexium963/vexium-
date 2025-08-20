@@ -56,7 +56,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: (userData.stats.contractsCreated || 0) > 5,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                contractMastery: (userData.stats.contractsCompleted || 0) >= 10,
+                highValueDeals: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
@@ -82,6 +84,12 @@ module.exports = {
         const type = interaction.options.getString('type');
         const counterparty = interaction.options.getUser('counterparty');
         const amount = interaction.options.getNumber('amount');
+        
+        const contractsCreated = userData.stats.contractsCreated || 0;
+        const isContractExpert = contractsCreated >= 25;
+        const isFirstContract = contractsCreated === 0;
+        const isHighValueDeal = amount >= 1000;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(amount * 0.02) : 0;
         
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()

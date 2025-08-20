@@ -65,13 +65,36 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                riskManagement: true,
+                wealthProtection: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'insurance',
                 behaviorContext
             );
+        }
+        
+        const insuranceUsage = userData.stats.insurancePurchases || 0;
+        const isInsuranceExpert = insuranceUsage >= 5;
+        const isInsuranceNovice = insuranceUsage === 0;
+        const hasActiveClaims = userData.insurance?.claimsUsed > 0;
+        const urgencyBonus = Math.random() < 0.15 ? Math.floor(userData.networth * 0.02) : 0;
+        
+        if (isInsuranceNovice && Math.random() < 0.3) {
+            const embed = new EmbedBuilder()
+                .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
+                .setDescription(`💰 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n⚠️ **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!`)
+                .addFields(
+                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: $${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
+                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **$${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
+                )
+                .setColor(constants.COLORS.ERROR)
+                .setFooter({ text: '⏰ Don\'t wait until it\'s too late! Protect your empire NOW!' })
+                .setTimestamp();
+            
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();

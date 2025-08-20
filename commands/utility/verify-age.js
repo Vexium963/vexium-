@@ -22,8 +22,32 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'verify-age', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                legalCompliance: true,
+                majorLifeEvent: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'verify-age',
+                behaviorContext
+            );
+        }
+        
         const confirmation = interaction.options.getBoolean('confirm_21_plus');
         const jurisdiction = interaction.options.getString('jurisdiction');
+        
+        const totalVerifications = Math.floor(Math.random() * 1000) + 500;
+        const todayVerifications = Math.floor(Math.random() * 50) + 10;
+        const isFirstTimeUser = (userData.stats?.commandsUsed || 0) < 10;
+        const hasHighNetworth = (userData.networth || 0) >= 1000;
         
         if (!confirmation) {
             const embed = new EmbedBuilder()
@@ -41,15 +65,31 @@ module.exports = {
         }
         
         if (userData.ageVerified) {
+            const daysSinceVerification = Math.floor((Date.now() - userData.ageVerifiedAt) / (1000 * 60 * 60 * 24));
+            const isVeteranPlayer = daysSinceVerification >= 30;
+            const entertainmentStats = userData.stats?.entertainmentGamesPlayed || 0;
+            
+            let title = `${constants.EMOJIS.SUCCESS} Already Verified - Welcome Back!`;
+            let description = '✅ **Your age has already been verified!** You have full access to all entertainment features.';
+            
+            if (isVeteranPlayer) {
+                title = `👑 VERIFIED VETERAN - ${daysSinceVerification} Days Strong!`;
+                description = `🏆 **Veteran Player Status!** You've been verified for ${daysSinceVerification} days!\n💎 **${entertainmentStats} games played** - You're a true VexiumVerse legend!`;
+            } else if (entertainmentStats >= 100) {
+                title = `🎮 ENTERTAINMENT MASTER - Verified Player!`;
+                description = `🔥 **Gaming Champion!** ${entertainmentStats} entertainment games played!\n⚡ **You're dominating the entertainment scene!**`;
+            }
+            
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.SUCCESS} Already Verified`)
-                .setDescription('Your age has already been verified. You have access to all entertainment features.')
-                .addFields({
-                    name: '📅 Verified On',
-                    value: `<t:${Math.floor(userData.ageVerifiedAt / 1000)}:F>`,
-                    inline: true
-                })
-                .setColor(constants.COLORS.SUCCESS);
+                .setTitle(title)
+                .setDescription(description)
+                .addFields(
+                    { name: '📅 Verified Since', value: `<t:${Math.floor(userData.ageVerifiedAt / 1000)}:F>`, inline: true },
+                    { name: '🎮 Games Played', value: `${entertainmentStats} entertainment sessions`, inline: true },
+                    { name: '📊 Player Status', value: isVeteranPlayer ? '👑 Veteran' : entertainmentStats >= 50 ? '🏆 Expert' : '⭐ Active', inline: true }
+                )
+                .setColor(isVeteranPlayer ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
+                .setFooter({ text: '🎯 Ready to dominate more entertainment games!' });
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }

@@ -18,6 +18,23 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'work', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now()
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'work',
+                behaviorContext
+            );
+        }
+        
         const now = Date.now();
         const lastWork = userData.lastWork ? new Date(userData.lastWork).getTime() : 0;
         const timeSinceLastWork = now - lastWork;
@@ -123,8 +140,24 @@ module.exports = {
         const gotBonus = bonusChance < (isProductiveDay ? 0.25 : 0.15);
         const bonusAmount = gotBonus ? Math.floor(vexEarned * 0.3) : 0;
         
+        const totalWorkSessions = userData.stats.workSessions || 0;
+        const isWorkExpert = totalWorkSessions >= 100;
+        const isWorkNovice = totalWorkSessions < 10;
+        const urgencyBonus = Math.random() < 0.15 ? Math.floor(vexEarned * 0.2) : 0;
+        
+        const socialProof = Math.random() < 0.3;
+        const activeWorkers = Math.floor(Math.random() * 25) + 10;
+        
         let title = `${constants.EMOJIS.WORK} Work Complete!`;
         let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **$${vexEarned.toFixed(2)} VEX** earned!`;
+        
+        if (isWorkExpert) {
+            title = `👑 WORK MASTER IN ACTION!`;
+            description = `🏆 **${totalWorkSessions} work sessions completed!** You're a productivity legend!\n💰 **$${vexEarned.toFixed(2)} VEX** earned with expert efficiency!`;
+        } else if (isWorkNovice) {
+            title = `🌟 BUILDING YOUR WORK EMPIRE!`;
+            description += `\n🚀 **Building your reputation!** (${totalWorkSessions}/100 sessions)`;
+        }
         
         if (gotBonus) {
             title = `🎉 EXCEPTIONAL PERFORMANCE!`;
@@ -132,9 +165,18 @@ module.exports = {
             await user.addVEX(bonusAmount, 'performance_bonus');
         }
         
+        if (urgencyBonus > 0) {
+            description += `\n⚡ **PRODUCTIVITY SURGE: +$${urgencyBonus} VEX!** You're on fire!`;
+            await user.addVEX(urgencyBonus, 'productivity_surge');
+        }
+        
         if (workStreak >= 10) {
             title = `🔥 WORK MACHINE! ${workStreak} Days Strong!`;
             description += `\n🏆 **PRODUCTIVITY LEGEND STATUS!**`;
+        }
+        
+        if (socialProof) {
+            description += `\n📈 **${activeWorkers} players are working right now!** Join the productivity wave!`;
         }
         
         const jobProgress = (userData.jobXp || 0) / ((userData.jobLevel + 1) * 500);

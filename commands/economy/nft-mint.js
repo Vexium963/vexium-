@@ -53,13 +53,35 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                nftCreation: true,
+                creativityBoost: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'nft-mint',
                 behaviorContext
             );
+        }
+        
+        const nftsMinted = userData.stats.nftsMinted || 0;
+        const isNFTMaster = nftsMinted >= 10;
+        const isFirstTime = nftsMinted === 0;
+        const recentActivity = Date.now() - (userData.lastActive || Date.now()) < 3600000;
+        
+        if (isFirstTime && Math.random() < 0.3) {
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`🎉 FIRST-TIME NFT CREATOR BONUS!`)
+                .setDescription(`🌟 **Welcome to the NFT world!** You're about to create digital history!\n✨ **SPECIAL OFFER:** 25% discount on your first mint!`)
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: '⏰ First-time bonus expires after this session!' });
+            
+            await interaction.reply({ embeds: [bonusEmbed], ephemeral: true });
+            
+            setTimeout(async () => {
+                await interaction.followUp({ content: '🎨 Ready to create your masterpiece? Use the command again!', ephemeral: true });
+            }, 3000);
+            return;
         }
         
         const subcommand = interaction.options.getSubcommand();

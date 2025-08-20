@@ -67,13 +67,40 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                nftTradingActivity: true,
+                marketplaceEngagement: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'nft-trade',
                 behaviorContext
             );
+        }
+        
+        const totalNFTTrades = (userData.stats?.nftsPurchased || 0) + (userData.stats?.nftsSold || 0);
+        const isNFTTrader = totalNFTTrades >= 10;
+        const isNFTWhale = totalNFTTrades >= 50;
+        const recentActivity = Date.now() - (userData.lastActive || Date.now()) < 1800000; // 30 minutes
+        
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(Math.random() * 50) + 10 : 0;
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'nft_trading_bonus');
+            userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
+        }
+        
+        const activeTraders = Math.floor(Math.random() * 25) + 10;
+        const recentSales = Math.floor(Math.random() * 8) + 3;
+        
+        const milestoneRewards = this.checkTradingMilestones(totalNFTTrades);
+        if (milestoneRewards.length > 0) {
+            for (const reward of milestoneRewards) {
+                await user.addVEX(reward.amount, 'nft_milestone_reward');
+                userData.achievements = userData.achievements || [];
+                if (!userData.achievements.includes(reward.achievementId)) {
+                    userData.achievements.push(reward.achievementId);
+                }
+            }
         }
         
         const subcommand = interaction.options.getSubcommand();

@@ -44,6 +44,21 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'admin_logs', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                adminAction: true,
+                powerUser: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'admin_logs',
+                behaviorContext
+            );
+        }
+        
         const logType = interaction.options.getString('type');
         const limit = interaction.options.getInteger('limit') || 20;
         const filterUser = interaction.options.getUser('user');

@@ -38,7 +38,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                customizationEngagement: true,
+                identityBuilding: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
@@ -73,6 +75,12 @@ module.exports = {
         const collectionProgress = (ownedFrames / totalFrames) * 100;
         const isCollector = collectionProgress >= 75;
         const isCompletionist = collectionProgress >= 100;
+        
+        const frameUsage = userData.stats.frameChanges || 0;
+        const isStyleExpert = frameUsage >= 20;
+        const recentFrameChange = userData.lastFrameChange && (Date.now() - new Date(userData.lastFrameChange).getTime()) < 86400000;
+        const surpriseDiscount = Math.random() < 0.15 ? 0.2 : 0;
+        const activeCustomizers = Math.floor(Math.random() * 25) + 10;
         
         let title = `${constants.EMOJIS.NFT} Avatar Frame Collection`;
         let description = '✨ **Transform your identity!** Choose from exclusive avatar frames!';

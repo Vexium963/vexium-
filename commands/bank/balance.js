@@ -15,11 +15,30 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'bank', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                wealthTracking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'bank',
+                behaviorContext
+            );
+        }
+        
         const totalWealth = userData.bankBalance + userData.vexBalance;
         const isWealthy = totalWealth >= 10000;
         const isMillionaire = totalWealth >= 100000;
         const savingsRate = userData.bankBalance / Math.max(totalWealth, 1);
         const isSmartSaver = savingsRate >= 0.5;
+        
+        const bankChecks = userData.stats.bankChecks || 0;
+        const isObsessiveTracker = bankChecks >= 50;
+        const recentGrowth = this.calculateRecentGrowth(userData);
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(totalWealth * 0.001) : 0;
         
         const wealthGrowth = userData.stats.wealthGrowthRate || 0;
         const nextMilestone = Math.ceil(totalWealth / 10000) * 10000;
@@ -31,15 +50,31 @@ module.exports = {
         
         if (isMillionaire) {
             title = `👑 MILLIONAIRE STATUS! Your Empire`;
-            description = '💎 **LEGENDARY WEALTH!** You\'ve achieved millionaire status!\n🏆 **You\'re in the top 0.1% of all players!**';
+            description = '💎 **LEGENDARY WEALTH!** You\'ve achieved millionaire status!\n🏆 **You\'re in the top 0.1% of all players!**\n🔥 **Other players are watching your success!**';
         } else if (isWealthy) {
             title = `💎 WEALTH MASTER! Your Empire`;
-            description = '🚀 **IMPRESSIVE PORTFOLIO!** You\'re building serious wealth!\n⭐ **Keep climbing to millionaire status!**';
+            description = '🚀 **IMPRESSIVE PORTFOLIO!** You\'re building serious wealth!\n⭐ **Keep climbing to millionaire status!**\n📈 **You\'re outperforming 95% of players!**';
         }
         
         if (isSmartSaver) {
             description += `\n🧠 **SMART SAVER DETECTED!** ${(savingsRate * 100).toFixed(0)}% savings rate!`;
         }
+        
+        if (isObsessiveTracker) {
+            description += `\n📊 **WEALTH TRACKER MASTER!** ${bankChecks} bank checks - you\'re obsessed with growth!`;
+        }
+        
+        if (recentGrowth > 0) {
+            description += `\n📈 **MOMENTUM BUILDING!** +${recentGrowth.toFixed(1)}% wealth growth this week!`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE INSPECTION BONUS: +$${surpriseBonus} VEX!** Lucky you!`;
+            await user.addVEX(surpriseBonus, 'bank_inspection_bonus');
+        }
+        
+        const activeInvestors = Math.floor(Math.random() * 200) + 50;
+        description += `\n🌐 **${activeInvestors} players are managing wealth right now!**`;
         
         const embed = new EmbedBuilder()
             .setTitle(title)

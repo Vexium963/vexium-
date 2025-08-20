@@ -11,15 +11,59 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'xp', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                progressTracking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'xp',
+                behaviorContext
+            );
+        }
+        
         const currentLevelXP = user.getXPForLevel(userData.level);
         const nextLevelXP = user.getXPForLevel(userData.level + 1);
         const xpForNextLevel = nextLevelXP - currentLevelXP;
         const progress = userData.xp / xpForNextLevel;
         
+        const xpChecks = userData.stats.xpChecked || 0;
+        const isXpExpert = xpChecks >= 20;
+        const isCloseToLevel = progress >= 0.8;
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(userData.level * 2) : 0;
+        const activeOptimizers = Math.floor(Math.random() * 25) + 10;
+        
+        let title = `${constants.EMOJIS.CHART} XP Progress Tracker`;
+        let description = `📊 **Track your legendary journey to greatness!**\n🎯 **${(progress * 100).toFixed(1)}% to your next breakthrough!**`;
+        
+        if (isCloseToLevel) {
+            title = `🔥 LEVEL UP IMMINENT!`;
+            description = `⚡ **SO CLOSE!** You're ${(100 - progress * 100).toFixed(1)}% away from leveling up!\n🚀 **Keep grinding - glory awaits!**`;
+        }
+        
+        if (isXpExpert) {
+            title = `🧠 XP OPTIMIZATION MASTER!`;
+            description += `\n👑 **${xpChecks} XP checks** - You're a true progression strategist!`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE XP BONUS: +${surpriseBonus} XP** for checking your progress!`;
+            await user.addXP(surpriseBonus, 'progress_check_bonus');
+        }
+        
+        description += `\n📈 **${activeOptimizers} players are optimizing XP right now!**`;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHART} XP Information`)
-            .setDescription('Detailed experience point breakdown and progression')
-            .setColor(constants.COLORS.INFO)
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(isCloseToLevel ? constants.COLORS.VEX : isXpExpert ? constants.COLORS.SUCCESS : constants.COLORS.INFO)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setTimestamp();
         
@@ -79,12 +123,32 @@ module.exports = {
             });
         }
         
-        embed.setFooter({ text: 'XP is gained through various activities in VexiumVerse' });
+        const motivationalMessages = [
+            "🚀 Every XP point brings you closer to legendary status!",
+            "💎 Consistent progress = Exponential rewards!",
+            "⚡ You're building something incredible!",
+            "🌟 Each level unlocks new possibilities!",
+            "🔥 Your dedication is your superpower!"
+        ];
+        
+        const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        embed.setFooter({ text: `${randomMotivation} | XP gained through VexiumVerse activities` });
         
         await interaction.reply({ embeds: [embed] });
         
         userData.stats.commandsUsed++;
+        userData.stats.xpChecked = xpChecks + 1;
         await user.save(userData);
+        
+        if (surpriseBonus > 0) {
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.STAR} Progress Check Bonus!`)
+                .setDescription(`🎉 **+${surpriseBonus} XP** for staying engaged with your progression!`)
+                .setColor(constants.COLORS.GOLD)
+                .setTimestamp();
+            
+            await interaction.followUp({ embeds: [bonusEmbed] });
+        }
     },
     
     createProgressBar(progress, length = 20) {

@@ -29,7 +29,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                knowledgeSeeking: true,
+                helpOptimization: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
@@ -74,13 +76,28 @@ module.exports = {
         
         const activeUsers = Math.floor(Math.random() * 500) + 100;
         const onlineNow = Math.floor(Math.random() * 50) + 20;
+        const recentEarners = Math.floor(Math.random() * 25) + 10;
         description += `\n\n📊 **Live Stats:** ${activeUsers} players building empires | ${onlineNow} online now!`;
+        description += `\n💰 **${recentEarners} players earned VEX in the last hour!**`;
+        
+        const surpriseBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 50) + 10 : 0;
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE KNOWLEDGE BONUS: +${surpriseBonus} VEX** for seeking help!`;
+            const User = require('../../database/models/User');
+            const user = new User(interaction.user.id);
+            await user.addVEX(surpriseBonus, 'help_bonus');
+        }
         
         if (helpCount === 0) {
             description += `\n🎉 **FIRST TIME BONUS!** You're taking the right first step!`;
         } else if (helpCount >= 10) {
             description += `\n🧠 **KNOWLEDGE SEEKER!** ${helpCount} help sessions - you're becoming a master!`;
+        } else if (helpCount >= 5) {
+            description += `\n📚 **LEARNING STREAK!** Knowledge is power - keep it up!`;
         }
+        
+        const urgencyMessage = Math.random() < 0.3 ? '\n⚠️ **LIMITED TIME:** Some features have daily limits - act fast!' : '';
+        description += urgencyMessage;
         
         const embed = new EmbedBuilder()
             .setTitle(title)
@@ -119,7 +136,7 @@ module.exports = {
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail('https://via.placeholder.com/128x128/8B5CF6/FFFFFF?text=VEX')
-            .setFooter({ text: 'Use /help category:<name> for detailed command information' })
+            .setFooter({ text: '💡 Pro Tip: Smart players check help regularly for hidden bonuses!' })
             .setTimestamp();
         
         const selectMenu = new StringSelectMenuBuilder()

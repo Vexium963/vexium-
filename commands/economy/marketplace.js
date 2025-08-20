@@ -63,11 +63,16 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now()
+                consecutiveUse: (userData.stats.lastMarketplaceUse && (Date.now() - userData.stats.lastMarketplaceUse) < 300000),
+                quickReturn: (userData.stats.lastMarketplaceUse && (Date.now() - userData.stats.lastMarketplaceUse) < 60000),
+                timeSinceLastUse: userData.stats.lastMarketplaceUse || 0,
+                marketplaceExpertise: (userData.stats.itemsPurchased || 0) + (userData.stats.itemsListed || 0),
+                tradingStreak: userData.stats.tradingStreak || 0
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -83,6 +88,38 @@ module.exports = {
                 'marketplace',
                 true
             );
+        }
+        
+        userData.stats.lastMarketplaceUse = Date.now();
+        userData.stats.marketplaceVisits = (userData.stats.marketplaceVisits || 0) + 1;
+        
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'marketplace_surprise_bonus');
+            
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.GIFT} SURPRISE MARKETPLACE BONUS!`)
+                .setDescription(`🎉 **Lucky you!** You found a hidden marketplace bonus!\n💰 **+$${surpriseBonus} VEX** added to your wallet!`)
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: '✨ Random bonuses reward active traders!' });
+            
+            await interaction.followUp({ embeds: [bonusEmbed], ephemeral: true });
+        }
+        
+        const totalTransactions = (userData.stats.itemsPurchased || 0) + (userData.stats.itemsListed || 0);
+        if (totalTransactions === 10 || totalTransactions === 50 || totalTransactions === 100) {
+            const achievementEmbed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.ACHIEVEMENT} TRADING MILESTONE ACHIEVED!`)
+                .setDescription(`🏆 **${totalTransactions} Total Transactions!**\n💎 You're becoming a marketplace legend!`)
+                .addFields({
+                    name: '🎁 Milestone Reward',
+                    value: `$${totalTransactions * 2} VEX bonus!`,
+                    inline: true
+                })
+                .setColor(constants.COLORS.GOLD);
+            
+            await user.addVEX(totalTransactions * 2, 'marketplace_milestone');
+            await interaction.followUp({ embeds: [achievementEmbed] });
         }
         
         const subcommand = interaction.options.getSubcommand();

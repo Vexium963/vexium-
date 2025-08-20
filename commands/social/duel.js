@@ -61,11 +61,17 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now()
+                consecutiveUse: (userData.stats?.lastDuelTime && (Date.now() - userData.stats.lastDuelTime) < 300000),
+                quickReturn: (userData.stats?.lastDuelTime && (Date.now() - userData.stats.lastDuelTime) < 60000),
+                timeSinceLastUse: userData.stats?.lastDuelTime || 0,
+                competitiveSpirit: true,
+                socialEngagement: true,
+                riskTaking: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -82,6 +88,8 @@ module.exports = {
                 true
             );
         }
+        
+        userData.stats.lastDuelTime = Date.now();
         
         const subcommand = interaction.options.getSubcommand();
         

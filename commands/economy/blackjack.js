@@ -18,6 +18,25 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'blackjack', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                skillBasedGame: true,
+                highStakes: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'blackjack',
+                behaviorContext
+            );
+        }
+        
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
@@ -34,6 +53,14 @@ module.exports = {
         }
         
         const playAmount = interaction.options.getNumber('play_amount');
+        
+        const totalBlackjackGames = userData.stats.blackjackGames || 0;
+        const blackjackWins = userData.stats.blackjackWins || 0;
+        const isBlackjackPro = totalBlackjackGames >= 50;
+        const isBlackjackNovice = totalBlackjackGames < 5;
+        const winRate = totalBlackjackGames > 0 ? ((blackjackWins / totalBlackjackGames) * 100).toFixed(1) : 0;
+        const isHighStakes = playAmount >= 100;
+        const hotStreak = (userData.stats.recentBlackjackWins || 0) >= 3;
         
         if (playAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
@@ -56,9 +83,41 @@ module.exports = {
         
         const game = this.initializeGame(playAmount);
         
+        const luckBonus = Math.random() < 0.15 ? Math.floor(playAmount * 0.1) : 0;
+        const activePlayersCount = Math.floor(Math.random() * 25) + 10;
+        
+        let title = `${constants.EMOJIS.CARDS} Blackjack Showdown!`;
+        let description = '🎯 **Get as close to 21 as possible without going over!**\n🔥 **Show your skill and beat the dealer!**';
+        
+        if (isBlackjackPro) {
+            title = `👑 BLACKJACK MASTER IN ACTION!`;
+            description = `🏆 **${totalBlackjackGames} games played** - You're a legend at the table!\n💎 **${winRate}% win rate** - The cards know your name!`;
+        } else if (isBlackjackNovice) {
+            title = `🌟 Welcome to the Blackjack Table!`;
+            description = `✨ **Building your card skills!** (${totalBlackjackGames}/50 games)\n🎯 **Every hand is a learning opportunity!**`;
+        }
+        
+        if (isHighStakes) {
+            title = `💎 HIGH-STAKES BLACKJACK!`;
+            description += `\n🔥 **BIG MONEY PLAY: $${playAmount} VEX!** The table is watching!`;
+        }
+        
+        if (hotStreak) {
+            description += `\n🔥 **HOT STREAK ACTIVE!** You're on fire - keep it going!`;
+        }
+        
+        if (luckBonus > 0) {
+            description += `\n✨ **LUCK BONUS: +$${luckBonus} VEX** if you win this hand!`;
+        }
+        
+        const socialProof = Math.random() < 0.4;
+        if (socialProof) {
+            description += `\n📊 **${activePlayersCount} players at blackjack tables right now!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CARDS} Blackjack Game`)
-            .setDescription('Try to get as close to 21 as possible without going over!')
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${this.calculateHandValue(game.playerHand)}`, inline: true },

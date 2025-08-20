@@ -19,6 +19,25 @@ module.exports = {
                 .setDescription('Generate detailed performance report')),
     
     async execute(interaction) {
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'performance', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                adminAccess: true,
+                systemMonitoring: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'performance',
+                behaviorContext
+            );
+        }
+        
         if (!this.isAdmin(interaction.user.id)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Access Denied`)

@@ -34,10 +34,20 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: userData.stats.rewardsClaimed >= 5,
                 quickReturn: false,
-                timeSinceLastUse: Date.now() - (userData.lastRewardCheck || 0)
+                timeSinceLastUse: Date.now() - (userData.lastRewardCheck || 0),
+                rewardHunting: true,
+                anticipationBuilding: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(interaction.user.id, 'rewards', behaviorContext);
         }
+        
+        const rewardStreak = userData.stats.rewardStreak || 0;
+        const isRewardMaster = userData.stats.rewardsClaimed >= 50;
+        const surpriseMultiplier = Math.random() < 0.15 ? (1.5 + Math.random() * 0.5) : 1;
+        const urgencyBonus = this.getUrgencyBonus(userData);
+        
+        const activeRewardHunters = Math.floor(Math.random() * 25) + 10;
+        const recentClaimers = Math.floor(Math.random() * 8) + 3;
         
         switch (subcommand) {
             case 'claim':

@@ -84,6 +84,28 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'pets', true);
         }
         
+        const petCount = userData.pets?.length || 0;
+        const isPetMaster = petCount >= 3;
+        const isNewPetOwner = petCount === 0;
+        const lastPetActivity = userData.stats.lastPetActivity || 0;
+        const timeSinceLastActivity = Date.now() - lastPetActivity;
+        const isReturningUser = timeSinceLastActivity > 86400000; // 24 hours
+        
+        const surpriseBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 100) + 50 : 0;
+        
+        const urgencyMessage = petCount > 0 && timeSinceLastActivity > 43200000 ? // 12 hours
+            '⚠️ **Your pets miss you!** They need attention soon!' : '';
+        
+        const activePetOwners = Math.floor(Math.random() * 200) + 150;
+        
+        const totalPetsFed = userData.stats.petsFed || 0;
+        const isCaringMilestone = [10, 25, 50, 100].includes(totalPetsFed);
+        
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'pet_surprise_bonus');
+            userData.stats.lastPetActivity = Date.now();
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {

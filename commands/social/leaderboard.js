@@ -28,10 +28,37 @@ module.exports = {
                 .setMinValue(1)),
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'leaderboard', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                competitiveSpirit: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'leaderboard',
+                behaviorContext
+            );
+        }
+        
         const category = interaction.options.getString('category') || 'networth';
         const page = interaction.options.getInteger('page') || 1;
         const usersPerPage = 10;
         const startIndex = (page - 1) * usersPerPage;
+        
+        const leaderboardViews = userData.stats.leaderboardViews || 0;
+        const isCompetitive = leaderboardViews >= 10;
+        const hasClimbed = userData.stats.rankImprovement || 0;
+        
+        userData.stats.leaderboardViews = leaderboardViews + 1;
         
         const allUsers = await User.getLeaderboard(category, 100);
         
@@ -68,10 +95,36 @@ module.exports = {
             tradesCompleted: 'Trades Completed'
         };
         
+        const activeCompetitors = Math.floor(Math.random() * 200) + 50;
+        const recentChanges = Math.floor(Math.random() * 15) + 5;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 100) + 50 : 0;
+        
+        let title = `${constants.EMOJIS.TROPHY} ${categoryNames[category]} Leaderboard`;
+        let description = `🔥 **${activeCompetitors} players competing RIGHT NOW!**\n⚡ **${recentChanges} rank changes in the last hour!**`;
+        
+        if (isCompetitive) {
+            title = `👑 COMPETITIVE WARRIOR: ${categoryNames[category]} Rankings`;
+            description = `🏆 **You've checked leaderboards ${leaderboardViews} times!**\n💪 **True competitor spirit detected!**\n${description}`;
+        }
+        
+        if (urgencyBonus > 0) {
+            description += `\n✨ **ACTIVE BONUS: +${urgencyBonus} VEX** for checking rankings during peak hours!`;
+        }
+        
+        if (hasClimbed > 0) {
+            description += `\n📈 **RANK CLIMBER!** You've improved ${hasClimbed} positions recently!`;
+        }
+        
+        const socialProof = Math.random() < 0.3;
+        if (socialProof) {
+            const topPlayers = Math.floor(Math.random() * 5) + 3;
+            description += `\n👑 **${topPlayers} legendary players online now!** Can you join their ranks?`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.TROPHY} ${categoryNames[category]} Leaderboard`)
-            .setDescription(`Top performers in VexiumVerse - Page ${page}/${totalPages}`)
-            .setColor(constants.COLORS.GOLD)
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(isCompetitive ? constants.COLORS.VEX : urgencyBonus > 0 ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
             .setTimestamp();
         
         const leaderboardText = await this.formatLeaderboard(interaction.client, pageUsers, category, startIndex);

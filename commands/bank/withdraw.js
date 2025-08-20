@@ -22,6 +22,24 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'withdraw', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                financialDecision: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'withdraw',
+                behaviorContext
+            );
+        }
+        
         const amount = interaction.options.getNumber('amount');
         const force = interaction.options.getBoolean('force') || false;
         
@@ -145,17 +163,44 @@ module.exports = {
         
         await user.save(userData);
         
+        const withdrawalCount = userData.stats.withdrawalCount || 0;
+        const isFrequentUser = withdrawalCount >= 10;
+        const isNewUser = withdrawalCount <= 3;
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(amount * 0.02) : 0;
+        const socialProof = Math.random() < 0.3;
+        
+        let title = `${constants.EMOJIS.SUCCESS} Withdrawal Successful!`;
+        let description = `💰 **$${amount.toFixed(2)} VEX** successfully moved to your wallet!`;
+        
+        if (isFrequentUser) {
+            title = `🏆 VIP WITHDRAWAL COMPLETE!`;
+            description = `💎 **Expert Trader Alert!** $${amount.toFixed(2)} VEX withdrawn!\n👑 **${withdrawalCount} withdrawals completed** - You're a financial master!`;
+        } else if (isNewUser) {
+            description += `\n🌟 **Building your financial empire!** (${withdrawalCount}/10 withdrawals)`;
+        }
+        
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'withdrawal_loyalty_bonus');
+            description += `\n✨ **LOYALTY BONUS: +$${surpriseBonus} VEX!** Thanks for being awesome!`;
+        }
+        
+        if (socialProof) {
+            const activeWithdrawers = Math.floor(Math.random() * 25) + 10;
+            description += `\n📊 **${activeWithdrawers} players are managing their wealth right now!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Withdrawal Successful!`)
-            .setDescription(`You've withdrawn **$${amount.toFixed(2)} VEX** from your bank account!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '💰 Withdrawn Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax Paid', value: `$${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Tax Rate', value: `${(taxResult.effectiveRate * 100).toFixed(2)}%`, inline: true },
                 { name: '💼 New Wallet Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '🏦 Remaining Bank Balance', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true }
+                { name: '🏦 Remaining Bank Balance', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Withdrawal Stats', value: `🤝 **${withdrawalCount}** completed\n🏅 **${isFrequentUser ? 'Expert' : isNewUser ? 'Beginner' : 'Experienced'}** trader`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isFrequentUser ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         if (earlyWithdrawalPenalty > 0) {

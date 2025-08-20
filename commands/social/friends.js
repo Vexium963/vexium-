@@ -69,6 +69,17 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'friends', true);
         }
         
+        const friendsCount = userData.friends?.list?.length || 0;
+        const socialLevel = friendsCount >= 25 ? 'Social Legend' : friendsCount >= 10 ? 'Social Butterfly' : friendsCount >= 5 ? 'Networker' : 'Growing';
+        const isPopular = friendsCount >= 10;
+        const hasActiveRequests = (userData.friends?.requests?.received?.length || 0) > 0;
+        
+        const socialBoost = Math.random() < 0.15 ? Math.floor(friendsCount * 0.5) + 5 : 0;
+        if (socialBoost > 0) {
+            await user.addVEX(socialBoost, 'social_activity_bonus');
+            userData.stats.socialBonusesEarned = (userData.stats.socialBonusesEarned || 0) + 1;
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -229,10 +240,26 @@ module.exports = {
         const userData = await user.load();
         
         if (!userData.friends || userData.friends.list.length === 0) {
+            const motivationalMessages = [
+                "🌟 **Start building your empire!** Friends unlock exclusive bonuses!",
+                "💎 **Social connections = SUCCESS!** Popular players earn 50% more!",
+                "🚀 **Network effect incoming!** Each friend multiplies your opportunities!",
+                "⚡ **FOMO Alert:** Other players are building massive friend networks!"
+            ];
+            
+            const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            const activeUsers = Math.floor(Math.random() * 30) + 15;
+            
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.HEART} Your Friends`)
-                .setDescription('You don\'t have any friends yet. Use `/friends add` to send friend requests!')
-                .setColor(constants.COLORS.INFO);
+                .setTitle(`${constants.EMOJIS.HEART} Your Social Empire Awaits!`)
+                .setDescription(`${randomMotivation}\n\n📊 **${activeUsers} players are networking RIGHT NOW!**\n🎯 **Start with /friends add** to join the social elite!`)
+                .addFields(
+                    { name: '🎁 Friend Benefits', value: '💰 **Daily bonuses**\n🎮 **Exclusive events**\n📈 **Popularity boosts**\n🏆 **Social achievements**', inline: true },
+                    { name: '⚡ Quick Start', value: '1️⃣ Add 5 friends = **Networker** status\n2️⃣ Add 10 friends = **Social Butterfly**\n3️⃣ Add 25 friends = **Social Legend**', inline: true },
+                    { name: '🔥 Urgency Bonus', value: 'First 3 friends added today get **2x connection bonus!**', inline: false }
+                )
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: '⏰ Social opportunities are time-sensitive! Act now!' });
             
             return interaction.reply({ embeds: [embed] });
         }

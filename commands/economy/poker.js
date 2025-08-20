@@ -47,7 +47,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                pokerSkillLevel: userData.stats?.pokerWins || 0,
+                competitiveSpirit: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
@@ -55,6 +57,22 @@ module.exports = {
                 behaviorContext
             );
         }
+        
+        const pokerStats = userData.stats || {};
+        const tournamentsPlayed = pokerStats.pokerTournaments || 0;
+        const isPokerPro = tournamentsPlayed >= 50;
+        const isPokerNovice = tournamentsPlayed < 5;
+        const recentWins = pokerStats.pokerWins || 0;
+        const hotStreak = pokerStats.pokerStreak >= 3;
+        
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'poker_engagement_bonus');
+            userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
+        }
+        
+        const activePlayers = Math.floor(Math.random() * 25) + 15;
+        const bigWinnerToday = Math.floor(Math.random() * 5000) + 1000;
         
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
@@ -100,6 +118,13 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        const pokerStats = userData.stats || {};
+        const tournamentsPlayed = pokerStats.pokerTournaments || 0;
+        const isPokerPro = tournamentsPlayed >= 50;
+        const recentWins = pokerStats.pokerWins || 0;
+        const hotStreak = pokerStats.pokerStreak >= 3;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(tournament.buyIn * 0.1) : 0;
         
         if (tournament.buyIn > userData.vexBalance) {
             const embed = new EmbedBuilder()

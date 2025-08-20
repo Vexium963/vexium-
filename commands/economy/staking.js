@@ -49,11 +49,22 @@ module.exports = {
     cooldown: 3,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const stakingExperience = userData.stats?.stakingTransactions || 0;
+        const isStakingExpert = stakingExperience >= 20;
+        const isStakingNovice = stakingExperience < 3;
+        const totalStaked = userData.stats?.totalStaked || 0;
+        const isWhaleStaker = totalStaked >= 10000;
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                stakingExpertise: isStakingExpert,
+                wealthLevel: isWhaleStaker ? 'whale' : totalStaked >= 1000 ? 'shark' : 'fish'
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(

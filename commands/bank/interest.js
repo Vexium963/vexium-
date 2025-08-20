@@ -26,6 +26,20 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'interest', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                financialPlanning: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'interest',
+                behaviorContext
+            );
+        }
+        
         const amount = interaction.options.getNumber('amount');
         const days = interaction.options.getInteger('days') || 30;
         
@@ -41,6 +55,16 @@ module.exports = {
         const isSaver = totalSavings >= 5000;
         const calculationStreak = userData.stats.calculationsUsed || 0;
         const isAnalyst = calculationStreak >= 20;
+        const isFirstTime = calculationStreak === 0;
+        const recentCalculations = userData.stats.recentCalculations || 0;
+        const isHotStreak = recentCalculations >= 3;
+        
+        userData.stats.calculationsUsed = calculationStreak + 1;
+        userData.stats.recentCalculations = recentCalculations + 1;
+        
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(amount * 0.01) : 0;
+        const urgencyFactor = Math.random() < 0.3;
+        const socialProof = Math.floor(Math.random() * 25) + 15;
         
         const calculations = [
             {

@@ -32,6 +32,20 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'history', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                financialTracking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'history',
+                behaviorContext
+            );
+        }
+        
         const type = interaction.options.getString('type') || 'transactions';
         const limit = interaction.options.getInteger('limit') || 10;
         
@@ -96,6 +110,13 @@ module.exports = {
         const recentActivity = records.filter(r => Date.now() - r.timestamp < 7 * 24 * 60 * 60 * 1000).length;
         const isActiveThisWeek = recentActivity >= 5;
         
+        const historyViews = userData.stats.historyViewed || 0;
+        const isDataAnalyst = historyViews >= 20;
+        const surpriseInsight = Math.random() < 0.25;
+        const activeUsers = Math.floor(Math.random() * 30) + 10;
+        
+        userData.stats.historyViewed = historyViews + 1;
+        
         let enhancedTitle = title;
         let enhancedDescription = description;
         
@@ -110,6 +131,16 @@ module.exports = {
         if (isActiveThisWeek) {
             enhancedDescription += `\n\n📈 **HOT STREAK!** ${recentActivity} transactions this week!`;
         }
+        
+        if (isDataAnalyst) {
+            enhancedDescription += `\n🧠 **DATA MASTER!** You've analyzed your history ${historyViews} times - true financial wisdom!`;
+        }
+        
+        if (surpriseInsight) {
+            enhancedDescription += `\n✨ **INSIGHT BONUS!** Your financial awareness is growing - keep tracking for hidden patterns!`;
+        }
+        
+        enhancedDescription += `\n\n📊 **${activeUsers} players** are analyzing their finances right now!`;
         
         const embed = new EmbedBuilder()
             .setTitle(enhancedTitle)
@@ -174,7 +205,16 @@ module.exports = {
             );
         }
         
-        embed.setFooter({ text: `Showing ${Math.min(limit, records.length)} of ${records.length} records` });
+        const footerMessages = [
+            `💡 Pro Tip: Regular financial tracking leads to wealth!`,
+            `🎯 Knowledge is power - you're building financial intelligence!`,
+            `📈 Smart investors always know their numbers!`,
+            `💎 Your financial awareness is your greatest asset!`
+        ];
+        
+        const randomFooter = footerMessages[Math.floor(Math.random() * footerMessages.length)];
+        
+        embed.setFooter({ text: `${randomFooter} | Showing ${Math.min(limit, records.length)} of ${records.length} records` });
         embed.setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

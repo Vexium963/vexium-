@@ -34,12 +34,36 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'settings', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                settingsOptimization: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'settings',
+                behaviorContext
+            );
+        }
+        
         const settingsUsage = userData.stats.settingsOptimized || 0;
         const isSettingsPro = settingsUsage >= 10;
         const isFirstTime = settingsUsage === 0;
+        const optimizationStreak = userData.stats.settingsStreak || 0;
+        const surpriseBonus = Math.random() < 0.2 ? Math.floor(settingsUsage * 5) : 0;
         
         if (isFirstTime) {
             userData.stats.settingsOptimized = 1;
+            userData.stats.settingsStreak = 1;
+            if (surpriseBonus > 0) {
+                await user.addVEX(surpriseBonus, 'settings_optimization_bonus');
+            }
+            await user.save(userData);
+        } else {
+            userData.stats.settingsOptimized = settingsUsage + 1;
+            userData.stats.settingsStreak = optimizationStreak + 1;
             await user.save(userData);
         }
         
@@ -68,12 +92,17 @@ module.exports = {
         let description = '⚙️ **Master your VexiumVerse experience!**';
         
         if (isFirstTime) {
-            title = `🌟 Welcome to Settings!`;
-            description = '✨ **NEW FEATURE UNLOCKED!** Customize your empire to perfection!';
+            title = `🌟 SETTINGS UNLOCKED! Welcome to Power!`;
+            description = `✨ **FIRST TIME BONUS!** You're taking control of your empire!${surpriseBonus > 0 ? `\n💰 **SURPRISE REWARD: +$${surpriseBonus} VEX** for being proactive!` : ''}`;
         } else if (isSettingsPro) {
-            title = `👑 Settings Master Dashboard`;
-            description = '💎 **OPTIMIZATION EXPERT!** Your setup is legendary!';
+            title = `👑 SETTINGS MASTER! Ultimate Control!`;
+            description = `💎 **OPTIMIZATION LEGEND!** ${settingsUsage} customizations completed!\n🔥 **${optimizationStreak}-session streak** - You're unstoppable!`;
+        } else {
+            description += `\n🎯 **${settingsUsage} optimizations completed** - Building your perfect setup!`;
         }
+        
+        const activeOptimizers = Math.floor(Math.random() * 25) + 10;
+        description += `\n📊 **${activeOptimizers} players optimizing right now!** Join the efficiency revolution!`;
         
         const progressBar = '█'.repeat(Math.floor(optimizationScore / 5)) + '░'.repeat(20 - Math.floor(optimizationScore / 5));
         

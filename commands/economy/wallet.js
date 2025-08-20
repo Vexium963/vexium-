@@ -18,6 +18,24 @@ module.exports = {
         const user = new User(targetUser.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'wallet', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                wealthTracking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'wallet',
+                behaviorContext
+            );
+        }
+        
         if (!isOwnWallet && userData.settings.privacy === 'private') {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Wallet`)
@@ -27,9 +45,45 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        const walletViews = userData.stats.walletViews || 0;
+        const isWealthyUser = userData.networth >= 1000;
+        const isRisingStar = userData.networth >= 100 && userData.networth < 1000;
+        const recentGrowth = this.calculateRecentGrowth(userData);
+        const wealthRank = this.getWealthRank(userData.networth);
+        
+        let title = `${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`;
+        let description = `**USD-Pegged VEX Token Balance**\n1 VEX = $1.00 USD`;
+        
+        if (isOwnWallet) {
+            if (isWealthyUser) {
+                title = `💎 YOUR WEALTH EMPIRE!`;
+                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **$${userData.networth.toFixed(2)} VEX**!\n💰 **1 VEX = $1.00 USD** - Real money, real power!`;
+            } else if (isRisingStar) {
+                title = `🚀 RISING WEALTH STAR!`;
+                description = `⭐ **You're building something AMAZING!** $${userData.networth.toFixed(2)} VEX and climbing!\n🎯 **Next milestone: $1,000 VEX** for Wealth Elite status!`;
+            } else {
+                title = `🌟 YOUR GROWING EMPIRE!`;
+                description = `💪 **Every legend starts somewhere!** You're at $${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: $100 VEX** for Rising Star status!`;
+            }
+            
+            if (recentGrowth > 0) {
+                description += `\n📈 **+$${recentGrowth.toFixed(2)} VEX growth** in recent activity!`;
+            }
+        } else {
+            if (isWealthyUser) {
+                title = `👑 ${targetUser.username}'s WEALTH EMPIRE`;
+                description = `💎 **This player is in the TOP ${wealthRank}%!** Net worth: $${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
+            }
+        }
+        
+        const activeUsers = Math.floor(Math.random() * 200) + 50;
+        if (Math.random() < 0.3) {
+            description += `\n📊 **${activeUsers} players** are checking wallets right now!`;
+        }
+        
         const walletEmbed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`)
-            .setDescription(`**USD-Pegged VEX Token Balance**\n1 VEX = $1.00 USD`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { 
                     name: `${constants.EMOJIS.VEX} VEX Balance`, 

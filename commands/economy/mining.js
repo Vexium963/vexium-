@@ -42,11 +42,16 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                miningExperience: userData.stats?.miningSessionsStarted || 0,
+                totalMined: userData.stats?.totalMined || 0
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(

@@ -38,6 +38,9 @@ module.exports = {
     cooldown: 10,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'quests', true);
         }
@@ -46,13 +49,33 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                questProgress: true,
+                achievementHunting: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'quests',
                 behaviorContext
             );
+        }
+        
+        const questsCompleted = userData.stats?.questsCompleted || 0;
+        const questStreak = userData.stats?.questStreak || 0;
+        const isQuestMaster = questsCompleted >= 50;
+        const isNewbie = questsCompleted < 5;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(questsCompleted * 10) : 0;
+        
+        if (urgencyBonus > 0) {
+            await user.addVEX(urgencyBonus, 'quest_urgency_bonus');
+            
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`✨ SURPRISE QUEST BONUS!`)
+                .setDescription(`🎉 **Lucky you!** Random quest bonus activated!\n💰 **+$${urgencyBonus} VEX** for being an active adventurer!`)
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: 'Random bonuses reward dedicated questers!' });
+            
+            await interaction.followUp({ embeds: [bonusEmbed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();

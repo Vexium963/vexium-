@@ -84,13 +84,26 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                cryptoTrading: true,
+                wealthBuilding: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'crypto',
                 behaviorContext
             );
+        }
+        
+        const cryptoTrades = userData.stats?.cryptoPurchases || 0;
+        const isCryptoExpert = cryptoTrades >= 25;
+        const isCryptoNovice = cryptoTrades < 5;
+        const totalCryptoValue = this.calculateTotalCryptoValue(userData);
+        const isWhale = totalCryptoValue >= 5000;
+        
+        if (isCryptoExpert) {
+            const expertBonus = Math.floor(Math.random() * 50) + 25;
+            userData.stats.expertBonusEarned = (userData.stats.expertBonusEarned || 0) + expertBonus;
         }
         
         const subcommand = interaction.options.getSubcommand();

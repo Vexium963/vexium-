@@ -61,16 +61,21 @@ module.exports = {
     cooldown: 15,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now()
+                consecutiveUse: (userData.stats.lastCommand === 'stocks'),
+                quickReturn: (Date.now() - (userData.stats.lastStocksUse || 0)) < 300000,
+                timeSinceLastUse: Date.now() - (userData.stats.lastStocksUse || 0),
+                investmentExpertise: (userData.stats.stocksPurchased || 0) >= 100,
+                portfolioValue: this.calculatePortfolioValue(userData)
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
-                interaction.commandName,
+                'stocks',
                 behaviorContext
             );
         }
@@ -78,10 +83,14 @@ module.exports = {
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(
                 interaction.user.id,
-                interaction.commandName,
+                'stocks',
                 true
             );
         }
+        
+        userData.stats.lastStocksUse = Date.now();
+        userData.stats.lastCommand = 'stocks';
+        await user.save(userData);
         
         const subcommand = interaction.options.getSubcommand();
         

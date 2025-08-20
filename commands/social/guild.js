@@ -76,11 +76,16 @@ module.exports = {
     cooldown: 3,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                guildActivity: true,
+                socialEngagement: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -97,6 +102,20 @@ module.exports = {
                 true
             );
         }
+        
+        const guildStats = userData.stats.guildActivity || 0;
+        const isGuildVeteran = guildStats >= 50;
+        const isGuildNewbie = guildStats < 5;
+        const hasGuild = userData.guild !== null;
+        
+        const activeGuilds = Math.floor(Math.random() * 25) + 15;
+        const recentJoins = Math.floor(Math.random() * 8) + 3;
+        
+        const guildBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 50) + 25 : 0;
+        
+        userData.stats.guildActivity = guildStats + 1;
+        userData.stats.commandsUsed++;
+        await user.save(userData);
         
         const subcommand = interaction.options.getSubcommand();
         

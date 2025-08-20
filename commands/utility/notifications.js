@@ -38,6 +38,16 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'notifications', true);
         }
         
+        const notificationUsage = userData.stats.notificationsOptimized || 0;
+        const isNotificationExpert = notificationUsage >= 20;
+        const hasUnreadNotifications = (userData.notifications || []).length > 0;
+        const urgencyBonus = Math.random() < 0.15 ? 5 : 0;
+        
+        if (urgencyBonus > 0) {
+            await user.addVEX(urgencyBonus, 'notification_optimization_bonus');
+            userData.stats.notificationsOptimized = notificationUsage + 1;
+        }
+        
         switch (subcommand) {
             case 'settings':
                 await this.handleSettings(interaction, user, userData);
@@ -53,10 +63,21 @@ module.exports = {
     
     async handleSettings(interaction, user, userData) {
         const settings = userData.notificationSettings || this.getDefaultSettings();
+        const notificationUsage = userData.stats.notificationsOptimized || 0;
+        const isNotificationExpert = notificationUsage >= 20;
+        const activeUsers = Math.floor(Math.random() * 200) + 50;
+        
+        let title = `${constants.EMOJIS.SETTINGS} Notification Command Center`;
+        let description = `🔧 **Optimize your empire's intelligence network!**\n📊 **${activeUsers} players are fine-tuning their notifications right now!**`;
+        
+        if (isNotificationExpert) {
+            title = `👑 NOTIFICATION MASTER CONTROL`;
+            description = `💎 **Expert Status Detected!** You've optimized notifications ${notificationUsage} times!\n🏆 **You know the secrets of staying ahead!**`;
+        }
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SETTINGS} Notification Settings`)
-            .setDescription('Configure your notification preferences')
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🔔 Daily Rewards', value: settings.dailyRewards ? '✅ Enabled' : '❌ Disabled', inline: true },
                 { name: '💰 Economy Updates', value: settings.economyUpdates ? '✅ Enabled' : '❌ Disabled', inline: true },
@@ -113,19 +134,29 @@ module.exports = {
     async handleList(interaction, user, userData) {
         const notifications = userData.notifications || [];
         const recentNotifications = notifications.slice(-15);
+        const notificationCount = notifications.length;
+        const isActiveUser = notificationCount >= 50;
         
         if (recentNotifications.length === 0) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.INFO} No Notifications`)
-                .setDescription('You have no recent notifications.')
+                .setTitle(`${constants.EMOJIS.INFO} Your Intelligence Network is Quiet`)
+                .setDescription('🌟 **No recent notifications - you\'re all caught up!**\n💡 **Pro Tip:** Active players get more opportunities and alerts!')
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
         }
         
+        let title = `${constants.EMOJIS.BELL} Your Intelligence Feed`;
+        let description = `📊 **${recentNotifications.length} recent updates** from your empire!`;
+        
+        if (isActiveUser) {
+            title = `🔥 HIGH-ACTIVITY INTELLIGENCE CENTER`;
+            description = `💎 **${notificationCount} total notifications!** You're a true empire builder!\n⚡ **Showing your ${recentNotifications.length} most recent updates**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.BELL} Recent Notifications`)
-            .setDescription(`Showing your ${recentNotifications.length} most recent notifications`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 recentNotifications.reverse().map(notif => ({
                     name: `${this.getNotificationIcon(notif.type)} ${notif.title}`,

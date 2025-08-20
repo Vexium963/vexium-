@@ -28,13 +28,24 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const subcommand = interaction.options.getSubcommand();
+        
+        const lotteryUsage = userData.stats.lotteryTicketsBought || 0;
+        const isLotteryVeteran = lotteryUsage >= 50;
+        const isLotteryNovice = lotteryUsage < 5;
+        const recentWins = userData.stats.lotteryWins || 0;
+        const hasWonBefore = recentWins > 0;
         
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                lotteryAddiction: lotteryUsage >= 20,
+                winStreak: hasWonBefore,
+                gamblingTendency: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
@@ -63,12 +74,40 @@ module.exports = {
     },
     
     async handleInfo(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
         const lotteryData = this.getCurrentLottery();
         
+        const timeUntilDraw = lotteryData.drawTime * 1000 - Date.now();
+        const hoursLeft = Math.floor(timeUntilDraw / (1000 * 60 * 60));
+        const isUrgent = hoursLeft <= 24;
+        const jackpotGrowth = Math.floor(Math.random() * 500) + 100;
+        const activeParticipants = Math.floor(Math.random() * 200) + 150;
+        
+        let title = `${constants.EMOJIS.LOTTERY} MASSIVE JACKPOT ALERT!`;
+        let description = `💎 **$${lotteryData.jackpot.toFixed(2)} VEX JACKPOT** - Life-changing money awaits!\n🔥 **${activeParticipants} players competing RIGHT NOW!**`;
+        
+        if (isUrgent) {
+            title = `🚨 URGENT: ${hoursLeft}H LEFT TO WIN!`;
+            description = `⏰ **FINAL HOURS!** Jackpot closes in ${hoursLeft} hours!\n💰 **$${lotteryData.jackpot.toFixed(2)} VEX** could be YOURS!\n🏃‍♂️ **Don't miss your chance at financial freedom!**`;
+        }
+        
+        const lotteryUsage = userData.stats.lotteryTicketsBought || 0;
+        if (lotteryUsage >= 10) {
+            description += `\n👑 **VIP PLAYER DETECTED!** ${lotteryUsage} tickets purchased - you're a lottery legend!`;
+        } else if (lotteryUsage === 0) {
+            description += `\n🌟 **FIRST TIME?** This could be your lucky break into wealth!`;
+        }
+        
+        const surpriseBonus = Math.random() < 0.2 ? Math.floor(lotteryData.jackpot * 0.1) : 0;
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE JACKPOT BOOST: +$${surpriseBonus} VEX!**`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.LOTTERY} Weekly VEX Lottery`)
-            .setDescription('Win massive VEX prizes in our weekly lottery draw!')
-            .setColor(constants.COLORS.GOLD)
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(isUrgent ? constants.COLORS.ERROR : constants.COLORS.GOLD)
             .addFields(
                 { name: '🎯 Current Jackpot', value: `$${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
                 { name: '🎫 Ticket Price', value: `$${constants.LOTTERY.TICKET_PRICE.toFixed(2)} VEX`, inline: true },

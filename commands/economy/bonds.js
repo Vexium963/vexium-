@@ -47,10 +47,18 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         
         if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                subcommand,
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                investmentFocus: true,
+                wealthBuilding: true
+            };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'bonds',
-                { subcommand, consecutiveUse: false, quickReturn: false }
+                behaviorContext
             );
         }
         
@@ -80,6 +88,12 @@ module.exports = {
         
         const bondType = interaction.options.getString('type');
         const amount = interaction.options.getNumber('amount');
+        
+        const totalBonds = userData.stats.bondsOwned || 0;
+        const isBondExpert = totalBonds >= 10;
+        const isBondNovice = totalBonds < 3;
+        const totalInvested = userData.stats.totalBondInvestment || 0;
+        const isHighValueInvestor = totalInvested >= 10000;
         
         const bondTypes = {
             short: { name: 'Short-term Bond', days: 30, returnRate: 0.03, minAmount: 100 },
@@ -144,9 +158,39 @@ module.exports = {
         
         await user.save(userData);
         
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(amount * 0.02) : 0;
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'bond_purchase_bonus');
+        }
+        
+        let title = `${constants.EMOJIS.SUCCESS} Bond Purchased Successfully!`;
+        let description = `Your **${bond.name}** has been issued!`;
+        
+        if (isBondExpert) {
+            title = `👑 BOND MASTER STRIKES AGAIN!`;
+            description = `🏆 **${totalBonds + 1} bonds owned!** Your **${bond.name}** shows your investment expertise!`;
+        } else if (isBondNovice) {
+            title = `🌟 SMART INVESTMENT CHOICE!`;
+            description = `💡 **Building wealth wisely!** Your **${bond.name}** is a great start to your investment journey!`;
+        }
+        
+        if (isHighValueInvestor) {
+            description += `\n💎 **HIGH-VALUE INVESTOR STATUS** - You're in the top 5% of bond investors!`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE BONUS: +$${surpriseBonus} VEX!** Lucky investment timing!`;
+        }
+        
+        const socialProof = Math.random() < 0.3;
+        if (socialProof) {
+            const activeBondInvestors = Math.floor(Math.random() * 25) + 15;
+            description += `\n📈 **${activeBondInvestors} investors** bought bonds in the last hour!`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Bond Purchased Successfully!`)
-            .setDescription(`Your **${bond.name}** has been issued!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🆔 Bond ID', value: bondId, inline: true },
                 { name: '📊 Bond Type', value: bond.name, inline: true },

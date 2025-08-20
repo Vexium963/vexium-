@@ -25,6 +25,20 @@ module.exports = {
             );
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                communityEngagement: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'report',
+                behaviorContext
+            );
+        }
+        
         const reportType = interaction.options.getString('type');
         
         const User = require('../../database/models/User');
@@ -34,12 +48,32 @@ module.exports = {
         const reportsSubmitted = userData.stats.reportsSubmitted || 0;
         const isCommunityHelper = reportsSubmitted >= 5;
         const isLegendaryContributor = reportsSubmitted >= 20;
+        const isFirstReport = reportsSubmitted === 0;
+        const recentReports = userData.stats.reportsThisWeek || 0;
+        const isActiveContributor = recentReports >= 3;
+        
+        const communityImpact = Math.floor(Math.random() * 50) + 10;
+        const urgencyBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 25) + 10 : 0;
         
         let modalTitle = this.getReportTitle(reportType);
+        let motivationalPrefix = '';
+        
         if (isLegendaryContributor) {
             modalTitle = `👑 LEGENDARY CONTRIBUTOR - ${this.getReportTitle(reportType)}`;
+            motivationalPrefix = '🔥 Your expertise shapes VexiumVerse! ';
         } else if (isCommunityHelper) {
             modalTitle = `⭐ COMMUNITY HERO - ${this.getReportTitle(reportType)}`;
+            motivationalPrefix = '💎 Your feedback drives innovation! ';
+        } else if (isFirstReport) {
+            modalTitle = `🌟 FIRST REPORT - ${this.getReportTitle(reportType)}`;
+            motivationalPrefix = '✨ Welcome to the VexiumVerse improvement team! ';
+        } else if (isActiveContributor) {
+            modalTitle = `🚀 ACTIVE CONTRIBUTOR - ${this.getReportTitle(reportType)}`;
+            motivationalPrefix = '⚡ Your dedication is noticed! ';
+        }
+        
+        if (urgencyBonus > 0) {
+            motivationalPrefix += `🎁 BONUS: +${urgencyBonus} VEX for quality reports! `;
         }
         
         const modal = new ModalBuilder()
@@ -50,9 +84,10 @@ module.exports = {
             .setCustomId('report_title')
             .setLabel('Title')
             .setStyle(TextInputStyle.Short)
-            .setPlaceholder(isCommunityHelper ? 
+            .setPlaceholder(motivationalPrefix + (isCommunityHelper ? 
                 '🔥 Your expertise matters! Brief description...' : 
-                'Brief description of your report')
+                isFirstReport ? '🌟 Your first contribution! Brief description...' :
+                'Brief description of your report'))
             .setRequired(true)
             .setMaxLength(100);
         

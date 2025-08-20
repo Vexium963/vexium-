@@ -41,6 +41,21 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'roulette', true);
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                riskTaking: true,
+                entertainmentSeeking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'roulette',
+                behaviorContext
+            );
+        }
+        
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
@@ -99,6 +114,13 @@ module.exports = {
         const hotStreak = currentStreak >= 3;
         const jackpotChance = isWin && Math.random() < 0.08;
         const comebackBonus = !isWin && currentStreak === 0 && totalSpins > 5 ? Math.floor(playAmount * 0.15) : 0;
+        
+        const isRouletteExpert = totalSpins >= 100;
+        const isRouletteNovice = totalSpins < 10;
+        const isHighRoller = playAmount >= 50;
+        const surpriseMultiplier = Math.random() < 0.12 ? (1.5 + Math.random() * 0.5) : 1;
+        const activeSpinners = Math.floor(Math.random() * 25) + 8;
+        const urgencyBonus = Math.random() < 0.18 ? Math.floor(playAmount * 0.08) : 0;
         
         let winnings = 0;
         if (isWin) {

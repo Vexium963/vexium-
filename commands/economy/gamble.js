@@ -56,13 +56,25 @@ module.exports = {
     cooldown: 3,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const gamesPlayed = userData.stats?.gamesPlayed || 0;
+        const isGameVeteran = gamesPlayed >= 50;
+        const isGameNovice = gamesPlayed < 5;
+        const recentWins = userData.stats?.recentWinStreak || 0;
+        const hotStreak = recentWins >= 3;
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
                 timeSinceLastUse: Date.now(),
                 riskLevel: 'high',
-                gameType: 'entertainment'
+                gameType: 'entertainment',
+                veteranStatus: isGameVeteran,
+                hotStreak: hotStreak,
+                gamesPlayed: gamesPlayed
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(

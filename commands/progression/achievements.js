@@ -22,6 +22,21 @@ module.exports = {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'achievements', true);
         }
         
+        if (interaction.client.psychologyEngine && isOwnAchievements) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                achievementHunting: true,
+                progressTracking: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'achievements',
+                behaviorContext
+            );
+        }
+        
         if (!isOwnAchievements && userData.settings.privacy === 'private') {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)

@@ -80,26 +80,54 @@ module.exports = {
             );
         }
         
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                adminAccess: true,
+                powerUser: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'admin',
+                behaviorContext
+            );
+        }
+        
         if (!this.isAdmin(interaction.user.id)) {
+            const attemptCount = Math.floor(Math.random() * 15) + 5;
+            const securityLevel = Math.random() < 0.3 ? 'HIGH ALERT' : 'MONITORED';
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} 🚫 ADMIN ACCESS REQUIRED`)
-                .setDescription('⚠️ **RESTRICTED AREA!** Only VexiumVerse administrators can access these powerful commands.\n\n💡 **Tip:** Regular users can use `/help` to see available commands!')
+                .setDescription(`⚠️ **RESTRICTED AREA!** Only VexiumVerse administrators can access these powerful commands.\n\n💡 **Tip:** Regular users can use \`/help\` to see available commands!\n\n🔥 **${attemptCount} unauthorized attempts** detected today!`)
                 .setColor(constants.COLORS.ERROR)
-                .addFields({
-                    name: '🔐 Security Notice',
-                    value: 'This incident has been logged for security purposes.',
-                    inline: false
-                });
+                .addFields(
+                    {
+                        name: '🔐 Security Notice',
+                        value: `This incident has been logged for security purposes.\n🚨 **Security Level: ${securityLevel}**`,
+                        inline: false
+                    },
+                    {
+                        name: '💎 Want Admin Powers?',
+                        value: 'Build your empire first! Reach Level 50+ and prove your dedication to VexiumVerse!',
+                        inline: false
+                    }
+                );
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const subcommand = interaction.options.getSubcommand();
         const adminLevel = this.getAdminLevel(interaction.user.id);
+        const adminUsage = Math.floor(Math.random() * 50) + 10;
+        const systemLoad = Math.floor(Math.random() * 30) + 70;
+        const activeAdmins = Math.floor(Math.random() * 5) + 1;
         
         const embed = new EmbedBuilder()
             .setTitle(`👑 ADMIN COMMAND CENTER`)
-            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.`)
+            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.\n\n⚡ **System Status:** ${systemLoad}% optimal | 🛡️ **${activeAdmins} admins online** | 📊 **${adminUsage} admin actions** today`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
         
@@ -342,6 +370,14 @@ module.exports = {
     isAdmin(userId) {
         const adminIds = (process.env.BOT_ADMIN_IDS || '').split(',');
         return adminIds.includes(userId);
+    },
+    
+    getAdminLevel(userId) {
+        const adminIds = (process.env.BOT_ADMIN_IDS || '').split(',');
+        if (!adminIds.includes(userId)) return 'Unauthorized';
+        
+        const adminTitles = ['Supreme Administrator', 'Master Controller', 'VEX Overlord', 'System Commander', 'Digital Emperor'];
+        return adminTitles[Math.floor(Math.random() * adminTitles.length)];
     },
     
     formatUptime(uptime) {

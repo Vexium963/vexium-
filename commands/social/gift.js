@@ -47,6 +47,28 @@ module.exports = {
     cooldown: 60,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'gift', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                socialEngagement: true,
+                generosity: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'gift',
+                behaviorContext
+            );
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {
@@ -60,6 +82,11 @@ module.exports = {
     async handleSend(interaction) {
         const user = new User(interaction.user.id);
         const userData = await user.load();
+        
+        const totalGifts = userData.stats.giftsSent || 0;
+        const isGenerous = totalGifts >= 10;
+        const isGiftMaster = totalGifts >= 50;
+        const recentGifts = userData.stats.giftsToday || 0;
         
         const targetUser = interaction.options.getUser('user');
         const vexAmount = interaction.options.getNumber('vex_amount') || 0;
@@ -160,8 +187,14 @@ module.exports = {
         }
         
         userData.stats.giftsSent++;
+        userData.stats.giftsToday = (userData.stats.giftsToday || 0) + 1;
         targetData.stats.giftsReceived++;
         userData.stats.commandsUsed++;
+        
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(vexAmount * 0.2) : 0;
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'generosity_bonus');
+        }
         
         await user.save(userData);
         await targetUserData.save(targetData);

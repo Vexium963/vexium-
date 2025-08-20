@@ -46,16 +46,22 @@ module.exports = {
     cooldown: 30,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now()
+                consecutiveUse: (userData.stats.lastCommand === 'real-estate'),
+                quickReturn: (Date.now() - (userData.stats.lastRealEstateUse || 0)) < 300000, // 5 minutes
+                timeSinceLastUse: Date.now() - (userData.stats.lastRealEstateUse || 0),
+                investmentLevel: (userData.realEstate || []).length,
+                portfolioValue: (userData.realEstate || []).reduce((sum, p) => sum + p.price, 0),
+                isWhaleInvestor: (userData.realEstate || []).reduce((sum, p) => sum + p.price, 0) >= 100000
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
-                interaction.commandName,
+                'real-estate',
                 behaviorContext
             );
         }
@@ -63,10 +69,13 @@ module.exports = {
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(
                 interaction.user.id,
-                interaction.commandName,
+                'real-estate',
                 true
             );
         }
+        
+        userData.stats.lastRealEstateUse = Date.now();
+        userData.stats.realEstateUsageCount = (userData.stats.realEstateUsageCount || 0) + 1;
         
         const subcommand = interaction.options.getSubcommand();
         
@@ -93,9 +102,15 @@ module.exports = {
         
         const marketTrend = Math.random() > 0.6 ? 'bullish' : 'bearish';
         const hotProperty = availableProperties[Math.floor(Math.random() * availableProperties.length)];
-        const isFlashSale = Math.random() < 0.2;
+        const isFlashSale = Math.random() < 0.25; // Increased chance for FOMO
         const userPortfolioValue = (userData.realEstate || []).reduce((sum, p) => sum + p.price, 0);
         const isWhale = userPortfolioValue >= 100000;
+        const isNewInvestor = (userData.realEstate || []).length === 0;
+        const isExperienced = (userData.realEstate || []).length >= 5;
+        const hasRecentActivity = (Date.now() - (userData.stats.lastRealEstateUse || 0)) < 3600000; // 1 hour
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(Math.random() * 1000) + 500 : 0;
+        const activeInvestors = Math.floor(Math.random() * 25) + 15; // Social proof
+        const propertiesSoldToday = Math.floor(Math.random() * 8) + 3;
         
         let title = `${constants.EMOJIS.REAL_ESTATE} VexiumVerse Real Estate Market`;
         let description = '🏠 **BUILD YOUR PROPERTY EMPIRE!** Passive income awaits!';

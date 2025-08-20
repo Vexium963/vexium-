@@ -59,13 +59,31 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                walletLinking: true,
+                cryptoEngagement: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'linkwallet',
                 behaviorContext
             );
+        }
+        
+        const walletCount = Object.keys(userData.linkedWallets || {}).length;
+        const isFirstWallet = walletCount === 0;
+        const isAdvancedUser = userData.level >= 10;
+        
+        const currentHour = new Date().getHours();
+        const isPeakHours = currentHour >= 18 && currentHour <= 22;
+        const bonusMultiplier = isPeakHours ? 1.5 : 1.0;
+        
+        const activeLinkers = Math.floor(Math.random() * 25) + 10;
+        if (Math.random() < 0.3) {
+            await interaction.followUp({ 
+                content: `🔥 **${activeLinkers} users are linking wallets right now!** Join the crypto revolution!`,
+                ephemeral: true 
+            });
         }
         
         const subcommand = interaction.options.getSubcommand();

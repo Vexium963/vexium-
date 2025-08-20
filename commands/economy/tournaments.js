@@ -68,7 +68,9 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                competitiveSpirit: true,
+                tournamentParticipation: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
@@ -76,6 +78,24 @@ module.exports = {
                 behaviorContext
             );
         }
+        
+        const tournamentsJoined = userData.stats.tournamentsJoined || 0;
+        const tournamentsWon = userData.stats.tournamentsWon || 0;
+        const isNewbie = tournamentsJoined === 0;
+        const isVeteran = tournamentsJoined >= 10;
+        const isChampion = tournamentsWon >= 3;
+        const lastTournament = userData.lastTournamentActivity || 0;
+        const timeSinceLastTournament = Date.now() - lastTournament;
+        const isReturningPlayer = timeSinceLastTournament > (7 * 24 * 60 * 60 * 1000); // 7 days
+        
+        const engagementBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 50) + 25 : 0;
+        if (engagementBonus > 0) {
+            await user.addVEX(engagementBonus, 'tournament_engagement_bonus');
+            userData.stats.surpriseBonusesReceived = (userData.stats.surpriseBonusesReceived || 0) + 1;
+        }
+        
+        userData.lastTournamentActivity = Date.now();
+        userData.stats.commandsUsed++;
         
         const subcommand = interaction.options.getSubcommand();
         

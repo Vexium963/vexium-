@@ -38,16 +38,27 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const eventUsage = userData.stats.eventsUsed || 0;
+        const isEventExpert = eventUsage >= 20;
+        const isEventNovice = eventUsage < 3;
+        const recentEventActivity = Date.now() - (userData.lastEventActivity || 0) < 3600000;
+        
         if (interaction.client.psychologyEngine) {
             const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now()
+                consecutiveUse: recentEventActivity,
+                quickReturn: eventUsage > 0 && Date.now() - (userData.lastEventActivity || 0) < 300000,
+                timeSinceLastUse: userData.lastEventActivity || Date.now(),
+                eventExpertise: isEventExpert,
+                socialEngagement: true,
+                competitiveSpirit: true
             };
             
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
-                interaction.commandName,
+                'events',
                 behaviorContext
             );
         }
@@ -55,10 +66,14 @@ module.exports = {
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(
                 interaction.user.id,
-                interaction.commandName,
+                'events',
                 true
             );
         }
+        
+        userData.stats.eventsUsed = eventUsage + 1;
+        userData.lastEventActivity = Date.now();
+        await user.save(userData);
         
         const subcommand = interaction.options.getSubcommand();
         

@@ -77,13 +77,44 @@ module.exports = {
             const behaviorContext = {
                 consecutiveUse: false,
                 quickReturn: false,
-                timeSinceLastUse: Date.now()
+                timeSinceLastUse: Date.now(),
+                governanceEngagement: true,
+                democraticParticipation: true
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(
                 interaction.user.id,
                 'dao',
                 behaviorContext
             );
+        }
+        
+        const daoUsage = userData.stats?.daoVotes || 0;
+        const isGovernanceNewbie = daoUsage === 0;
+        const isGovernanceVeteran = daoUsage >= 20;
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(userData.vexBalance * 0.02) : 0;
+        
+        if (isGovernanceNewbie && subcommand === 'proposals') {
+            const welcomeEmbed = new EmbedBuilder()
+                .setTitle(`🎉 WELCOME TO DEMOCRACY!`)
+                .setDescription(`👑 **${interaction.user.username}, you're about to shape VexiumVerse's future!**\n\n🗳️ **Your voice matters!** Join the governance elite and earn exclusive rewards!\n⚡ **First-time voters get 2x influence** on their first proposal!`)
+                .addFields(
+                    { name: '💎 Governance Benefits', value: '🏆 **Exclusive voter badges**\n💰 **Proposal rewards**\n👑 **Elite status recognition**\n🎁 **Democracy bonuses**', inline: true },
+                    { name: '🔥 Active Now', value: `📊 **${Math.floor(Math.random() * 50) + 20} voters** participating\n⏰ **${Math.floor(Math.random() * 5) + 2} proposals** closing soon\n🚨 **Your input needed urgently!**`, inline: true }
+                )
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: '🌟 Democracy rewards those who participate!' });
+            
+            await interaction.followUp({ embeds: [welcomeEmbed], ephemeral: true });
+        }
+        
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'governance_participation_bonus');
+            const bonusEmbed = new EmbedBuilder()
+                .setTitle(`✨ DEMOCRACY BONUS!`)
+                .setDescription(`🎁 **Surprise reward for governance participation!**\n💰 **+$${surpriseBonus} VEX** for being an active citizen!`)
+                .setColor(constants.COLORS.SUCCESS);
+            
+            setTimeout(() => interaction.followUp({ embeds: [bonusEmbed], ephemeral: true }), 2000);
         }
         
         switch (subcommand) {

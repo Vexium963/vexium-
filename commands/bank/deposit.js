@@ -26,6 +26,24 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'deposit', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                wealthBuilding: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'deposit',
+                behaviorContext
+            );
+        }
+        
         const amount = interaction.options.getNumber('amount');
         const term = interaction.options.getString('term') || 'none';
         
@@ -99,9 +117,53 @@ module.exports = {
         const dailyInterest = amount * interestRate;
         const projectedYearly = dailyInterest * 365;
         
+        const totalDeposits = userData.bankDeposits.length;
+        const isSmartInvestor = totalDeposits >= 10;
+        const isHighRoller = amount >= 1000;
+        const surpriseBonus = Math.random() < 0.15 ? Math.floor(amount * 0.02) : 0;
+        const compoundingPower = projectedYearly > amount ? ((projectedYearly / amount - 1) * 100).toFixed(0) : 0;
+        
+        if (surpriseBonus > 0) {
+            await user.addVEX(surpriseBonus, 'deposit_surprise_bonus');
+        }
+        
+        let title = `${constants.EMOJIS.BANK} WEALTH SECURED!`;
+        let description = `💰 **$${amount.toFixed(2)} VEX** locked and loaded for compound growth!`;
+        
+        if (isHighRoller) {
+            title = `💎 HIGH-ROLLER DEPOSIT CONFIRMED!`;
+            description = `🔥 **MASSIVE DEPOSIT!** $${amount.toFixed(2)} VEX is now working for you!\n💪 **You're building serious wealth!**`;
+        }
+        
+        if (isSmartInvestor) {
+            title = `🧠 INVESTMENT GENIUS AT WORK!`;
+            description += `\n👑 **${totalDeposits} deposits** - You understand compound interest!`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n✨ **SURPRISE BONUS: +$${surpriseBonus} VEX!** Lucky you!`;
+        }
+        
+        const socialProof = Math.random() < 0.3;
+        if (socialProof) {
+            const activeDepositors = Math.floor(Math.random() * 200) + 50;
+            description += `\n📈 **${activeDepositors} players are banking VEX right now!** Smart money moves!`;
+        }
+        
+        const motivationalMessages = [
+            "🚀 Your money is working while you sleep!",
+            "💎 Compound interest is the 8th wonder of the world!",
+            "⚡ Every day your wealth grows automatically!",
+            "🌟 You're building generational wealth!",
+            "🔥 Smart investors always win in the long run!"
+        ];
+        
+        const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        description += `\n\n${randomMotivation}`;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.BANK} Deposit Successful!`)
-            .setDescription(`You've deposited **$${amount.toFixed(2)} VEX** into your bank account!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '💰 Deposited Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Interest Rate', value: `${(interestRate * 100).toFixed(3)}% daily`, inline: true },

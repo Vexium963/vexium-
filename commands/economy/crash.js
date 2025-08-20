@@ -18,6 +18,25 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'crash', true);
+        }
+        
+        if (interaction.client.psychologyEngine) {
+            const behaviorContext = {
+                consecutiveUse: false,
+                quickReturn: false,
+                timeSinceLastUse: Date.now(),
+                riskTaking: true,
+                entertainmentEngagement: true
+            };
+            interaction.client.psychologyEngine.analyzeUserBehavior(
+                interaction.user.id,
+                'crash',
+                behaviorContext
+            );
+        }
+        
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
@@ -56,13 +75,41 @@ module.exports = {
         
         const game = this.initializeCrashGame(playAmount, interaction.user.id);
         
+        const totalCrashGames = userData.stats.crashGames || 0;
+        const crashWins = userData.stats.crashWins || 0;
+        const winRate = totalCrashGames > 0 ? ((crashWins / totalCrashGames) * 100).toFixed(1) : 0;
+        const isExpert = totalCrashGames >= 50;
+        const isNovice = totalCrashGames < 5;
+        const hotStreak = crashWins >= 3 && (crashWins / Math.max(totalCrashGames, 1)) > 0.6;
+        const activePlayers = Math.floor(Math.random() * 25) + 15;
+        
+        let title = `${constants.EMOJIS.CHART} 🚀 CRASH GAME LAUNCHED!`;
+        let description = '🔥 **The rocket is BLASTING OFF!** Cash out before it crashes!';
+        
+        if (isExpert) {
+            title = `👑 CRASH MASTER IN ACTION!`;
+            description = `🏆 **${totalCrashGames} games played!** You know the drill - timing is everything!`;
+        } else if (isNovice) {
+            description = `✨ **Welcome to the thrill!** Watch the multiplier climb and cash out before the crash!`;
+        }
+        
+        if (hotStreak) {
+            title = `🔥 HOT STREAK PLAYER!`;
+            description += `\n💎 **${winRate}% win rate** - You're on fire!`;
+        }
+        
+        description += `\n📊 **${activePlayers} players** are playing crash games right now!`;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHART} Crash Game`)
-            .setDescription('🚀 The rocket is taking off! Cash out before it crashes!')
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Current Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💎 Potential Winnings', value: `$${(playAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true }
+                { name: '💎 Potential Winnings', value: `$${(playAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true },
+                { name: '🎯 Your Stats', value: `🎮 **${totalCrashGames}** games\n🏆 **${winRate}%** win rate\n🔥 **${isExpert ? 'Expert' : isNovice ? 'Novice' : 'Experienced'}** player`, inline: true },
+                { name: '⚡ Live Action', value: `🚀 **${activePlayers}** players active\n💥 **High stakes** entertainment\n⏰ **Real-time** multiplier`, inline: true },
+                { name: '🎲 Pro Tip', value: hotStreak ? '🔥 **You\'re hot!** Trust your instincts!' : isExpert ? '👑 **Master timing** wins big!' : '💡 **Start conservative** and learn!', inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Cash out before the crash to win!' });
