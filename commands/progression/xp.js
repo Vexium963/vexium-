@@ -58,7 +58,17 @@ module.exports = {
             await user.addXP(surpriseBonus, 'progress_check_bonus');
         }
         
-        description += `\n📈 **${activeOptimizers} players are optimizing XP right now!**`;
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeOptimizers);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(0)) : null;
+        
+        description += `\n${socialProofMessage}`;
+        if (isCloseToLevel) {
+            description += `\n${fomoMessage}`;
+        }
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
         
         const embed = new EmbedBuilder()
             .setTitle(title)

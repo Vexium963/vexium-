@@ -95,12 +95,20 @@ module.exports = {
             description = '💎 **AMAZING NETWORK!** You\'re building an incredible community!';
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = isViral ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const urgencyMessage = Math.random() < 0.3 ? '\n⚡ **LIMITED TIME:** Double rewards this week!' : '';
         const socialProof = totalReferrals > 0 ? `\n🌟 **${totalReferrals} friends joined because of you!**` : '';
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + socialProof + urgencyMessage)
+            .setDescription(description + socialProof + urgencyMessage + 
+                (variableReward ? `\n${variableReward}` : '') + 
+                (milestoneMessage ? `\n${milestoneMessage}` : '') + 
+                `\n${fomoMessage}\n${socialProofMessage}`)
             .setColor(isViral ? constants.COLORS.VEX : isInfluencer ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL());
         
@@ -183,9 +191,12 @@ module.exports = {
             await user.save(userData);
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.REFERRAL} Your Referral Code`)
-            .setDescription(`Share this code with friends to earn rewards!`)
+            .setDescription(`Share this code with friends to earn rewards!\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '🔗 Referral Code', value: `\`${userData.referral.code}\``, inline: false },
                 { name: '💰 Reward per Referral', value: `$${constants.REFERRAL.REFERRER_REWARD.toFixed(2)} VEX`, inline: true },
@@ -204,9 +215,11 @@ module.exports = {
         const referralStats = userData.referral || { pendingRewards: 0 };
         
         if (referralStats.pendingRewards < constants.REFERRAL.MIN_CLAIM_AMOUNT) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Rewards`)
-                .setDescription(`You need at least $${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pending: $${referralStats.pendingRewards.toFixed(2)} VEX`)
+                .setDescription(`You need at least $${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pending: $${referralStats.pendingRewards.toFixed(2)} VEX\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -228,9 +241,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 5 + 2).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Referral Rewards Claimed!`)
-            .setDescription('Successfully claimed your referral rewards!')
+            .setDescription(`Successfully claimed your referral rewards!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '💎 Gross Rewards', value: `$${claimAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax (5%)', value: `$${taxAmount.toFixed(2)} VEX`, inline: true },

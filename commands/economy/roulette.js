@@ -57,9 +57,12 @@ module.exports = {
         }
         
         if (!userData.ageVerified) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}\n${socialProof}`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -76,18 +79,23 @@ module.exports = {
         const number = interaction.options.getInteger('number');
         
         if (playType === 'single' && number === null) {
+            const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Number Required`)
-                .setDescription('You must specify a number (0-36) for single number plays.')
+                .setDescription(`You must specify a number (0-36) for single number plays.\n\n${nearMiss}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (playAmount > userData.vexBalance) {
+            const comeback = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n${comeback}\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

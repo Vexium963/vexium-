@@ -94,9 +94,13 @@ module.exports = {
         const totalWealth = userData.vexBalance + userData.bankBalance;
         const accountAge = Math.floor((Date.now() - new Date(userData.createdAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const milestoneMessage = totalWealth >= 1000 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ANALYTICS} ${interaction.user.displayName}'s Analytics Dashboard`)
-            .setDescription(`Comprehensive overview of your VexiumVerse journey`)
+            .setDescription(`Comprehensive overview of your VexiumVerse journey\n\n${milestoneMessage ? milestoneMessage + '\n' : ''}${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '💰 Wealth Overview', value: this.formatWealthStats(userData), inline: true },
                 { name: '📊 Activity Summary', value: this.formatActivityStats(stats), inline: true },
@@ -149,9 +153,12 @@ module.exports = {
         const netProfit = totalEarned - totalSpent;
         const avgDailyEarnings = totalEarned / Math.max(1, Math.floor((Date.now() - new Date(userData.createdAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24)));
         
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Analytics`)
-            .setDescription('Detailed analysis of your economic activity')
+            .setDescription(`Detailed analysis of your economic activity\n\n${variableReward ? variableReward + '\n' : ''}${socialProofMessage}`)
             .addFields(
                 { name: '💵 Income Sources', value: this.formatIncomeBreakdown(stats), inline: true },
                 { name: '💸 Spending Categories', value: this.formatSpendingBreakdown(stats), inline: true },
@@ -190,9 +197,12 @@ module.exports = {
         const totalWon = (stats.slotsWon || 0) + (stats.coinflipWon || 0) + (stats.diceWon || 0);
         const winRate = totalPlayed > 0 ? ((totalWon / totalPlayed) * 100).toFixed(1) : '0.0';
         
+        const nearMissMessage = winRate > 40 ? constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ENTERTAINMENT} Entertainment Analytics`)
-            .setDescription('Performance analysis of your skill-based entertainment activities')
+            .setDescription(`Performance analysis of your skill-based entertainment activities\n\n${nearMissMessage ? nearMissMessage + '\n' : ''}${socialProofMessage}`)
             .addFields(
                 { name: '🎰 Game Statistics', value: this.formatGameStats(stats), inline: true },
                 { name: '🏆 Win/Loss Record', value: `**Total Games**: ${totalPlayed}\n**Games Won**: ${totalWon}\n**Win Rate**: ${winRate}%\n**Current Streak**: ${stats.currentStreak || 0}`, inline: true },
@@ -227,9 +237,12 @@ module.exports = {
         const userData = await user.load();
         const stats = userData.stats || {};
         
+        const milestoneMessage = (userData.achievements || []).length >= 5 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SOCIAL} Social Analytics`)
-            .setDescription('Analysis of your community interactions and social activity')
+            .setDescription(`Analysis of your community interactions and social activity\n\n${milestoneMessage ? milestoneMessage + '\n' : ''}${socialProofMessage}`)
             .addFields(
                 { name: '🤝 Trading Activity', value: this.formatTradingStats(stats), inline: true },
                 { name: '🎁 Gift Exchange', value: this.formatGiftStats(stats), inline: true },

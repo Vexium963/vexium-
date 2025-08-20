@@ -94,9 +94,13 @@ module.exports = {
         const nextMilestone = Math.ceil(completedIds.length / 10) * 10;
         const toNextMilestone = nextMilestone - completedIds.length;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const milestoneMessage = completionRate >= 50 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n🎯 **"Collect them all and become legendary!"**`)
+            .setDescription(description + `\n\n🎯 **"Collect them all and become legendary!"**\n\n${fomoMessage}\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields({
                 name: '📊 Completion Progress',
                 value: `${progressBar} **${completionRate.toFixed(1)}%**\n🎯 **Next Milestone:** ${toNextMilestone} achievements to ${nextMilestone}\n🔥 **Streak Bonus:** ${streakBonus > 1 ? `+${((streakBonus - 1) * 100).toFixed(0)}%` : 'None'}`,
@@ -169,9 +173,12 @@ module.exports = {
             .sort((a, b) => (b.progress.current / b.progress.target) - (a.progress.current / a.progress.target))
             .slice(0, 8);
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 15);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(0)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.PROGRESS} Achievement Progress`)
-            .setDescription(`Track your progress toward unlocking new achievements!`)
+            .setDescription(`Track your progress toward unlocking new achievements!\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .setColor(constants.COLORS.INFO)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFooter({ text: 'Keep playing to unlock more achievements!' });
@@ -237,9 +244,11 @@ module.exports = {
         const achievement = userAchievements.find(a => a.id === achievementId);
         
         if (!achievement) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Achievement Not Found`)
-                .setDescription(`You haven't unlocked achievement ID: ${achievementId}\n\nUse \`/achievements progress\` to see available achievements.`)
+                .setDescription(`You haven't unlocked achievement ID: ${achievementId}\n\nUse \`/achievements progress\` to see available achievements.\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

@@ -94,9 +94,13 @@ module.exports = {
         const timeLeft = this.getTimeUntilMidnight();
         const urgencyMessage = timeLeft < 3 ? '⚠️ **HURRY!** Challenges reset soon!' : `⏰ **${timeLeft}h remaining** to complete!`;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 25 + 10).toFixed(0)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${urgencyMessage}`)
+            .setDescription(description + `\n\n${urgencyMessage}\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .setColor(isChallengeMaster ? constants.COLORS.VEX : hasUnclaimed ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setFooter({ text: 'Daily challenges = Daily rewards! Don\'t miss out!' })
             .setTimestamp();
@@ -152,9 +156,12 @@ module.exports = {
         const completedCount = weeklyChallenges.filter(c => c.completed).length;
         const totalRewards = weeklyChallenges.reduce((sum, c) => sum + (c.completed && !c.claimed ? c.reward : 0), 0);
         
+        const milestoneMessage = completedCount >= 2 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CHALLENGES} Weekly Challenges`)
-            .setDescription(`Bigger challenges, bigger rewards!\n\n**Progress**: ${completedCount}/${weeklyChallenges.length} completed`)
+            .setDescription(`Bigger challenges, bigger rewards!\n\n**Progress**: ${completedCount}/${weeklyChallenges.length} completed\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Weekly challenges reset every Monday • Higher difficulty, higher rewards!' })
             .setTimestamp();
@@ -210,9 +217,12 @@ module.exports = {
         const totalChallengesCompleted = (userData.stats.challengesCompleted || 0);
         const challengeStreak = (userData.stats.challengeStreak || 0);
         
+        const milestoneMessage = totalChallengesCompleted >= 50 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.PROGRESS} Challenge Progress`)
-            .setDescription(`Track your challenge completion and streaks`)
+            .setDescription(`Track your challenge completion and streaks\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields(
                 { name: '📅 Daily Progress', value: `${dailyCompleted}/${dailyChallenges.length} completed\n${this.createProgressBar(dailyCompleted, dailyChallenges.length)}`, inline: true },
                 { name: '📊 Weekly Progress', value: `${weeklyCompleted}/${weeklyChallenges.length} completed\n${this.createProgressBar(weeklyCompleted, weeklyChallenges.length)}`, inline: true },
@@ -288,9 +298,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (challenge.reward * 0.1).toFixed(0)) : null;
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Challenge Reward Claimed!`)
-            .setDescription(`**${challenge.name}** reward claimed successfully!`)
+            .setDescription(`**${challenge.name}** reward claimed successfully!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '💰 VEX Reward', value: `$${challenge.reward.toFixed(2)}`, inline: true },
                 { name: '⭐ XP Reward', value: `${challenge.xp} XP`, inline: true },

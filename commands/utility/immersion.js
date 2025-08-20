@@ -50,9 +50,10 @@ module.exports = {
         const userData = await user.load();
         
         if (!interaction.client.immersionEngine) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription('The immersion system is currently unavailable.')
+                .setDescription(`The immersion system is currently unavailable.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -62,9 +63,13 @@ module.exports = {
         const immersionLevel = immersionReport.immersionLevel;
         const session = immersionReport.sessionData;
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 200) + 100);
+        const milestoneMessage = immersionLevel === 'highly_immersed' ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DIAMOND} Your Immersion Status`)
-            .setDescription(`🎮 **Immersion Level:** ${this.getImmersionEmoji(immersionLevel)} **${immersionLevel.toUpperCase()}**\n${this.getImmersionMessage(immersionLevel)}`)
+            .setDescription(`🎮 **Immersion Level:** ${this.getImmersionEmoji(immersionLevel)} **${immersionLevel.toUpperCase()}**\n${this.getImmersionMessage(immersionLevel)}\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}`)
             .setColor(this.getImmersionColor(immersionLevel))
             .setTimestamp();
         
@@ -166,9 +171,10 @@ module.exports = {
         const userData = await user.load();
         
         if (!interaction.client.immersionEngine) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription('The challenge system is currently unavailable.')
+                .setDescription(`The challenge system is currently unavailable.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -178,9 +184,12 @@ module.exports = {
         const activeChallenges = immersionReport.activeChallenges;
         const completedChallenges = immersionReport.completedChallenges;
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 150) + 75);
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TARGET} Daily Challenges`)
-            .setDescription('Complete challenges to earn massive rewards and boost your immersion!')
+            .setDescription(`Complete challenges to earn massive rewards and boost your immersion!\n\n${fomoMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
         

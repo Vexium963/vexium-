@@ -133,9 +133,10 @@ module.exports = {
         if (!userData.pets) userData.pets = [];
         
         if (userData.pets.length >= 5) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Pet Limit Reached`)
-                .setDescription('You can only have 5 pets at a time.\n\nConsider releasing a pet to make room for a new one.')
+                .setDescription(`You can only have 5 pets at a time.\n\nConsider releasing a pet to make room for a new one.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -144,9 +145,10 @@ module.exports = {
         const adoptionCost = 500;
         
         if (userData.vexBalance < adoptionCost) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Pet adoption costs $${adoptionCost.toFixed(2)} VEX.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Pet adoption costs $${adoptionCost.toFixed(2)} VEX.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -154,9 +156,10 @@ module.exports = {
         
         const result = await user.removeVEX(adoptionCost, 'pet_adoption');
         if (!result.success) {
+            const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Adoption Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${nearMiss}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -200,9 +203,13 @@ module.exports = {
             rabbit: '🐰'
         };
         
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 50 + 25).toFixed(0)) : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+        const milestoneMessage = userData.stats.petsAdopted >= 3 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Pet Adopted Successfully!`)
-            .setDescription(`Welcome your new companion **${pet.name}**!`)
+            .setDescription(`Welcome your new companion **${pet.name}**!${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProof}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}`)
             .addFields(
                 { name: '🏷️ Name', value: pet.name, inline: true },
                 { name: '🐾 Type', value: `${petEmojis[petType]} ${petType.charAt(0).toUpperCase() + petType.slice(1)}`, inline: true },

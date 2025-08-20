@@ -164,9 +164,13 @@ module.exports = {
             description = '👑 **Welcome back, trading legend!** Exclusive deals await!';
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', marketActivity);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n📊 **${marketActivity} players active** | 🔥 **${hotDeals.length} hot deals**`)
+            .setDescription(description + `\n\n${socialProofMessage}\n🔥 **${hotDeals.length} hot deals**${variableReward ? `\n${variableReward}` : ''}\n\n${fomoMessage}`)
             .setColor(flashSale ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.MARKETPLACE)
             .setFooter({ text: `💡 Pro tip: ${isActiveTrader ? 'You get priority on rare items!' : 'Buy low, sell high!'}` })
             .setTimestamp();
@@ -311,9 +315,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = (userData.stats.itemsListed || 0) >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Item Listed Successfully!`)
-            .setDescription(`**${itemName}** is now available in the marketplace!`)
+            .setDescription(`**${itemName}** is now available in the marketplace!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '📦 Item', value: itemName, inline: true },
                 { name: '💰 Price', value: `$${price.toFixed(2)} VEX`, inline: true },
@@ -419,9 +426,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = (userData.stats.itemsPurchased || 0) >= 5 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 5 + 2).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Purchase Successful!`)
-            .setDescription(`You've successfully purchased **${listing.itemName}**!`)
+            .setDescription(`You've successfully purchased **${listing.itemName}**!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '📦 Item', value: listing.itemName, inline: true },
                 { name: '🔢 Quantity', value: `${listing.quantity}`, inline: true },

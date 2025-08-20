@@ -107,9 +107,10 @@ module.exports = {
         const targetUser = interaction.options.getUser('user');
         
         if (targetUser.id === interaction.user.id) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Add Yourself`)
-                .setDescription('You cannot add yourself as a friend.')
+                .setDescription(`You cannot add yourself as a friend.\n\n${fomoMessage}\n💡 **Pro Tip:** Add other players to unlock exclusive social bonuses!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -179,9 +180,12 @@ module.exports = {
         
         const randomTip = socialTips[Math.floor(Math.random() * socialTips.length)];
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${randomTip}`)
+            .setDescription(description + `\n\n${randomTip}\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '👤 Target', value: `${targetUser.username} ${Math.random() > 0.5 ? '📈 Rising Star' : '⭐ Active Player'}`, inline: true },
                 { name: '📤 Status', value: 'Request Sent ✨', inline: true },
@@ -250,9 +254,12 @@ module.exports = {
             const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
             const activeUsers = Math.floor(Math.random() * 30) + 15;
             
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.HEART} Your Social Empire Awaits!`)
-                .setDescription(`${randomMotivation}\n\n📊 **${activeUsers} players are networking RIGHT NOW!**\n🎯 **Start with /friends add** to join the social elite!`)
+                .setDescription(`${randomMotivation}\n\n📊 **${activeUsers} players are networking RIGHT NOW!**\n🎯 **Start with /friends add** to join the social elite!\n\n${fomoMessage}\n${milestoneMessage}`)
                 .addFields(
                     { name: '🎁 Friend Benefits', value: '💰 **Daily bonuses**\n🎮 **Exclusive events**\n📈 **Popularity boosts**\n🏆 **Social achievements**', inline: true },
                     { name: '⚡ Quick Start', value: '1️⃣ Add 5 friends = **Networker** status\n2️⃣ Add 10 friends = **Social Butterfly**\n3️⃣ Add 25 friends = **Social Legend**', inline: true },
@@ -413,9 +420,12 @@ module.exports = {
         await user.save(userData);
         await requesterData.save(requesterUserData);
         
+        const milestoneMessage = userData.friends.list.length >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Friend Request Accepted!`)
-            .setDescription(`You're now friends with **${requesterUser.username}**!`)
+            .setDescription(`You're now friends with **${requesterUser.username}**!\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields(
                 { name: '👤 New Friend', value: requesterUser.username, inline: true },
                 { name: '👥 Total Friends', value: `${userData.friends.list.length}`, inline: true }

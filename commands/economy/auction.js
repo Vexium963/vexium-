@@ -96,9 +96,12 @@ module.exports = {
         const userParticipation = auctions.filter(a => a.bids.some(b => b.bidderId === interaction.user.id));
         
         if (auctions.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.AUCTION} 🔥 AUCTION HOUSE - EMPTY!`)
-                .setDescription('💎 **GOLDEN OPPORTUNITY!** No active auctions right now!\n🚀 **BE THE FIRST** to create one and dominate the market!')
+                .setDescription(`💎 **GOLDEN OPPORTUNITY!** No active auctions right now!\n🚀 **BE THE FIRST** to create one and dominate the market!\n\n${fomoMessage}\n${socialProof}`)
                 .addFields({
                     name: '💡 Pro Tip',
                     value: '🎯 **First movers get the most attention!** Create an auction now and watch the bidding wars begin!',
@@ -123,6 +126,14 @@ module.exports = {
         
         if (userParticipation.length > 0) {
             description += `\n🎯 **You're actively bidding on ${userParticipation.length} auction${userParticipation.length > 1 ? 's' : ''}!**`;
+        }
+        
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
+        description += `\n\n${socialProof}`;
+        if (variableReward) {
+            description += `\n${variableReward}`;
         }
         
         const embed = new EmbedBuilder()

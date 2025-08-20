@@ -208,13 +208,38 @@ module.exports = {
             giftDescription += `📦 ${itemQuantity}x ${itemId}`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableReward = surpriseBonus > 0 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', surpriseBonus.toFixed(2)) : null;
+        
+        let title = `${constants.EMOJIS.GIFT} Gift Sent!`;
+        let description = `Your gift has been sent to ${targetUser.username}!`;
+        
+        if (isGiftMaster) {
+            title = `👑 GIFT MASTER! Legendary Generosity!`;
+            description = `🎉 **GIFT MASTER STATUS!** You've sent ${totalGifts} gifts and spread LEGENDARY generosity!\n💎 Your gift to ${targetUser.username} shows true VexiumVerse spirit!`;
+        } else if (isGenerous) {
+            title = `🌟 GENEROUS SOUL! Gift Champion!`;
+            description = `⭐ **GENEROUS CHAMPION!** ${totalGifts} gifts sent - you're building an amazing community!\n🎁 Your gift to ${targetUser.username} makes VexiumVerse better!`;
+        }
+        
+        if (surpriseBonus > 0) {
+            description += `\n${variableReward}`;
+        }
+        
+        description += `\n\n${socialProofMessage}`;
+        
+        if (Math.random() < 0.3) {
+            description += `\n${fomoMessage}`;
+        }
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.GIFT} Gift Sent!`)
-            .setDescription(`Your gift has been sent to ${targetUser.username}!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🎁 Gift Contents', value: giftDescription, inline: false }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isGiftMaster ? constants.COLORS.VEX : isGenerous ? constants.COLORS.GOLD : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         if (giftTax > 0) {
@@ -318,9 +343,12 @@ module.exports = {
         await user.save(userData);
         await targetUserData.save(targetData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.GIFT} Random Gift Sent!`)
-            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!`)
+            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '🎯 Impact', value: 'Your kindness helps build the VexiumVerse community!', inline: false }
             )

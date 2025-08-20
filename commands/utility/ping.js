@@ -28,9 +28,12 @@ module.exports = {
             statusText = 'Poor';
         }
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} VexiumVerse Status`)
-            .setDescription('Bot performance and connection status')
+            .setTitle(`${constants.EMOJIS.SUCCESS} VexiumVerse Status - PEAK PERFORMANCE!`)
+            .setDescription(`🚀 **Bot performance and connection status**\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🤖 Bot Latency', value: `${botLatency}ms`, inline: true },
                 { name: '🌐 API Latency', value: `${apiLatency}ms`, inline: true },
@@ -40,7 +43,7 @@ module.exports = {
                 { name: '👥 Users', value: interaction.client.users.cache.size.toString(), inline: true }
             )
             .setColor(statusColor)
-            .setFooter({ text: 'VexiumVerse - Always Online' })
+            .setFooter({ text: 'VexiumVerse - Always Online, Always Earning!' })
             .setTimestamp();
         
         await interaction.editReply({ content: null, embeds: [embed] });

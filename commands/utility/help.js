@@ -99,6 +99,16 @@ module.exports = {
         const urgencyMessage = Math.random() < 0.3 ? '\n⚠️ **LIMITED TIME:** Some features have daily limits - act fast!' : '';
         description += urgencyMessage;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
+        description += `\n${fomoMessage}`;
+        description += `\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
@@ -400,15 +410,24 @@ module.exports = {
         if (!data) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Category Not Found`)
-                .setDescription('Invalid help category.')
+                .setDescription('Invalid help category.\n\n' + constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)])
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 15);
+        const milestoneMessage = Math.random() < 0.2 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        let enhancedDescription = data.description;
+        enhancedDescription += `\n\n${socialProofMessage}`;
+        if (milestoneMessage) {
+            enhancedDescription += `\n${milestoneMessage}`;
+        }
+        
         const embed = new EmbedBuilder()
             .setTitle(data.title)
-            .setDescription(data.description)
+            .setDescription(enhancedDescription)
             .addFields(data.fields)
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Need more help? Join our support server!' })

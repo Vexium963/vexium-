@@ -96,9 +96,18 @@ module.exports = {
         const progressBar = '█'.repeat(Math.floor(collectionProgress / 5)) + '░'.repeat(20 - Math.floor(collectionProgress / 5));
         const flashSale = Math.random() < 0.3;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeCustomizers);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
+        const milestoneMessage = isCollector ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + (flashSale ? '\n\n🔥 **FLASH SALE ACTIVE!** Limited time discounts!' : ''))
+            .setDescription(description + 
+                (flashSale ? `\n\n🔥 **FLASH SALE ACTIVE!** Limited time discounts!` : '') +
+                (variableReward ? `\n${variableReward}` : '') +
+                (milestoneMessage ? `\n${milestoneMessage}` : '') +
+                `\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields({
                 name: '📊 Collection Progress',
                 value: `${progressBar} **${collectionProgress.toFixed(1)}%**\n🎨 **${ownedFrames}**/${totalFrames} frames owned`,
@@ -136,9 +145,12 @@ module.exports = {
         const frameId = interaction.options.getString('frame');
         
         if (frameId !== 'none' && !userData.inventory[`avatar_frame_${frameId}`]) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Frame Not Owned`)
-                .setDescription(`You don't own the **${frameId}** avatar frame. Purchase it from the shop first!`)
+                .setDescription(`You don't own the **${frameId}** avatar frame. Purchase it from the shop first!\n\n${fomoMessage}\n${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -167,9 +179,13 @@ module.exports = {
             ice: '❄️'
         };
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 20) + 10);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Avatar Frame Updated!`)
-            .setDescription(`You've equipped the **${frameNames[frameId]}**!`)
+            .setDescription(`You've equipped the **${frameNames[frameId]}**!\n\n${milestoneMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields({
                 name: `${frameEmojis[frameId]} Current Frame`,
                 value: frameNames[frameId],

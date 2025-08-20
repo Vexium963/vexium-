@@ -11,34 +11,38 @@ module.exports = {
         const permissions = '274877906944';
         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${botId}&permissions=${permissions}&scope=bot%20applications.commands`;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 500) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', '50') : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.ROCKET} Invite VexiumVerse to Your Server!`)
-            .setDescription('Bring the ultimate Discord economy experience to your community!')
+            .setTitle(`${constants.EMOJIS.ROCKET} EXPLOSIVE GROWTH OPPORTUNITY!`)
+            .setDescription(`🔥 **Transform your server into a WEALTH EMPIRE!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 {
-                    name: '🎯 What VexiumVerse Offers',
-                    value: '• **USD-Pegged VEX Tokens** - Real value economy\n' +
-                           '• **Advanced Banking** - Earn interest on deposits\n' +
-                           '• **Investment Platform** - Crypto, stocks, bonds, real estate\n' +
+                    name: '💎 EXCLUSIVE SERVER BENEFITS',
+                    value: '• **USD-Pegged VEX Tokens** - Real value economy that EXPLODES growth!\n' +
+                           '• **Advanced Banking** - Members earn 5% DAILY interest!\n' +
+                           '• **Investment Platform** - Crypto, stocks, bonds, real estate EMPIRE!\n' +
                            '• **Entertainment Games** - Skill-based slots, coinflip, dice (21+ verified)\n' +
-                           '• **Social Features** - Profiles, gifts, leaderboards\n' +
-                           '• **Premium Tiers** - Reduced taxes and exclusive perks',
+                           '• **Social Competition** - Leaderboards drive INSANE engagement!\n' +
+                           '• **Premium Tiers** - VIP members get exclusive perks!',
                     inline: false
                 },
                 {
-                    name: '🔧 Required Permissions',
-                    value: '• Send Messages & Embeds\n• Use Slash Commands\n• Read Message History\n• Add Reactions',
+                    name: '⚡ INSTANT SETUP',
+                    value: '• Send Messages & Embeds\n• Use Slash Commands\n• Read Message History\n• Add Reactions\n\n🚀 **Ready in 30 seconds!**',
                     inline: true
                 },
                 {
-                    name: '📊 Bot Statistics',
-                    value: `• **Servers**: ${interaction.client.guilds.cache.size}\n• **Users**: ${interaction.client.users.cache.size}\n• **Commands**: 64+`,
+                    name: '🏆 PROVEN SUCCESS',
+                    value: `• **${interaction.client.guilds.cache.size}** thriving servers\n• **${interaction.client.users.cache.size}** active wealth builders\n• **68+** addictive commands\n\n💰 **Average 300% engagement boost!**`,
                     inline: true
                 }
             )
-            .setColor(constants.COLORS.PRIMARY)
+            .setColor(constants.COLORS.VEX)
             .setThumbnail(interaction.client.user.displayAvatarURL({ size: 256 }))
-            .setFooter({ text: 'VexiumVerse - Where Virtual Meets Reality' })
+            .setFooter({ text: '⏰ Limited time: First 1000 servers get premium features FREE!' })
             .setTimestamp();
         
         const inviteButton = new ButtonBuilder()

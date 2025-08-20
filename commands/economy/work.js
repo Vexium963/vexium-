@@ -44,9 +44,12 @@ module.exports = {
             const timeLeft = workCooldown - timeSinceLastWork;
             const minutesLeft = Math.floor(timeLeft / (60 * 1000));
             
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Work Cooldown Active`)
-                .setDescription(`You need to rest for **${minutesLeft} minutes** before working again.`)
+                .setDescription(`You need to rest for **${minutesLeft} minutes** before working again.\n\n${fomoMessage}\n${socialProofMessage}`)
                 .addFields(
                     { name: '💡 Tip', value: 'Use an Energy Drink from `/shop` to skip cooldown!', inline: false }
                 )
@@ -67,9 +70,11 @@ module.exports = {
             const selectedJob = availableJobs.find(job => job.id === jobChoice);
             
             if (!selectedJob) {
+                const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+                
                 const embed = new EmbedBuilder()
                     .setTitle(`${constants.EMOJIS.ERROR} Job Not Available`)
-                    .setDescription(`You don't have access to the **${jobChoice}** job yet.`)
+                    .setDescription(`You don't have access to the **${jobChoice}** job yet.\n\n🎯 **Level up to unlock more opportunities!**\n${milestoneMessage}`)
                     .addFields(
                         { name: '📊 Your Level', value: userData.level.toString(), inline: true },
                         { name: '🔓 Required Level', value: 'Check available jobs below', inline: true }
@@ -252,9 +257,11 @@ module.exports = {
         const availableJobs = Economics.getAvailableJobs(userData.level);
         
         if (availableJobs.length === 0) {
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} No Jobs Available`)
-                .setDescription('You need to reach level 1 to unlock jobs.')
+                .setDescription(`You need to reach level 1 to unlock jobs.\n\n${comebackMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

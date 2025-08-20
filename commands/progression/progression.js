@@ -25,9 +25,14 @@ module.exports = {
         const streakBonus = this.calculateStreakBonus(userData.dailyStreak);
         const levelUpRewards = this.getLevelUpRewards(currentLevel + 1);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(0)) : null;
+        const milestoneMessage = progressPercentage >= 90 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LEVEL_UP} ${interaction.user.username}'s Epic Journey`)
-            .setDescription(`🌟 **You're ${progressPercentage.toFixed(1)}% to your next breakthrough!**\n${this.getMotivationalMessage(progressPercentage)}`)
+            .setDescription(`🌟 **You're ${progressPercentage.toFixed(1)}% to your next breakthrough!**\n${this.getMotivationalMessage(progressPercentage)}\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${fomoMessage}`)
             .addFields(
                 { name: '🎯 Current Level', value: `**${currentLevel}** ${this.getLevelEmoji(currentLevel)}`, inline: true },
                 { name: '⭐ Current XP', value: `**${currentXP.toLocaleString()}** XP`, inline: true },

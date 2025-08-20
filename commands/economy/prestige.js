@@ -106,6 +106,20 @@ module.exports = {
         const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
         description += `\n\n${randomMotivation}`;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 100 + 50).toFixed(0)) : null;
+        
+        if (prestigeData.canPrestige && Math.random() < 0.3) {
+            description += `\n\n${fomoMessage}`;
+        }
+        if (Math.random() < 0.4) {
+            description += `\n${socialProofMessage}`;
+        }
+        if (variableReward && prestigeData.canPrestige) {
+            description += `\n${variableReward}`;
+        }
+
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
@@ -157,9 +171,10 @@ module.exports = {
         const prestigeData = this.calculatePrestigeRewards(userData);
         
         if (!prestigeData.canPrestige) {
+            const motivationalMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Prestige`)
-                .setDescription(`You need to be level ${constants.PRESTIGE.MIN_LEVEL} to prestige.`)
+                .setDescription(`You need to be level ${constants.PRESTIGE.MIN_LEVEL} to prestige.\n\n${motivationalMessage}\n\nKeep grinding to reach prestige eligibility!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -184,9 +199,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialCelebration = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CROWN} Prestige Complete!`)
-            .setDescription(`🎉 Congratulations! You've prestiged to level ${userData.prestige}!`)
+            .setDescription(`🎉 Congratulations! You've prestiged to level ${userData.prestige}!\n\n${milestoneMessage}\n\n${socialCelebration}`)
             .addFields(
                 { name: '💰 VEX Bonus Received', value: `$${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
                 { name: '⭐ New Prestige Level', value: `${userData.prestige}`, inline: true },

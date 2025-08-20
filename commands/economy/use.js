@@ -43,9 +43,10 @@ module.exports = {
         const quantity = interaction.options.getInteger('quantity') || 1;
         
         if (!userData.inventory[itemId] || userData.inventory[itemId] < quantity) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Available`)
-                .setDescription(`You don't have ${quantity}x **${itemId}** in your inventory.`)
+                .setDescription(`You don't have ${quantity}x **${itemId}** in your inventory.\n\n${fomoMessage}\n🛍️ **Visit /shop to get more items!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -53,9 +54,10 @@ module.exports = {
         
         const item = this.findItem(itemId);
         if (!item) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Unknown Item`)
-                .setDescription(`The item **${itemId}** is not recognized.`)
+                .setDescription(`The item **${itemId}** is not recognized.\n\n${socialProof}\n🔍 **Check /shop for available items!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -63,9 +65,10 @@ module.exports = {
         
         const result = await user.removeItem(itemId, quantity);
         if (!result.success) {
+            const variableReward = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', '5.00');
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Use Item`)
-                .setDescription('Failed to use the item.')
+                .setDescription(`Failed to use the item.\n\n💡 **Try again soon!** ${variableReward}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -105,6 +108,18 @@ module.exports = {
         if (socialProof) {
             const activeUsers = Math.floor(Math.random() * 25) + 10;
             description += `\n📊 **${activeUsers} players are optimizing with items right now!**`;
+        }
+        
+        const milestoneCheck = itemsUsed > 0 && itemsUsed % 25 === 0;
+        if (milestoneCheck) {
+            const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+            description += `\n\n${milestoneMessage}`;
+        }
+        
+        const variableBonus = Math.random() < 0.2;
+        if (variableBonus) {
+            const bonusMessage = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2));
+            description += `\n${bonusMessage}`;
         }
         
         const embed = new EmbedBuilder()

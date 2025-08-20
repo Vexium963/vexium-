@@ -12,9 +12,13 @@ module.exports = {
         const userData = await user.load();
         
         if (userData.stats.commandsUsed > 0) {
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
+            const milestoneBonus = userData.networth >= 100 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+            
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.VEX} Welcome Back to VexiumVerse!`)
-                .setDescription(`You already have an account with **$${userData.vexBalance.toFixed(2)} VEX**`)
+                .setTitle(`${constants.EMOJIS.VEX} ${comebackMessage.split('!')[0]}!`)
+                .setDescription(`${comebackMessage}\n\n💎 **Your Empire Status:** $${userData.vexBalance.toFixed(2)} VEX${milestoneBonus ? `\n\n${milestoneBonus}` : ''}\n\n${socialProof}`)
                 .addFields(
                     { name: '💰 VEX Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
                     { name: '🏦 Bank Balance', value: `$${userData.bankBalance.toFixed(2)}`, inline: true },
@@ -36,15 +40,20 @@ module.exports = {
         const welcomeBonus = Math.random() < 0.3 ? Math.floor(constants.VEX_TOKEN.STARTING_BALANCE * 0.5) : 0;
         const totalStarting = constants.VEX_TOKEN.STARTING_BALANCE + welcomeBonus;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 150) + 50);
+        const variableReward = Math.random() < 0.25 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 5 + 1).toFixed(2)) : null;
+        
         const welcomeEmbed = new EmbedBuilder()
             .setTitle(`🎉 WELCOME TO YOUR EMPIRE!`)
-            .setDescription(`👑 **${interaction.user.username}, you're about to become LEGENDARY!**\n\n💎 **Starting Fortune:** $${totalStarting.toFixed(2)} VEX${welcomeBonus > 0 ? `\n✨ **LUCKY BONUS:** +$${welcomeBonus} VEX!` : ''}\n\n🚀 **Your journey to wealth and power starts NOW!**\n\n` +
+            .setDescription(`👑 **${interaction.user.username}, you're about to become LEGENDARY!**\n\n💎 **Starting Fortune:** $${totalStarting.toFixed(2)} VEX${welcomeBonus > 0 ? `\n✨ **LUCKY BONUS:** +$${welcomeBonus} VEX!` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n🚀 **Your journey to wealth and power starts NOW!**\n\n` +
                 `${constants.EMOJIS.VEX} **VEX Token**: 1 VEX = $1 USD (REAL VALUE!)\n` +
                 `${constants.EMOJIS.MONEY} **Unlimited Earning**: Work, invest, dominate skill-based games\n` +
                 `${constants.EMOJIS.BANK} **Compound Interest**: 5% daily on savings!\n` +
                 `${constants.EMOJIS.CHART} **Investment Empire**: Crypto, stocks, real estate\n` +
                 `${constants.EMOJIS.TROPHY} **Achievement Rewards**: Hidden bonuses worth 1000s!\n` +
-                `${constants.EMOJIS.PREMIUM} **VIP Status**: Reduce taxes, unlock exclusive features`)
+                `${constants.EMOJIS.PREMIUM} **VIP Status**: Reduce taxes, unlock exclusive features\n\n` +
+                `${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { 
                     name: '🎯 YOUR FIRST MISSIONS (Complete for MASSIVE rewards!)', 

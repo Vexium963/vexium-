@@ -105,18 +105,20 @@ module.exports = {
         const bond = bondTypes[bondType];
         
         if (amount < bond.minAmount) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.`)
+                .setDescription(`${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (userData.vexBalance < amount) {
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Investment amount: $${amount.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Investment amount: $${amount.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -124,9 +126,10 @@ module.exports = {
         
         const result = await user.removeVEX(amount, 'bond_purchase');
         if (!result.success) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -187,6 +190,12 @@ module.exports = {
             const activeBondInvestors = Math.floor(Math.random() * 25) + 15;
             description += `\n📈 **${activeBondInvestors} investors** bought bonds in the last hour!`;
         }
+        
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = isBondExpert ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        if (variableReward) description += `\n${variableReward}`;
+        if (milestoneMessage) description += `\n${milestoneMessage}`;
         
         const embed = new EmbedBuilder()
             .setTitle(title)

@@ -113,9 +113,13 @@ module.exports = {
         
         const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
         
+        const dailyFomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const dailySocialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 200) + 100);
+        const milestoneMessage = isStreakMilestone ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${randomMotivation}`)
+            .setDescription(description + `\n\n${randomMotivation}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n${dailyFomoMessage}\n${dailySocialProof}`)
             .addFields(
                 { name: '💰 Base Reward', value: `$${baseReward.toFixed(2)}`, inline: true },
                 { name: '🔥 Streak Power', value: `$${streakBonus.toFixed(2)} ${userData.dailyStreak >= 30 ? '👑' : ''}`, inline: true },

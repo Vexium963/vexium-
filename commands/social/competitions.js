@@ -101,9 +101,15 @@ module.exports = {
             description = `🏆 **Welcome back, competitor!** ${hasWins ? 'Defend your legacy!' : 'Time to claim your first victory!'}\n🔥 **${totalParticipants} rivals await your challenge!**`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
+        const enhancedDescription = description + `\n\n${fomoMessage}\n${socialProofMessage}` + (variableReward ? `\n${variableReward}` : '');
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(enhancedDescription)
             .setColor(urgencyCount > 0 ? constants.COLORS.ERROR : isCompetitive ? constants.COLORS.VEX : constants.COLORS.GOLD);
         
         if (activeCompetitions.length === 0) {
@@ -221,9 +227,13 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const competitorCount = Math.floor(Math.random() * 30) + 15;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', competitorCount);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Registration Successful!`)
-            .setDescription(`Successfully registered for **${competition.name}**!`)
+            .setDescription(`Successfully registered for **${competition.name}**!\n\n${milestoneMessage}\n${socialProof}`)
             .addFields(
                 { name: '🏆 Competition', value: competition.name, inline: true },
                 { name: '💰 Entry Fee', value: `$${competition.entryFee.toFixed(2)} VEX`, inline: true },
@@ -286,9 +296,13 @@ module.exports = {
     async handleLeaderboard(interaction) {
         const leaderboard = this.getCompetitionLeaderboard();
         
+        const activeCompetitors = Math.floor(Math.random() * 100) + 50;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeCompetitors);
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Competition Leaderboard`)
-            .setDescription('Top competitive players across all tournaments')
+            .setDescription(`Top competitive players across all tournaments\n\n${socialProofMessage}\n${fomoMessage}`)
             .setColor(constants.COLORS.GOLD);
         
         if (leaderboard.length === 0) {

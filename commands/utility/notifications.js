@@ -75,9 +75,13 @@ module.exports = {
             description = `💎 **Expert Status Detected!** You've optimized notifications ${notificationUsage} times!\n🏆 **You know the secrets of staying ahead!**`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeUsers);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', '2.5') : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(description + (variableReward ? `\n${variableReward}` : '') + `\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '🔔 Daily Rewards', value: settings.dailyRewards ? '✅ Enabled' : '❌ Disabled', inline: true },
                 { name: '💰 Economy Updates', value: settings.economyUpdates ? '✅ Enabled' : '❌ Disabled', inline: true },
@@ -86,7 +90,7 @@ module.exports = {
                 { name: '🏆 Achievements', value: settings.achievements ? '✅ Enabled' : '❌ Disabled', inline: true },
                 { name: '📊 Leaderboard', value: settings.leaderboard ? '✅ Enabled' : '❌ Disabled', inline: true }
             )
-            .setColor(constants.COLORS.PRIMARY)
+            .setColor(isNotificationExpert ? constants.COLORS.VEX : constants.COLORS.PRIMARY)
             .setTimestamp();
         
         const buttons = [
@@ -138,9 +142,12 @@ module.exports = {
         const isActiveUser = notificationCount >= 50;
         
         if (recentNotifications.length === 0) {
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} Your Intelligence Network is Quiet`)
-                .setDescription('🌟 **No recent notifications - you\'re all caught up!**\n💡 **Pro Tip:** Active players get more opportunities and alerts!')
+                .setDescription(`🌟 **No recent notifications - you\'re all caught up!**\n💡 **Pro Tip:** Active players get more opportunities and alerts!\n\n${comebackMessage}\n${socialProofMessage}`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });

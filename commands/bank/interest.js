@@ -104,9 +104,20 @@ module.exports = {
             description = `📊 **EXPERT ANALYSIS!** $${amount.toFixed(2)} VEX over **${days} days**\n⭐ **You're a calculation master!**`;
         }
         
+        const fomoMessage = urgencyFactor ? constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', socialProof);
+        const variableReward = surpriseBonus > 0 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', surpriseBonus.toFixed(2)) : null;
+        const milestoneMessage = isAnalyst ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        let psychologyText = `\n\n🎯 **"Compound interest is the 8th wonder of the world!"**`;
+        if (fomoMessage) psychologyText += `\n${fomoMessage}`;
+        if (socialProofMessage) psychologyText += `\n${socialProofMessage}`;
+        if (variableReward) psychologyText += `\n${variableReward}`;
+        if (milestoneMessage) psychologyText += `\n${milestoneMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n🎯 **"Compound interest is the 8th wonder of the world!"**`)
+            .setDescription(description + psychologyText)
             .setColor(isWhale ? constants.COLORS.VEX : constants.COLORS.PRIMARY);
         
         for (const calc of calculations) {

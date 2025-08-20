@@ -90,45 +90,50 @@ module.exports = {
         const itemQuantity = interaction.options.getInteger('item_quantity') || 1;
         
         if (targetUser.id === interaction.user.id) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Trade`)
-                .setDescription('You cannot trade with yourself!')
+                .setDescription(`You cannot trade with yourself!\n\n${fomoMessage}\n💡 **Pro Tip:** Find other players in the leaderboard to trade with!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (targetUser.bot) {
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Trade`)
-                .setDescription('You cannot trade with bots!')
+                .setDescription(`You cannot trade with bots!\n\n${socialProofMessage}\n🤝 **Find real players** to build your trading empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (vexAmount === 0 && !itemId) {
+            const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Empty Trade`)
-                .setDescription('You must offer either VEX tokens or an item!')
+                .setDescription(`You must offer either VEX tokens or an item!\n\n💰 **Trading builds wealth!** Offer something valuable to create win-win deals!\n\n${milestoneMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (vexAmount > 0 && vexAmount > userData.vexBalance) {
+            const variableReward = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2));
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`You only have $${userData.vexBalance.toFixed(2)} VEX.`)
+                .setDescription(`You only have $${userData.vexBalance.toFixed(2)} VEX.\n\n💡 **Earn more VEX:** Use /work, /daily, or /invest to build your trading power!\n\n${variableReward}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (itemId && (!userData.inventory[itemId] || userData.inventory[itemId] < itemQuantity)) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Items`)
-                .setDescription(`You don't have ${itemQuantity}x **${itemId}**.`)
+                .setDescription(`You don't have ${itemQuantity}x **${itemId}**.\n\n🛍️ **Get items:** Visit /shop to buy what you need for trading!\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

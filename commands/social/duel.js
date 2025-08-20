@@ -182,9 +182,13 @@ module.exports = {
             dice: 'Dice Roll'
         };
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 10);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 1).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SWORD} Duel Challenge Sent!`)
-            .setDescription(`You've challenged **${opponent.username}** to a duel!`)
+            .setTitle(`${constants.EMOJIS.SWORD} DUEL CHALLENGE SENT!`)
+            .setDescription(`🔥 **You've challenged ${opponent.username} to EPIC COMBAT!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
                 { name: '💰 Prize Pool', value: `$${prizeAmount.toFixed(2)} VEX`, inline: true },
@@ -193,7 +197,7 @@ module.exports = {
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(opponent.displayAvatarURL())
-            .setFooter({ text: 'Your opponent has 5 minutes to respond.' })
+            .setFooter({ text: '⚡ Your opponent has 5 minutes to respond - GLORY AWAITS!' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

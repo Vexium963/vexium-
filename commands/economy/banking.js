@@ -128,9 +128,10 @@ module.exports = {
     
     async handleLoanApplication(interaction, userData, user, amount) {
         if (!amount) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Required`)
-                .setDescription('Please specify the loan amount you want to apply for.')
+                .setDescription(`Please specify the loan amount you want to apply for.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -140,9 +141,10 @@ module.exports = {
         const maxLoanAmount = this.getMaxLoanAmount(creditScore, userData);
         
         if (amount > maxLoanAmount) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Loan Amount Too High`)
-                .setDescription(`Based on your credit score (${creditScore}), your maximum loan amount is $${maxLoanAmount.toFixed(2)} VEX.`)
+                .setDescription(`Based on your credit score (${creditScore}), your maximum loan amount is $${maxLoanAmount.toFixed(2)} VEX.\n\n${socialProof}`)
                 .addFields(
                     { name: '💡 Improve Your Credit', value: '• Make timely payments\n• Maintain low debt-to-income ratio\n• Build transaction history\n• Complete achievements', inline: false }
                 )
@@ -155,9 +157,10 @@ module.exports = {
         
         const activeLoans = userData.loans.filter(loan => loan.status === 'active');
         if (activeLoans.length >= 3) {
+            const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Maximum Loans Reached`)
-                .setDescription('You can have a maximum of 3 active loans at once.\n\nPay off existing loans to apply for new ones.')
+                .setDescription(`You can have a maximum of 3 active loans at once.\n\nPay off existing loans to apply for new ones.\n\n${nearMiss}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -192,9 +195,13 @@ module.exports = {
         
         await user.save(userData);
         
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = userData.stats.loansApplied >= 5 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Loan Approved!`)
-            .setDescription(`Your loan application has been approved and funds have been disbursed!`)
+            .setDescription(`Your loan application has been approved and funds have been disbursed!${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🆔 Loan ID', value: loanId, inline: true },
                 { name: '💰 Loan Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },

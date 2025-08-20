@@ -149,9 +149,10 @@ module.exports = {
         const guildDescription = interaction.options.getString('description') || 'A VexiumVerse guild';
         
         if (userData.guild) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already in Guild`)
-                .setDescription('You must leave your current guild before creating a new one.')
+                .setDescription(`You must leave your current guild before creating a new one.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,9 +160,10 @@ module.exports = {
         
         const creationCost = constants.GUILD.CREATION_COST;
         if (creationCost > userData.vexBalance) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Creating a guild costs $${creationCost.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`Creating a guild costs $${creationCost.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -210,9 +212,13 @@ module.exports = {
         await user.save(userData);
         this.saveGuild(guild);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 25 + 10).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Guild Created!`)
-            .setDescription(`Successfully created **${guildName}**!`)
+            .setDescription(`${milestoneMessage}\n\nSuccessfully created **${guildName}**!\n\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🆔 Guild ID', value: guildId, inline: true },
                 { name: '👑 Leader', value: interaction.user.username, inline: true },
@@ -283,9 +289,12 @@ module.exports = {
         await user.save(userData);
         this.saveGuild(guild);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 25);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Joined Guild!`)
-            .setDescription(`Welcome to **${guild.name}**!`)
+            .setDescription(`${milestoneMessage}\n\nWelcome to **${guild.name}**!\n\n${socialProof}`)
             .addFields(
                 { name: '🏰 Guild', value: guild.name, inline: true },
                 { name: '👥 Members', value: `${guild.members.length}/${constants.GUILD.MAX_MEMBERS}`, inline: true },
@@ -357,9 +366,12 @@ module.exports = {
     async handleList(interaction) {
         const guilds = this.getPublicGuilds();
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 60) + 30);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHIELD} Available Guilds`)
-            .setDescription('Browse and join public guilds!')
+            .setDescription(`Browse and join public guilds!\n\n${fomoMessage}\n${socialProof}`)
             .setColor(constants.COLORS.PRIMARY);
         
         if (guilds.length === 0) {

@@ -88,9 +88,13 @@ module.exports = {
     },
     
     async handleGlobal(interaction) {
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 300) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.LEADERBOARD} Global VexiumVerse Leaderboards`)
-            .setDescription('Compete across multiple categories and climb the rankings!')
+            .setTitle(`🏆 GLOBAL LEADERBOARDS - COMPETE FOR GLORY!`)
+            .setDescription(`💎 **COMPETE FOR LEGENDARY STATUS!** Climb the rankings and dominate VexiumVerse!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '💰 Wealth Leaders', value: 'Top players by net worth\nand VEX accumulation', inline: true },
                 { name: '🎮 Entertainment Masters', value: 'Skill-based game champions\nand win rate leaders', inline: true },
@@ -135,9 +139,12 @@ module.exports = {
     async handleWealth(interaction) {
         const topPlayers = await this.getTopPlayersByWealth();
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 150) + 75);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.WEALTH} Wealth Leaderboard`)
-            .setDescription('Top players by net worth and VEX accumulation')
+            .setTitle(`💰 WEALTH EMPIRE LEADERBOARD - THE ELITE!`)
+            .setDescription(`👑 **THESE ARE THE LEGENDS!** Top VEX accumulation masters!\n\n${milestoneMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Rankings based on total net worth (wallet + bank + investments)' })
             .setTimestamp();
@@ -188,9 +195,12 @@ module.exports = {
     async handleEntertainment(interaction) {
         const topPlayers = await this.getTopPlayersByEntertainment();
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 200) + 50);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.ENTERTAINMENT} Entertainment Leaderboard`)
-            .setDescription('Top performers in skill-based entertainment games')
+            .setTitle(`🎮 SKILL MASTERS LEADERBOARD - PURE TALENT!`)
+            .setDescription(`⚡ **SKILL-BASED ENTERTAINMENT LEGENDS!** These players dominate through pure talent!\n\n${fomoMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.ENTERTAINMENT)
             .addFields(
                 { name: '🎯 Ranking Criteria', value: '• Win rate percentage\n• Total games won\n• Skill progression\n• Consistency score', inline: true },
@@ -246,9 +256,12 @@ module.exports = {
     async handleSocial(interaction) {
         const topPlayers = await this.getTopPlayersBySocial();
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 180) + 60);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SOCIAL} Social Leaderboard`)
-            .setDescription('Most active social players and community contributors')
+            .setTitle(`👥 SOCIAL CHAMPIONS - COMMUNITY LEGENDS!`)
+            .setDescription(`🤝 **THESE PLAYERS BUILD THE COMMUNITY!** Most active traders and social contributors!\n\n${milestoneMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.SOCIAL)
             .addFields(
                 { name: '🤝 Social Activities', value: '• Successful trades\n• Gifts sent/received\n• Community participation\n• Guild contributions', inline: true },

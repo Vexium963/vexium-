@@ -124,6 +124,22 @@ module.exports = {
             description += `\n🔥 **QUEST STREAK: ${questStreak} days!** You're unstoppable!`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
+        if (hasUrgentQuests) {
+            description += `\n\n${fomoMessage}`;
+        }
+        
+        if (Math.random() < 0.3) {
+            description += `\n${socialProofMessage}`;
+        }
+        
+        if (variableReward && isQuestMaster) {
+            description += `\n${variableReward}`;
+        }
+
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
@@ -192,9 +208,10 @@ module.exports = {
         const quest = activeQuests.find(q => q.id === questId);
         
         if (!quest) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Quest Not Found`)
-                .setDescription(`No active quest found with ID: ${questId}\n\nUse \`/quests active\` to see your quests.`)
+                .setDescription(`No active quest found with ID: ${questId}\n\nUse \`/quests active\` to see your quests.\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -236,9 +253,28 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        const variableBonus = Math.random() < 0.2 ? Math.floor(quest.reward * 0.25) : 0;
+        
+        if (variableBonus > 0) {
+            await user.addVEX(variableBonus, 'quest_completion_bonus');
+        }
+        
+        let celebrationDescription = `**${quest.name}** has been completed successfully!\n\n${milestoneMessage}`;
+        
+        if (variableBonus > 0) {
+            const bonusMessage = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', variableBonus.toFixed(2));
+            celebrationDescription += `\n${bonusMessage}`;
+        }
+        
+        if (Math.random() < 0.4) {
+            celebrationDescription += `\n${socialProofMessage}`;
+        }
+
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Quest Completed!`)
-            .setDescription(`**${quest.name}** has been completed successfully!`)
+            .setDescription(celebrationDescription)
             .addFields(
                 { name: '🎯 Quest', value: quest.name, inline: true },
                 { name: '💰 VEX Reward', value: `$${quest.reward.toFixed(2)}`, inline: true },

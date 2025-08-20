@@ -135,9 +135,10 @@ module.exports = {
         const amount = interaction.options.getNumber('amount');
         
         if (amount > userData.vexBalance) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -196,9 +197,13 @@ module.exports = {
         
         await user.save(userData);
         
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = userData.stats.totalInvested >= 1000 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CHART} Investment Purchased!`)
-            .setDescription(`Successfully invested in **${assetData.name}**`)
+            .setDescription(`Successfully invested in **${assetData.name}**${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '💰 Amount Invested', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Asset', value: `${assetData.name} (${assetData.symbol})`, inline: true },

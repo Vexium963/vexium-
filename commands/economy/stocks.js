@@ -111,16 +111,20 @@ module.exports = {
     async handleMarket(interaction) {
         const stocks = this.getStockData();
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 300) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.STOCKS} VexiumVerse Stock Market`)
-            .setDescription('Trade virtual stocks and build your investment portfolio!')
+            .setTitle(`${constants.EMOJIS.STOCKS} 🔥 EXPLOSIVE STOCK MARKET!`)
+            .setDescription(`💎 **MILLIONAIRE MAKERS TRADING NOW!** Build your investment empire!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
-                { name: '📊 Market Status', value: '**Status**: Open\n**Stocks Available**: 12\n**Market Cap**: $2.5M VEX', inline: true },
-                { name: '📈 Market Performance', value: '**Daily Change**: +2.3%\n**Volume**: $125K VEX\n**Active Traders**: 1,247', inline: true },
-                { name: '💡 Trading Tips', value: '• Diversify your portfolio\n• Research before investing\n• Consider long-term growth\n• Monitor market trends', inline: true }
+                { name: '📊 Market Status', value: '**Status**: 🔥 **BLAZING HOT**\n**Stocks Available**: 12 **GOLDMINES**\n**Market Cap**: $2.5M VEX **GROWING**', inline: true },
+                { name: '📈 Market Performance', value: '**Daily Change**: +2.3% **BULLISH**\n**Volume**: $125K VEX **MASSIVE**\n**Active Traders**: 1,247 **LEGENDS**', inline: true },
+                { name: '💡 INSIDER SECRETS', value: '• **DIVERSIFY** = Guaranteed wealth\n• **RESEARCH** = Beat 90% of traders\n• **LONG-TERM** = Millionaire mindset\n• **TRENDS** = Fortune follows patterns', inline: true }
             )
             .setColor(constants.COLORS.STOCKS)
-            .setFooter({ text: 'Virtual stock market • Educational purposes only' })
+            .setFooter({ text: '🚀 Virtual stock market • Where legends are born!' })
             .setTimestamp();
         
         for (const stock of stocks.slice(0, 8)) {
@@ -168,9 +172,10 @@ module.exports = {
         const stock = stocks.find(s => s.symbol === symbol);
         
         if (!stock) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Stock Not Found`)
-                .setDescription(`No stock found with symbol: ${symbol}\n\nUse \`/stocks market\` to see available stocks.`)
+                .setTitle(`${constants.EMOJIS.ERROR} Stock Symbol Not Found`)
+                .setDescription(`**${symbol}** doesn't exist in our market!\n\n${nearMissMessage}\n\nUse \`/stocks market\` to discover **REAL GOLDMINES**!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -181,9 +186,10 @@ module.exports = {
         const totalWithFees = totalCost + transactionFee;
         
         if (userData.vexBalance < totalWithFees) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Total cost: $${totalWithFees.toFixed(2)} VEX (including 1% fee)\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setTitle(`${constants.EMOJIS.ERROR} 💔 SO CLOSE TO WEALTH!`)
+                .setDescription(`**You need:** $${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** $${userData.vexBalance.toFixed(2)} VEX\n\n${fomoMessage}\n\n💡 **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

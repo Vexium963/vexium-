@@ -64,9 +64,10 @@ module.exports = {
         
         const items = constants.SHOP_ITEMS[category.toUpperCase()];
         if (!items) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Category Not Found`)
-                .setDescription('Invalid shop category.')
+                .setDescription(`Invalid shop category.\n\n${fomoMessage}\n📊 **${Math.floor(Math.random() * 50) + 20} players** are browsing the shop right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -104,9 +105,10 @@ module.exports = {
         
         const item = this.findItem(itemId);
         if (!item) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Found`)
-                .setDescription(`The item **${itemId}** doesn't exist in the shop.`)
+                .setDescription(`The item **${itemId}** doesn't exist in the shop.\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -115,18 +117,20 @@ module.exports = {
         const totalCost = item.price * quantity;
         
         if (totalCost > userData.vexBalance) {
+            const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${nearMiss}\n💡 **Try /work or /daily to earn more VEX!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (item.supply && quantity > item.supply) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Supply`)
-                .setDescription(`Only ${item.supply} ${item.name}(s) available.`)
+                .setDescription(`Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n🔥 **${Math.floor(Math.random() * 15) + 5} players** are trying to buy this item!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -134,9 +138,10 @@ module.exports = {
         
         const result = await user.removeVEX(totalCost, 'shop_purchase', false);
         if (!result.success) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 10);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

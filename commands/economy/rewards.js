@@ -69,9 +69,12 @@ module.exports = {
         const availableRewards = this.getAvailableRewards(userData);
         
         if (availableRewards.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} No Rewards Available`)
-                .setDescription('You have no rewards available to claim at this time.')
+                .setDescription(`You have no rewards available to claim at this time.\n\n${fomoMessage}\n${socialProof}`)
                 .addFields({
                     name: '⏰ Next Reward',
                     value: 'Check back later for new rewards!',
@@ -92,15 +95,19 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = userData.stats.rewardsClaimed >= 25 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 20);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Rewards Claimed!`)
-            .setDescription(`🎉 You've claimed ${availableRewards.length} reward(s)!`)
+            .setTitle(`${constants.EMOJIS.SUCCESS} ${milestoneMessage ? '🏆 MILESTONE ACHIEVED!' : 'Rewards Claimed!'}`)
+            .setDescription(`🎉 You've claimed ${availableRewards.length} reward(s)!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '💰 Total Value', value: `$${totalValue.toFixed(2)} VEX`, inline: true },
                 { name: '🎁 Rewards Claimed', value: availableRewards.map(r => `• ${r.name}: $${r.value.toFixed(2)}`).join('\n'), inline: false },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(milestoneMessage ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

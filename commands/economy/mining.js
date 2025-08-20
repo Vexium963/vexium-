@@ -161,9 +161,13 @@ module.exports = {
         
         await user.save(userData);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 500) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(3)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.MINING} Mining Started!`)
-            .setDescription(`Your **${rig.name}** is now mining VEX tokens!`)
+            .setTitle(`${constants.EMOJIS.MINING} ⚡ MINING EMPIRE ACTIVATED!`)
+            .setDescription(`🚀 **Your ${rig.name} is now DOMINATING the blockchain!**\n\n${variableReward ? `${variableReward}\n` : ''}💎 **PASSIVE INCOME ACTIVATED** - Earn while you sleep!\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '⚡ Hash Rate', value: `${rig.hashRate.toFixed(2)} TH/s`, inline: true },
                 { name: '🔋 Energy Cost', value: `$${energyCost.toFixed(2)} VEX`, inline: true },
@@ -173,7 +177,7 @@ module.exports = {
                 { name: '🔥 Energy Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
-            .setFooter({ text: 'Use /mining status to check your progress!' })
+            .setFooter({ text: '💡 Pro Tip: Higher tier rigs = EXPONENTIAL rewards!' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });

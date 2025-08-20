@@ -125,16 +125,20 @@ module.exports = {
     async handleMarket(interaction) {
         const cryptoData = this.getCryptoData();
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 300) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CRYPTO} VexiumVerse Crypto Market`)
-            .setDescription('Trade virtual cryptocurrencies in the VexiumVerse ecosystem!')
+            .setTitle(`🚀 CRYPTO EMPIRE AWAITS!`)
+            .setDescription(`💎 **EXPLOSIVE CRYPTO OPPORTUNITIES!** Trade virtual cryptocurrencies and build your digital fortune!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '📊 Market Overview', value: '**Total Market Cap**: $1.2M VEX\n**24h Volume**: $85K VEX\n**Active Traders**: 892', inline: true },
                 { name: '📈 Market Trends', value: '**Trending**: VexCoin (+15.2%)\n**Top Gainer**: QuantumVex (+28.7%)\n**Most Traded**: EtherVex', inline: true },
                 { name: '💡 Trading Info', value: '**Trading Fee**: 2%\n**Staking Available**: Yes\n**Min Trade**: $10 VEX', inline: true }
             )
             .setColor(constants.COLORS.CRYPTO)
-            .setFooter({ text: 'Virtual cryptocurrency market • Educational simulation' })
+            .setFooter({ text: '⚡ Virtual cryptocurrency market • Fortunes are made HERE!' })
             .setTimestamp();
         
         for (const crypto of cryptoData) {

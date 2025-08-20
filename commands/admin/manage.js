@@ -99,9 +99,12 @@ module.exports = {
             const attemptCount = Math.floor(Math.random() * 15) + 5;
             const securityLevel = Math.random() < 0.3 ? 'HIGH ALERT' : 'MONITORED';
             
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 500) + 100);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} 🚫 ADMIN ACCESS REQUIRED`)
-                .setDescription(`⚠️ **RESTRICTED AREA!** Only VexiumVerse administrators can access these powerful commands.\n\n💡 **Tip:** Regular users can use \`/help\` to see available commands!\n\n🔥 **${attemptCount} unauthorized attempts** detected today!`)
+                .setDescription(`⚠️ **RESTRICTED AREA!** Only VexiumVerse administrators can access these powerful commands.\n\n💡 **Tip:** Regular users can use \`/help\` to see available commands!\n\n🔥 **${attemptCount} unauthorized attempts** detected today!\n\n${fomoMessage}\n${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR)
                 .addFields(
                     {
@@ -125,9 +128,12 @@ module.exports = {
         const systemLoad = Math.floor(Math.random() * 30) + 70;
         const activeAdmins = Math.floor(Math.random() * 5) + 1;
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 200) + 50);
+        
         const embed = new EmbedBuilder()
             .setTitle(`👑 ADMIN COMMAND CENTER`)
-            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.\n\n⚡ **System Status:** ${systemLoad}% optimal | 🛡️ **${activeAdmins} admins online** | 📊 **${adminUsage} admin actions** today`)
+            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.\n\n⚡ **System Status:** ${systemLoad}% optimal | 🛡️ **${activeAdmins} admins online** | 📊 **${adminUsage} admin actions** today\n\n${milestoneMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
         
@@ -163,9 +169,11 @@ module.exports = {
             case 'remove':
                 const result = await user.removeVEX(amount, 'admin_remove', false);
                 if (!result.success) {
+                    const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
+                    
                     const embed = new EmbedBuilder()
                         .setTitle(`${constants.EMOJIS.ERROR} Operation Failed`)
-                        .setDescription(result.reason)
+                        .setDescription(`${result.reason}\n\n${nearMissMessage}`)
                         .setColor(constants.COLORS.ERROR);
                     
                     return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -194,9 +202,12 @@ module.exports = {
             description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed $${amount.toFixed(2)} VEX for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
         }
         
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`${description}${variableReward ? `\n\n${variableReward}` : ''}\n${socialProofMessage}`)
             .addFields(
                 { name: '👤 Target User', value: `${targetUser.username} (<@${targetUser.id}>)`, inline: true },
                 { name: '⚙️ Admin Action', value: `${action.charAt(0).toUpperCase() + action.slice(1)} ${impactLevel}`, inline: true },

@@ -231,9 +231,20 @@ module.exports = {
         
         await user.save(userData);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(2)) : null;
+        const nearMiss = !payout && Math.random() < 0.3 ? constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)] : null;
+        
+        let description = `**${symbols.join(' | ')}**\n\n${resultText}`;
+        if (variableReward) description += `\n${variableReward}`;
+        if (nearMiss) description += `\n${nearMiss}`;
+        description += `\n\n${socialProofMessage}`;
+        if (Math.random() < 0.4) description += `\n${fomoMessage}`;
+
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SLOT} VEX Skill-Based Slots`)
-            .setDescription(`**${symbols.join(' | ')}**\n\n${resultText}`)
+            .setDescription(description)
             .addFields(
                 { name: '💰 Play Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '🎰 Payout', value: `$${payout.toFixed(2)} VEX`, inline: true },

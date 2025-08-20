@@ -50,9 +50,12 @@ module.exports = {
         const hasHighNetworth = (userData.networth || 0) >= 1000;
         
         if (!confirmation) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', todayVerifications);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Age Verification Failed`)
-                .setDescription('**LEGAL NOTICE**: You must confirm that you are 21+ years old to access cryptocurrency entertainment games.')
+                .setDescription(`**LEGAL NOTICE**: You must confirm that you are 21+ years old to access cryptocurrency entertainment games.\n\n${fomoMessage}\n${socialProofMessage.replace('are actively earning', 'completed age verification today')}`)
                 .addFields({
                     name: '⚖️ Legal Requirements',
                     value: 'Cryptocurrency gaming platforms must verify user age to comply with financial regulations and prevent underage participation.',
@@ -80,9 +83,12 @@ module.exports = {
                 description = `🔥 **Gaming Champion!** ${entertainmentStats} entertainment games played!\n⚡ **You're dominating the entertainment scene!**`;
             }
             
+            const milestoneMessage = isVeteranPlayer ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(title)
-                .setDescription(description)
+                .setDescription(`${description}\n\n${isVeteranPlayer ? milestoneMessage : comebackMessage}`)
                 .addFields(
                     { name: '📅 Verified Since', value: `<t:${Math.floor(userData.ageVerifiedAt / 1000)}:F>`, inline: true },
                     { name: '🎮 Games Played', value: `${entertainmentStats} entertainment sessions`, inline: true },

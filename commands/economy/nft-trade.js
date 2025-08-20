@@ -127,9 +127,10 @@ module.exports = {
         const price = interaction.options.getNumber('price');
         
         if (!userData.nfts || userData.nfts.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} No NFTs Found`)
-                .setDescription('You don\'t own any NFTs to trade.\n\nUse `/nft-mint create` to mint your first NFT!')
+                .setDescription(`You don\'t own any NFTs to trade.\n\nUse \`/nft-mint create\` to mint your first NFT!\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -183,9 +184,12 @@ module.exports = {
             legendary: '🟡'
         };
         
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} NFT Listed for Trade!`)
-            .setDescription(`**${nft.name}** is now available for purchase`)
+            .setDescription(`**${nft.name}** is now available for purchase\n\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: `${rarityEmojis[nft.rarity]} ${nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1)}`, inline: true },
@@ -304,9 +308,12 @@ module.exports = {
         await user.save(userData);
         await seller.save(sellerData);
         
+        const milestoneMessage = (userData.stats.nftsPurchased || 0) >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 20) + 8);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} NFT Purchase Successful!`)
-            .setDescription(`You've successfully purchased **${nft.name}**!`)
+            .setDescription(`You've successfully purchased **${nft.name}**!\n\n${socialProof}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1), inline: true },
@@ -358,9 +365,12 @@ module.exports = {
             .sort((a, b) => new Date(b.listedAt) - new Date(a.listedAt))
             .slice(0, 10);
         
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 20);
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} NFT Marketplace`)
-            .setDescription(`**${activeListings.length}** NFTs available for purchase`)
+            .setDescription(`**${activeListings.length}** NFTs available for purchase\n\n${socialProof}\n${fomoMessage}`)
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Use /nft-trade buy <listing_id> to purchase' });
         

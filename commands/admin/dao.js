@@ -137,14 +137,17 @@ module.exports = {
         const activeProposals = global.daoProposals.filter(p => p.status === 'active');
         
         if (activeProposals.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+            
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.DAO} DAO Governance`)
-                .setDescription('No active proposals at this time.\n\nCreate a proposal to get the community involved!')
+                .setTitle(`${constants.EMOJIS.DAO} 🚨 DEMOCRACY AWAITS YOUR VOICE!`)
+                .setDescription(`🏛️ **BE THE FIRST TO SHAPE THE FUTURE!**\n\n${fomoMessage}\n${socialProof}\n\n💎 **EARLY GOVERNANCE REWARDS** for first-time proposal creators!`)
                 .addFields(
                     { name: '🗳️ How to Participate', value: 'Use `/dao create` to submit proposals\nRequires 1000 VEX stake', inline: false },
                     { name: '💡 Proposal Ideas', value: '• Economy adjustments\n• New features\n• Community rules\n• Technical improvements', inline: false }
                 )
-                .setColor(constants.COLORS.INFO);
+                .setColor(constants.COLORS.VEX);
             
             return interaction.reply({ embeds: [embed] });
         }
@@ -165,9 +168,12 @@ module.exports = {
             description += `\n👑 **GOVERNANCE ELITE STATUS** - You're a democracy champion!`;
         }
         
+        const fomoTrigger = urgentProposals.length > 0 ? constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)] : '';
+        const socialValidation = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', totalVoters + Math.floor(Math.random() * 20));
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`${description}\n\n${fomoTrigger ? fomoTrigger + '\n' : ''}${socialValidation}`)
             .setColor(urgentProposals.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX)
             .setFooter({ text: '🗳️ Your vote shapes VexiumVerse! Every voice matters!' });
         
@@ -210,9 +216,11 @@ module.exports = {
         
         const proposal = global.daoProposals.find(p => p.id === proposalId && p.status === 'active');
         if (!proposal) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 10);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Proposal Not Found`)
-                .setDescription(`No active proposal found with ID: ${proposalId}\n\nUse \`/dao proposals\` to see available proposals.`)
+                .setDescription(`No active proposal found with ID: ${proposalId}\n\nUse \`/dao proposals\` to see available proposals.\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

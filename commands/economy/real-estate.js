@@ -128,13 +128,17 @@ module.exports = {
         const marketEmoji = marketTrend === 'bullish' ? '📈' : '📉';
         const marketMessage = marketTrend === 'bullish' ? 'PERFECT TIMING! Prices rising!' : 'BUY THE DIP! Great deals available!';
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeInvestors);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', surpriseBonus) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${marketEmoji} **Market Status:** ${marketMessage}`)
+            .setDescription(description + `\n\n${marketEmoji} **Market Status:** ${marketMessage}\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { 
                     name: '🏘️ Market Intelligence', 
-                    value: `**${availableProperties.length}** prime properties available\n🔥 **Hot Property:** ${hotProperty.name}\n📊 **Average ROI:** 12-25% annually\n💰 **Your Portfolio:** $${userPortfolioValue.toFixed(0)} VEX`, 
+                    value: `**${availableProperties.length}** prime properties available\n🔥 **Hot Property:** ${hotProperty.name}\n📊 **Average ROI:** 12-25% annually\n💰 **Your Portfolio:** $${userPortfolioValue.toFixed(0)} VEX\n📈 **${propertiesSoldToday} properties** sold today!`, 
                     inline: false 
                 }
             )
@@ -184,9 +188,10 @@ module.exports = {
         const property = availableProperties.find(p => p.id === propertyId);
         
         if (!property) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Property Not Found`)
-                .setDescription(`No property found with ID: ${propertyId}\n\nUse \`/real-estate market\` to see available properties.`)
+                .setDescription(`No property found with ID: ${propertyId}\n\n${nearMissMessage}\n\nUse \`/real-estate market\` to see available properties.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -239,9 +244,12 @@ module.exports = {
         
         const annualROI = ((property.dailyIncome * 365) / property.price * 100).toFixed(1);
         
+        const milestoneMessage = userData.stats.propertiesOwned >= 5 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Property Purchased Successfully!`)
-            .setDescription(`Congratulations! You now own **${property.name}**!`)
+            .setDescription(`Congratulations! You now own **${property.name}**!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '🏠 Property', value: `${property.emoji} ${property.name}`, inline: true },
                 { name: '💰 Purchase Price', value: `$${property.price.toFixed(2)} VEX`, inline: true },

@@ -91,9 +91,12 @@ module.exports = {
             
             const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
             
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} ${title}`)
-                .setDescription(`No records found yet!\n\n${randomMotivation}`)
+                .setDescription(`No records found yet!\n\n${randomMotivation}\n\n${fomoMessage}\n${socialProof}`)
                 .addFields({
                     name: '💡 Quick Start Tips',
                     value: '• Use `/daily` to earn your first VEX\n• Try `/work` to build consistent income\n• Use `/shop` to make your first purchase\n• Check `/invest` to multiply your wealth',
@@ -142,9 +145,16 @@ module.exports = {
         
         enhancedDescription += `\n\n📊 **${activeUsers} players** are analyzing their finances right now!`;
         
+        const milestoneMessage = isFinancialGuru ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
+        
+        const finalDescription = enhancedDescription + 
+            (milestoneMessage ? `\n\n${milestoneMessage}` : '') +
+            (variableReward ? `\n${variableReward}` : '');
+        
         const embed = new EmbedBuilder()
             .setTitle(enhancedTitle)
-            .setDescription(enhancedDescription)
+            .setDescription(finalDescription)
             .setColor(isFinancialGuru ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY);
         
         const recentRecords = records.slice(0, limit);

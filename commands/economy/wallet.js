@@ -37,9 +37,10 @@ module.exports = {
         }
         
         if (!isOwnWallet && userData.settings.privacy === 'private') {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Wallet`)
-                .setDescription(`${targetUser.username}'s wallet is set to private.`)
+                .setDescription(`${targetUser.username}'s wallet is set to private.\n\n${fomoMessage}\n💡 **Tip:** Make your wallet public to inspire others!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -77,8 +78,20 @@ module.exports = {
         }
         
         const activeUsers = Math.floor(Math.random() * 200) + 50;
-        if (Math.random() < 0.3) {
-            description += `\n📊 **${activeUsers} players** are checking wallets right now!`;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeUsers);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = isWealthyUser ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        if (Math.random() < 0.4) {
+            description += `\n${socialProofMessage}`;
+        }
+        
+        if (variableReward && isOwnWallet) {
+            description += `\n${variableReward}`;
+        }
+        
+        if (milestoneMessage && isOwnWallet) {
+            description += `\n${milestoneMessage}`;
         }
         
         const walletEmbed = new EmbedBuilder()

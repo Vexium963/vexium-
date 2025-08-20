@@ -76,6 +76,21 @@ module.exports = {
         const activeInvestors = Math.floor(Math.random() * 200) + 50;
         description += `\n🌐 **${activeInvestors} players are managing wealth right now!**`;
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
+        if (isMillionaire || isWealthy) {
+            const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+            description += `\n${milestoneMessage}`;
+        }
+        
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
+        
+        description += `\n${fomoMessage}\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)

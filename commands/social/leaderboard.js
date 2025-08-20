@@ -63,9 +63,10 @@ module.exports = {
         const allUsers = await User.getLeaderboard(category, 100);
         
         if (allUsers.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Leaderboard`)
-                .setDescription('No users found for this leaderboard.')
+                .setDescription(`No users found for this leaderboard.\n\n${fomoMessage}\n🚀 **Be the FIRST to dominate this category!**`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -75,9 +76,10 @@ module.exports = {
         const totalPages = Math.ceil(allUsers.length / usersPerPage);
         
         if (pageUsers.length === 0) {
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Page Not Found`)
-                .setDescription(`Page ${page} doesn't exist. There are only ${totalPages} pages.`)
+                .setDescription(`Page ${page} doesn't exist. There are only ${totalPages} pages.\n\n${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -119,6 +121,16 @@ module.exports = {
         if (socialProof) {
             const topPlayers = Math.floor(Math.random() * 5) + 3;
             description += `\n👑 **${topPlayers} legendary players online now!** Can you join their ranks?`;
+        }
+        
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = leaderboardViews % 10 === 0 && leaderboardViews > 0 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
+        if (milestoneMessage) {
+            description += `\n${milestoneMessage}`;
         }
         
         const embed = new EmbedBuilder()

@@ -83,9 +83,13 @@ module.exports = {
         const urgencyBonus = Math.random() < 0.15 ? Math.floor(userData.networth * 0.02) : 0;
         
         if (isInsuranceNovice && Math.random() < 0.3) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 15);
+            const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+            
             const embed = new EmbedBuilder()
                 .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
-                .setDescription(`💰 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n⚠️ **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!`)
+                .setDescription(`💰 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n⚠️ **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
                 .addFields(
                     { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: $${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
                     { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **$${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
@@ -177,9 +181,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = userData.stats.insurancePurchases >= 3 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Insurance Policy Activated!`)
-            .setDescription(`**${policy.name}** is now protecting your VEX!`)
+            .setDescription(`**${policy.name}** is now protecting your VEX!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🛡️ Policy Type', value: policy.name, inline: true },
                 { name: '📊 Coverage', value: `${(policy.coverage * 100)}% of losses`, inline: true },
@@ -278,9 +285,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (coverageAmount * 0.1).toFixed(2)) : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 12) + 8);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Insurance Claim Approved!`)
-            .setDescription(`Your claim has been processed and approved.`)
+            .setDescription(`Your claim has been processed and approved.${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🆔 Claim ID', value: claimId, inline: true },
                 { name: '💸 Loss Amount', value: `$${lossAmount.toFixed(2)} VEX`, inline: true },

@@ -121,9 +121,10 @@ module.exports = {
         const userData = await user.load();
         
         if (!isOwnProfile && userData.settings.privacy === 'private') {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)
-                .setDescription(`${targetUser.username}'s profile is set to private.`)
+                .setDescription(`${targetUser.username}'s profile is set to private.\n\n${fomoMessage}\n💡 **Tip:** Customize your own profile to stand out!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -143,6 +144,9 @@ module.exports = {
         if (userData.premiumTier) {
             title = `👑 VIP PROFILE: ${targetUser.username}`;
         }
+        
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const milestoneMessage = userData.level >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
         
         const embed = new EmbedBuilder()
             .setTitle(title)
@@ -219,7 +223,14 @@ module.exports = {
         }
         
         const joinDate = new Date(userData.createdAt).toLocaleDateString();
-        embed.setFooter({ text: `VexiumVerse member since ${joinDate}` });
+        let footerText = `VexiumVerse member since ${joinDate}`;
+        if (Math.random() < 0.4) {
+            footerText += ` • ${socialProofMessage}`;
+        }
+        if (milestoneMessage && Math.random() < 0.3) {
+            footerText += ` • ${milestoneMessage}`;
+        }
+        embed.setFooter({ text: footerText });
         
         const components = [];
         if (isOwnProfile) {
@@ -278,9 +289,10 @@ module.exports = {
         const bioText = interaction.options.getString('text');
         
         if (bioText.length > 200) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bio Too Long`)
-                .setDescription('Bio must be 200 characters or less.')
+                .setDescription(`Bio must be 200 characters or less.\n\n${fomoMessage}\n💡 **Pro Tip:** Shorter bios get 2x more profile views!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -291,9 +303,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Bio Updated!`)
-            .setDescription(`Your bio has been set to:\n\n*${bioText}*`)
+            .setDescription(`Your bio has been set to:\n\n*${bioText}*${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProofMessage}`)
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
         

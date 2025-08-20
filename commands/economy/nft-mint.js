@@ -114,9 +114,12 @@ module.exports = {
         const cost = costs[rarity];
         
         if (userData.vexBalance < cost) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${fomoMessage}\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -124,9 +127,11 @@ module.exports = {
         
         const result = await user.removeVEX(cost, 'nft_mint');
         if (!result.success) {
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Transaction Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${comebackMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -162,9 +167,13 @@ module.exports = {
             legendary: '🟡'
         };
         
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = userData.stats.nftsMinted >= 5 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} NFT Minted Successfully!`)
-            .setDescription(`**${name}** has been minted!`)
+            .setDescription(`**${name}** has been minted!${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🏷️ Name', value: name, inline: true },
                 { name: '✨ Rarity', value: `${rarityEmojis[rarity]} ${rarity.charAt(0).toUpperCase() + rarity.slice(1)}`, inline: true },
@@ -201,9 +210,12 @@ module.exports = {
         const userData = await user.load();
         
         if (!userData.nfts || userData.nfts.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.NFT} Your NFT Collection`)
-                .setDescription('You don\'t own any NFTs yet!\n\nUse `/nft-mint create` to mint your first NFT.')
+                .setDescription(`You don't own any NFTs yet!\n\nUse \`/nft-mint create\` to mint your first NFT.\n\n${fomoMessage}\n${socialProof}`)
                 .addFields(
                     { name: '🎨 Getting Started', value: 'Mint NFTs with unique traits and rarity levels', inline: false },
                     { name: '💰 Rarity Costs', value: 'Common: 50 VEX\nRare: 150 VEX\nEpic: 500 VEX\nLegendary: 1500 VEX', inline: false }

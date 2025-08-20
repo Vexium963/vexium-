@@ -587,3 +587,75 @@ const STAKING_POOLS = {
         riskLevel: 'Medium'
     }
 };
+
+const FOMO_MESSAGES = [
+    "⏰ **LIMITED TIME:** This opportunity expires soon!",
+    "🔥 **URGENT:** Only available for the next few hours!",
+    "⚡ **FLASH BONUS:** Don't miss this rare chance!",
+    "🚨 **EXCLUSIVE:** This won't be available tomorrow!",
+    "💎 **RARE OPPORTUNITY:** Most players miss this!",
+    "⏳ **COUNTDOWN ACTIVE:** Time is running out!",
+    "🎯 **SPECIAL WINDOW:** Available for limited time only!",
+    "🌟 **ONCE IN A LIFETIME:** This chance may never return!"
+];
+
+const SOCIAL_PROOF = [
+    "📊 **{count} players** are actively earning right now!",
+    "🔥 **{count} users** completed this action in the last hour!",
+    "⚡ **{count} members** are currently online and grinding!",
+    "💎 **{count} players** have achieved this milestone today!",
+    "🏆 **{count} users** are competing in this category!",
+    "🚀 **{count} members** joined the action in the last 10 minutes!",
+    "💰 **{count} players** earned VEX through this method today!",
+    "🎯 **{count} users** are currently using this feature!"
+];
+
+const VARIABLE_REWARDS = [
+    "🎰 **JACKPOT BONUS:** +{amount} VEX surprise reward!",
+    "✨ **LUCKY STREAK:** Bonus multiplier activated!",
+    "🎁 **MYSTERY BONUS:** You found a hidden reward!",
+    "💫 **COSMIC LUCK:** The universe rewards you!",
+    "🌟 **STELLAR BONUS:** Your timing was perfect!",
+    "🎊 **CELEBRATION BONUS:** Extra rewards for you!",
+    "💎 **PREMIUM LUCK:** Rare bonus unlocked!",
+    "🔮 **MYSTICAL REWARD:** Fortune smiles upon you!"
+];
+
+const NEAR_MISS_MESSAGES = [
+    "😱 **SO CLOSE!** You almost hit the jackpot!",
+    "💔 **ALMOST THERE!** One number away from glory!",
+    "🎯 **NEARLY PERFECT!** Try again for the big win!",
+    "⚡ **CLOSE CALL!** You're getting warmer!",
+    "🔥 **BURNING HOT!** You're on the right track!",
+    "💎 **DIAMOND CLOSE!** Victory is within reach!",
+    "🌟 **STAR QUALITY!** You're destined for greatness!",
+    "🚀 **ROCKET FUEL!** Your next attempt will soar!"
+];
+
+const MILESTONE_MESSAGES = [
+    "🎉 **LEGENDARY ACHIEVEMENT!** You've reached a major milestone!",
+    "👑 **EMPIRE BUILDER!** Your wealth grows stronger!",
+    "🏆 **CHAMPION STATUS!** You're among the elite!",
+    "💎 **DIAMOND TIER!** Exceptional performance unlocked!",
+    "🚀 **ROCKET TO SUCCESS!** Your journey accelerates!",
+    "⭐ **STAR PERFORMER!** You're shining bright!",
+    "🔥 **ON FIRE!** Your streak is unstoppable!",
+    "💫 **COSMIC POWER!** You've transcended limits!"
+];
+
+const COMEBACK_MESSAGES = [
+    "🎊 **WELCOME BACK, LEGEND!** We missed your greatness!",
+    "💎 **RETURN OF THE KING!** Your empire awaits!",
+    "🚀 **COMEBACK BONUS ACTIVATED!** Extra rewards for returning!",
+    "🔥 **THE LEGEND RETURNS!** Your streak continues!",
+    "⭐ **MISSED YOU!** Special bonus for coming back!",
+    "💰 **LOYALTY REWARD!** Thanks for returning to VexiumVerse!",
+    "🏆 **CHAMPION'S RETURN!** Your throne is ready!",
+    "✨ **MAGICAL COMEBACK!** Fortune favors your return!"
+];
+module.exports.FOMO_MESSAGES = FOMO_MESSAGES;
+module.exports.SOCIAL_PROOF = SOCIAL_PROOF;
+module.exports.VARIABLE_REWARDS = VARIABLE_REWARDS;
+module.exports.NEAR_MISS_MESSAGES = NEAR_MISS_MESSAGES;
+module.exports.MILESTONE_MESSAGES = MILESTONE_MESSAGES;
+module.exports.COMEBACK_MESSAGES = COMEBACK_MESSAGES;

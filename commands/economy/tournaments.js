@@ -138,9 +138,13 @@ module.exports = {
             description += `\n🔥 **HOT TOURNAMENT:** ${hotTournament.name} is almost full!`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 25 + 10).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n⚡ **"Champions are made in tournaments!"**`)
+            .setDescription(description + `\n\n⚡ **"Champions are made in tournaments!"**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '⚖️ Legal Notice', value: 'All tournaments feature skill-based entertainment games, not gambling', inline: false },
                 { name: '🔞 Age Requirement', value: 'Must be 21+ and age verified to participate', inline: true },
@@ -197,9 +201,10 @@ module.exports = {
         const userData = await user.load();
         
         if (!userData.ageVerified) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Age Verification Required`)
-                .setDescription('You must be 21+ and age verified to participate in tournaments.\n\nUse `/verify-age` to complete verification.')
+                .setDescription(`You must be 21+ and age verified to participate in tournaments.\n\nUse \`/verify-age\` to complete verification.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

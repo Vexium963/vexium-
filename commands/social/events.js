@@ -112,9 +112,13 @@ module.exports = {
             description += `\n👑 **VETERAN DETECTED!** You get priority access to exclusive rewards!`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 300) + 100);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 25 + 10).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(description + `\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .setColor(urgentEvents.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX);
         
         if (activeEvents.length === 0) {
@@ -163,9 +167,11 @@ module.exports = {
         const event = this.getEvent(eventId);
         
         if (!event) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Event Not Found`)
-                .setDescription(`Event **${eventId}** doesn't exist or has ended.`)
+                .setDescription(`Event **${eventId}** doesn't exist or has ended.\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -208,9 +214,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Event Joined!`)
-            .setDescription(`Successfully joined **${event.name}**!`)
+            .setDescription(`Successfully joined **${event.name}**!\n\n${milestoneMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '🎯 Event', value: event.name, inline: true },
                 { name: '📝 Objective', value: event.objective, inline: true },
@@ -374,9 +383,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (totalRewards * 0.1).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Event Rewards Claimed!`)
-            .setDescription(`Successfully claimed rewards from ${claimedEvents} completed event${claimedEvents > 1 ? 's' : ''}!`)
+            .setDescription(`Successfully claimed rewards from ${claimedEvents} completed event${claimedEvents > 1 ? 's' : ''}!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🎁 Rewards Claimed', value: rewardDetails.join('\n'), inline: false },
                 { name: '💰 Total Earned', value: `$${totalRewards.toFixed(2)} VEX`, inline: true },

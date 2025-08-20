@@ -134,6 +134,16 @@ module.exports = {
             description += `\n🔥 **CRAFTING STREAK: ${craftingStreak} days!** You're on fire!`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
+        
+        if (variableReward) {
+            description += `\n\n${variableReward}`;
+        }
+        
+        description += `\n\n${fomoMessage}\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
@@ -214,9 +224,10 @@ module.exports = {
         const recipe = allRecipes.find(r => r.id === recipeId);
         
         if (!recipe) {
+            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Recipe Not Found`)
-                .setDescription(`No recipe found with ID: ${recipeId}\n\nUse \`/crafting recipes\` to see available recipes.`)
+                .setDescription(`No recipe found with ID: ${recipeId}\n\nUse \`/crafting recipes\` to see available recipes.\n\n${comebackMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -276,9 +287,18 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = userData.stats.itemsCrafted >= 50 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 15);
+        
+        let successDescription = `Successfully crafted **${quantity}x ${recipe.name}**!`;
+        if (milestoneMessage) {
+            successDescription += `\n\n${milestoneMessage}`;
+        }
+        successDescription += `\n\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Crafting Successful!`)
-            .setDescription(`Successfully crafted **${quantity}x ${recipe.name}**!`)
+            .setDescription(successDescription)
             .addFields(
                 { name: '🔨 Item Crafted', value: `${recipe.emoji} ${recipe.name}`, inline: true },
                 { name: '🔢 Quantity', value: `${quantity}`, inline: true },
@@ -323,9 +343,12 @@ module.exports = {
         const materialCount = Object.keys(materials).length;
         const totalMaterials = Object.values(materials).reduce((sum, count) => sum + count, 0);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 60) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.MATERIALS} ${interaction.user.displayName}'s Materials`)
-            .setDescription('Your crafting materials inventory')
+            .setDescription(`Your crafting materials inventory\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '📊 Material Stats', value: `**Types**: ${materialCount}\n**Total Items**: ${totalMaterials}\n**Crafting XP**: ${userData.stats.craftingXP || 0}`, inline: true },
                 { name: '🏭 Workshop', value: `**Level**: ${userData.workshopLevel || 1}\n**Items Crafted**: ${userData.stats.itemsCrafted || 0}\n**Recipes Unlocked**: ${this.getAvailableRecipes(userData.workshopLevel || 1, 'all').length}`, inline: true }

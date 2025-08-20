@@ -38,9 +38,10 @@ module.exports = {
         }
         
         if (!isOwnAchievements && userData.settings.privacy === 'private') {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)
-                .setDescription(`${targetUser.username}'s achievements are private.`)
+                .setDescription(`${targetUser.username}'s achievements are private.\n\n${fomoMessage}\n💡 **Unlock your own achievements to inspire others!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -73,6 +74,16 @@ module.exports = {
         
         const progressBar = '█'.repeat(Math.floor(completionRate / 5)) + '░'.repeat(20 - Math.floor(completionRate / 5));
         description += `\n\n📊 ${progressBar} **${completionRate.toFixed(1)}%**`;
+        
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = isCompletionist ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        if (isOwnAchievements) {
+            description += `\n\n${socialProofMessage}`;
+            if (variableReward) description += `\n${variableReward}`;
+            if (milestoneMessage) description += `\n${milestoneMessage}`;
+        }
         
         const embed = new EmbedBuilder()
             .setTitle(title)

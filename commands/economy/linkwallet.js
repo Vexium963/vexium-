@@ -108,18 +108,20 @@ module.exports = {
         const walletAddress = interaction.options.getString('wallet_address');
         
         if (!this.isValidAddress(walletType, walletAddress)) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Wallet Address`)
-                .setDescription('The wallet address format is invalid for the selected wallet type.')
+                .setDescription(`The wallet address format is invalid for the selected wallet type.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         if (userData.linkedWallets[walletType]) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Wallet Already Linked`)
-                .setDescription(`You already have a ${walletType} wallet linked. Disconnect it first to link a new one.`)
+                .setDescription(`You already have a ${walletType} wallet linked. Disconnect it first to link a new one.\n\n${socialProof}`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -173,9 +175,13 @@ module.exports = {
         const securityLevel = totalLinkedWallets >= 2 ? '🛡️ HIGH' : '⚠️ BASIC';
         const diversificationBonus = isMultiWallet ? 'Active' : 'Inactive';
         
+        const milestoneMessage = isMultiWallet ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : '';
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : '';
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n🚀 **"Decentralization is the future!"**`)
+            .setDescription(description + `\n\n🚀 **"Decentralization is the future!"**${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '📍 Address', value: `\`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}\``, inline: true },
                 { name: '🔗 Status', value: 'Connected (Unverified)', inline: true },
@@ -206,9 +212,10 @@ module.exports = {
         const walletType = interaction.options.getString('wallet_type');
         
         if (!userData.linkedWallets[walletType]) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Wallet Not Found`)
-                .setDescription(`You don't have a ${walletType} wallet linked.`)
+                .setDescription(`You don't have a ${walletType} wallet linked.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -219,9 +226,10 @@ module.exports = {
         userData.stats.commandsUsed++;
         await user.save(userData);
         
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Wallet Disconnected`)
-            .setDescription(`${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet has been disconnected.`)
+            .setDescription(`${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet has been disconnected.\n\n${socialProof}`)
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
         

@@ -32,9 +32,12 @@ module.exports = {
     
     async execute(interaction) {
         if (!this.isAdmin(interaction.user.id)) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 5);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Access Denied`)
-                .setDescription('🚫 **ADMIN ONLY!** You need legendary admin powers to access the system logs!\n\n💡 **Tip:** Become a trusted community member to unlock special privileges!')
+                .setDescription(`🚫 **ADMIN ONLY!** You need legendary admin powers to access the system logs!\n\n💡 **Tip:** Become a trusted community member to unlock special privileges!\n\n${fomoMessage}\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -84,9 +87,12 @@ module.exports = {
         const treasuryData = await User.getTreasuryData();
         const transactions = treasuryData.transactions.slice(0, limit);
         
+        const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 15) + 3);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TREASURY} Treasury Transaction Logs`)
-            .setDescription(`Recent ${limit} treasury transactions`)
+            .setDescription(`Recent ${limit} treasury transactions\n\n${milestoneMessage}\n${socialProof}`)
             .addFields(
                 { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
@@ -139,11 +145,16 @@ module.exports = {
         
         const transactions = allTransactions.slice(0, limit);
         
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.MONEY} Transaction Logs`)
-            .setDescription(filterUser ? 
+            .setDescription((filterUser ? 
                 `Recent ${limit} transactions for ${filterUser.username}` :
-                `Recent ${limit} transactions across all users`)
+                `Recent ${limit} transactions across all users`) + 
+                `\n\n${socialProof}` + 
+                (variableReward ? `\n${variableReward}` : ''))
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
         

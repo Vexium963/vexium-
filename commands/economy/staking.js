@@ -164,9 +164,13 @@ module.exports = {
         
         await user.save(userData);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (amount * 0.01).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Staking Successful!`)
-            .setDescription(`Successfully staked $${amount.toFixed(2)} VEX in **${pool.name}**!`)
+            .setTitle(`${constants.EMOJIS.SUCCESS} 🚀 STAKING EMPIRE ACTIVATED!`)
+            .setDescription(`💎 **LEGENDARY MOVE!** You've staked $${amount.toFixed(2)} VEX in **${pool.name}**!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🆔 Stake ID', value: stakeId, inline: true },
                 { name: '💰 Amount Staked', value: `$${amount.toFixed(2)} VEX`, inline: true },
@@ -312,9 +316,12 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = totalRewards >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Rewards Claimed!`)
-            .setDescription(`Successfully claimed rewards from ${claimedStakes} stake${claimedStakes > 1 ? 's' : ''}!`)
+            .setTitle(`${constants.EMOJIS.SUCCESS} 💰 PASSIVE INCOME HARVESTED!`)
+            .setDescription(`🔥 **WEALTH MACHINE ACTIVATED!** Claimed rewards from ${claimedStakes} stake${claimedStakes > 1 ? 's' : ''}!\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields(
                 { name: '💎 Total Rewards', value: `$${totalRewards.toFixed(4)} VEX`, inline: true },
                 { name: '💸 Tax (10%)', value: `$${taxAmount.toFixed(4)} VEX`, inline: true },
@@ -384,9 +391,12 @@ module.exports = {
     },
     
     async handlePools(interaction) {
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.STAKING} Staking Pools`)
-            .setDescription('Choose from our variety of staking pools to earn passive rewards!')
+            .setTitle(`${constants.EMOJIS.STAKING} 💎 PASSIVE WEALTH EMPIRE`)
+            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMessage}\n${socialProofMessage}`)
             .setColor(constants.COLORS.PRIMARY);
         
         for (const [poolId, pool] of Object.entries(constants.STAKING_POOLS)) {

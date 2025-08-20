@@ -126,9 +126,13 @@ module.exports = {
         const daysActive = stats.daysActive || 1;
         const avgCommandsPerDay = (totalCommands / daysActive).toFixed(1);
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const milestoneMessage = totalCommands >= 100 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STATISTICS} ${interaction.user.displayName}'s VexiumVerse Statistics`)
-            .setDescription('Your complete journey through the VexiumVerse ecosystem')
+            .setDescription(`Your complete journey through the VexiumVerse ecosystem\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n${fomoMessage}`)
             .addFields(
                 { name: '📊 General Statistics', value: `**Commands Used**: ${totalCommands.toLocaleString()}\n**Days Active**: ${daysActive}\n**Avg Commands/Day**: ${avgCommandsPerDay}\n**Account Level**: ${userData.level || 1}`, inline: true },
                 { name: '💰 Economic Overview', value: `**Net Worth**: $${(userData.networth || 0).toLocaleString()} VEX\n**Total Earned**: $${(stats.totalEarned || 0).toLocaleString()} VEX\n**Total Spent**: $${(stats.totalSpent || 0).toLocaleString()} VEX\n**Work Sessions**: ${stats.workSessions || 0}`, inline: true },
@@ -192,9 +196,12 @@ module.exports = {
         const totalRealEstate = realEstate.reduce((sum, prop) => sum + prop.price, 0);
         const totalCrypto = Object.values(crypto).reduce((sum, c) => sum + (c.amount * c.avgPrice || 0), 0);
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 120) + 40);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Statistics`)
-            .setDescription(`Detailed financial analytics for ${interaction.user.displayName}`)
+            .setDescription(`Detailed financial analytics for ${interaction.user.displayName}\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '💼 Wallet & Banking', value: `**VEX Balance**: $${(userData.vexBalance || 0).toLocaleString()}\n**Bank Balance**: $${(userData.bankBalance || 0).toLocaleString()}\n**Total Deposits**: $${(stats.totalDeposits || 0).toLocaleString()}\n**Interest Earned**: $${(stats.interestEarned || 0).toLocaleString()}`, inline: true },
                 { name: '💼 Work & Income', value: `**Work Sessions**: ${stats.workSessions || 0}\n**Total Work Income**: $${(stats.totalWorkIncome || 0).toLocaleString()}\n**Daily Claims**: ${stats.dailyClaims || 0}\n**Avg Daily Earnings**: $${this.getAvgDailyEarnings(stats)}`, inline: true },
@@ -243,9 +250,12 @@ module.exports = {
         
         const stats = userData.stats || {};
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 90) + 30);
+        const nearMissMessage = Math.random() < 0.3 ? constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)] : null;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ENTERTAINMENT} Skill-Based Entertainment Statistics`)
-            .setDescription(`Your performance in skill-based entertainment activities`)
+            .setDescription(`Your performance in skill-based entertainment activities\n\n${socialProofMessage}${nearMissMessage ? `\n${nearMissMessage}` : ''}`)
             .addFields(
                 { name: '🎮 Overall Performance', value: `**Games Played**: ${(stats.entertainmentGamesPlayed || 0).toLocaleString()}\n**Win Rate**: ${this.calculateWinRate(stats)}%\n**Total Winnings**: $${(stats.totalWinnings || 0).toLocaleString()}\n**Net Profit**: $${this.calculateNetProfit(stats)}`, inline: true },
                 { name: '🃏 Card Games', value: `**Blackjack Games**: ${stats.blackjackGames || 0}\n**Blackjack Wins**: ${stats.blackjackWins || 0}\n**Poker Games**: ${stats.pokerGames || 0}\n**Poker Wins**: ${stats.pokerWins || 0}`, inline: true },

@@ -104,6 +104,15 @@ module.exports = {
             description += `\n✨ **SURPRISE JACKPOT BOOST: +$${surpriseBonus} VEX!**`;
         }
         
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeParticipants);
+        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 50 + 10).toFixed(2)) : null;
+        
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
+        description += `\n\n${fomoMessage}\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
@@ -138,9 +147,10 @@ module.exports = {
         const totalCost = ticketCount * constants.LOTTERY.TICKET_PRICE;
         
         if (totalCost > userData.vexBalance) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -186,9 +196,18 @@ module.exports = {
         
         await user.save(userData);
         
+        const milestoneMessage = userData.stats.lotteryTicketsBought >= 25 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50);
+        
+        let description = `You bought ${ticketCount} lottery ticket${ticketCount > 1 ? 's' : ''}! 🎫✨`;
+        if (milestoneMessage) {
+            description += `\n\n${milestoneMessage}`;
+        }
+        description += `\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Lottery Tickets Purchased!`)
-            .setDescription(`You bought ${ticketCount} lottery ticket${ticketCount > 1 ? 's' : ''}!`)
+            .setDescription(description)
             .addFields(
                 { name: '🎫 Your Tickets', value: newTickets.join(', '), inline: false },
                 { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
@@ -211,9 +230,12 @@ module.exports = {
         const userTickets = userData.lotteryTickets?.[lotteryWeek] || [];
         
         if (userTickets.length === 0) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 200) + 100);
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.LOTTERY} Your Lottery Tickets`)
-                .setDescription('You don\'t have any tickets for this week\'s lottery. Use `/lottery buy` to purchase tickets!')
+                .setDescription(`You don't have any tickets for this week's lottery. Use \`/lottery buy\` to purchase tickets!\n\n${fomoMessage}\n${socialProofMessage}`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });

@@ -48,9 +48,10 @@ module.exports = {
         const term = interaction.options.getString('term') || 'none';
         
         if (amount > userData.vexBalance) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick tip:** Use \`/work\` or \`/daily\` to earn more VEX!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -58,9 +59,10 @@ module.exports = {
         
         const result = await user.removeVEX(amount, 'bank_deposit', false);
         if (!result.success) {
+            const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Deposit Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,7 +161,12 @@ module.exports = {
         ];
         
         const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (amount * 0.01).toFixed(2)) : null;
+        const milestoneMessage = amount >= 1000 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
         description += `\n\n${randomMotivation}`;
+        if (variableReward) description += `\n${variableReward}`;
+        if (milestoneMessage) description += `\n${milestoneMessage}`;
         
         const embed = new EmbedBuilder()
             .setTitle(title)

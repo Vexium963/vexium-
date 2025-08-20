@@ -44,9 +44,10 @@ module.exports = {
         const force = interaction.options.getBoolean('force') || false;
         
         if (amount > userData.bankBalance) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Bank Funds`)
-                .setDescription(`You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.`)
+                .setDescription(`You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.\n\n${fomoMessage}\n💡 **Quick Fix:** Use `/work` or `/daily` to earn more VEX instantly!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -59,10 +60,11 @@ module.exports = {
         if (timeSinceLastWithdraw < constants.COOLDOWNS.WITHDRAW) {
             const timeLeft = constants.COOLDOWNS.WITHDRAW - timeSinceLastWithdraw;
             const minutesLeft = Math.floor(timeLeft / (60 * 1000));
+            const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Withdrawal Cooldown`)
-                .setDescription(`You can withdraw again in **${minutesLeft} minutes**.`)
+                .setDescription(`You can withdraw again in **${minutesLeft} minutes**.\n\n${socialProofMessage}\n💡 **Pro Tip:** Use this time to earn more with `/work` or `/invest`!`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

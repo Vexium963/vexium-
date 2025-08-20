@@ -155,16 +155,55 @@ module.exports = {
         
         const reportId = this.generateReportId();
         
+        const User = require('../../database/models/User');
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const reportsSubmitted = (userData.stats.reportsSubmitted || 0) + 1;
+        const isLegendaryContributor = reportsSubmitted >= 20;
+        const isCommunityHelper = reportsSubmitted >= 5;
+        const isFirstReport = reportsSubmitted === 1;
+        
+        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
+        const milestoneMessage = isLegendaryContributor ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
+        
+        let title = `${constants.EMOJIS.SUCCESS} Report Submitted`;
+        let description = `Your ${this.getReportTitle(reportType).toLowerCase()} has been submitted successfully!`;
+        
+        if (isLegendaryContributor) {
+            title = `👑 LEGENDARY CONTRIBUTOR! Report Submitted`;
+            description = `🔥 **COMMUNITY LEGEND!** Your ${reportsSubmitted}th report shows incredible dedication!\n\n${milestoneMessage}`;
+        } else if (isCommunityHelper) {
+            title = `⭐ COMMUNITY HERO! Report Submitted`;
+            description = `💎 **RISING STAR!** ${reportsSubmitted} reports submitted - you're making VexiumVerse better!`;
+        } else if (isFirstReport) {
+            title = `🌟 FIRST REPORT! Welcome to the Team`;
+            description = `✨ **WELCOME TO THE IMPROVEMENT SQUAD!** Your first report is the beginning of something amazing!`;
+        }
+        
+        if (variableReward) {
+            description += `\n\n${variableReward}`;
+        }
+        
+        description += `\n\n${fomoMessage}\n${socialProofMessage}`;
+        
+        userData.stats.reportsSubmitted = reportsSubmitted;
+        userData.stats.commandsUsed++;
+        await user.save(userData);
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Report Submitted`)
-            .setDescription(`Your ${this.getReportTitle(reportType).toLowerCase()} has been submitted successfully!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🆔 Report ID', value: reportId, inline: true },
                 { name: '📋 Title', value: title, inline: false },
-                { name: '📝 Status', value: 'Under Review', inline: true }
+                { name: '📝 Status', value: 'Under Review', inline: true },
+                { name: '🏆 Community Impact', value: `${reportsSubmitted} reports submitted\n${isLegendaryContributor ? '👑 **Legendary Status**' : isCommunityHelper ? '⭐ **Hero Status**' : '🌟 **Growing Contributor**'}`, inline: true }
             )
-            .setColor(constants.COLORS.SUCCESS)
-            .setFooter({ text: 'Thank you for helping improve VexiumVerse!' })
+            .setColor(isLegendaryContributor ? constants.COLORS.VEX : isCommunityHelper ? constants.COLORS.GOLD : constants.COLORS.SUCCESS)
+            .setFooter({ text: 'Your feedback shapes the future of VexiumVerse!' })
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed], ephemeral: true });

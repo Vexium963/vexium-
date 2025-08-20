@@ -38,9 +38,10 @@ module.exports = {
         }
         
         if (!userData.ageVerified) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -55,9 +56,10 @@ module.exports = {
         const playAmount = interaction.options.getNumber('play_amount');
         
         if (playAmount > userData.vexBalance) {
+            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}\n\n💡 **Pro Tip:** Use `/work` or `/daily` to earn more VEX!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -65,9 +67,10 @@ module.exports = {
         
         const result = await user.removeVEX(playAmount, 'crash_play', false);
         if (!result.success) {
+            const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${result.reason}\n\n${nearMiss}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -98,7 +101,11 @@ module.exports = {
             description += `\n💎 **${winRate}% win rate** - You're on fire!`;
         }
         
-        description += `\n📊 **${activePlayers} players** are playing crash games right now!`;
+        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activePlayers);
+        const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(2)) : null;
+        
+        description += `\n${socialProof}`;
+        if (variableReward) description += `\n${variableReward}`;
         
         const embed = new EmbedBuilder()
             .setTitle(title)

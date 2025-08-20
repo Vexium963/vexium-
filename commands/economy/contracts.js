@@ -92,9 +92,10 @@ module.exports = {
         const urgencyBonus = Math.random() < 0.2 ? Math.floor(amount * 0.02) : 0;
         
         if (amount > userData.vexBalance) {
+            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -121,9 +122,32 @@ module.exports = {
         
         await user.save(userData);
         
+        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
+        const variableReward = urgencyBonus > 0 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', urgencyBonus.toFixed(2)) : null;
+        
+        let title = `${constants.EMOJIS.SUCCESS} Contract Created`;
+        let description = `📋 Smart contract created successfully!`;
+        
+        if (isContractExpert) {
+            title = `👑 MASTER NEGOTIATOR! Contract Empire!`;
+            description = `🏆 **LEGENDARY DEAL MAKER!** ${contractsCreated} contracts mastered!\n📋 **EXPERT CONTRACT** created with MAXIMUM efficiency!`;
+        } else if (isFirstContract) {
+            title = `🎉 FIRST CONTRACT! Welcome to Elite Deals!`;
+            description = `🌟 **CONGRATULATIONS!** Your first smart contract is LIVE!\n🚀 **You're now part of the VEX elite trading community!**`;
+        } else if (isHighValueDeal) {
+            title = `💎 HIGH-VALUE DEAL! Elite Status!`;
+            description = `🔥 **BIG MONEY MOVES!** $${amount.toFixed(2)} VEX contract created!\n👑 **You're playing in the major leagues now!**`;
+        }
+        
+        if (variableReward) {
+            description += `\n${variableReward}`;
+        }
+        
+        description += `\n\n${socialProofMessage}`;
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Contract Created`)
-            .setDescription(`📋 Smart contract created successfully!`)
+            .setTitle(title)
+            .setDescription(description)
             .addFields(
                 { name: '🆔 Contract ID', value: contractId, inline: true },
                 { name: '📝 Type', value: type.charAt(0).toUpperCase() + type.slice(1), inline: true },
@@ -132,7 +156,7 @@ module.exports = {
                 { name: '📊 Status', value: 'Pending Acceptance', inline: true },
                 { name: '📜 Terms', value: contract.terms, inline: false }
             )
-            .setColor(constants.COLORS.SUCCESS)
+            .setColor(isContractExpert ? constants.COLORS.VEX : isHighValueDeal ? constants.COLORS.GOLD : constants.COLORS.SUCCESS)
             .setTimestamp();
         
         await interaction.reply({ embeds: [embed] });
