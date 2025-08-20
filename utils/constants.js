@@ -68,9 +68,10 @@ module.exports = {
             HIGH_AMOUNT_RATE: 0.08,
             FREQUENT_WITHDRAWAL_PENALTY: 0.03
         },
-        GAMBLING: {
+        ENTERTAINMENT: {
             LOSS_BURN_RATE: 0.15,
-            WIN_TAX_RATE: 0.02
+            WIN_TAX_RATE: 0.02,
+            HOUSE_EDGE: 0.05
         },
         TRADING: {
             TRANSACTION_FEE: 0.01,
@@ -305,7 +306,7 @@ module.exports = {
         }
     },
 
-    GAMBLING_GAMES: {
+    ENTERTAINMENT_GAMES: {
         SLOTS: {
             symbols: ['🍒', '🍋', '🍊', '🍇', '⭐', '💎', '💜'],
             payouts: {

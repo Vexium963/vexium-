@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('poker')
-        .setDescription('Play Texas Hold\'em poker tournaments for VEX prizes')
+        .setDescription('Play skill-based Texas Hold\'em poker tournaments for VEX prizes (21+ verification required)')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('join')
@@ -36,6 +36,24 @@ module.exports = {
     cooldown: 5,
     
     async execute(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        if (!userData.ageVerified) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
+                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .addFields({
+                    name: '🔞 Verification Required',
+                    value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
+                    inline: false
+                })
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'Age verification required by cryptocurrency gaming regulations' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
         const subcommand = interaction.options.getSubcommand();
         
         switch (subcommand) {

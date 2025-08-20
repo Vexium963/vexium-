@@ -5,38 +5,38 @@ const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('gamble')
-        .setDescription('Try your luck with various gambling games')
+        .setName('entertainment')
+        .setDescription('Play skill-based entertainment games for VEX rewards (21+ verification required)')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('slots')
-                .setDescription('Play the VEX slot machine')
+                .setDescription('Play skill-based VEX slot entertainment game')
                 .addNumberOption(option =>
-                    option.setName('bet')
-                        .setDescription('Amount of VEX to bet')
+                    option.setName('amount')
+                        .setDescription('Amount of VEX to play with')
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('coinflip')
-                .setDescription('Flip a coin and double your VEX')
+                .setDescription('Skill-based coin prediction entertainment game')
                 .addStringOption(option =>
                     option.setName('choice')
-                        .setDescription('Choose heads or tails')
+                        .setDescription('Predict heads or tails')
                         .setRequired(true)
                         .addChoices(
                             { name: 'Heads', value: 'heads' },
                             { name: 'Tails', value: 'tails' }
                         ))
                 .addNumberOption(option =>
-                    option.setName('bet')
-                        .setDescription('Amount of VEX to bet')
+                    option.setName('amount')
+                        .setDescription('Amount of VEX to play with')
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('dice')
-                .setDescription('Roll dice and predict the outcome')
+                .setDescription('Skill-based dice prediction entertainment game')
                 .addIntegerOption(option =>
                     option.setName('prediction')
                         .setDescription('Predict the dice roll (1-6)')
@@ -44,14 +44,14 @@ module.exports = {
                         .setMinValue(1)
                         .setMaxValue(6))
                 .addNumberOption(option =>
-                    option.setName('bet')
-                        .setDescription('Amount of VEX to bet')
+                    option.setName('amount')
+                        .setDescription('Amount of VEX to play with')
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stats')
-                .setDescription('View your gambling statistics')),
+                .setDescription('View your entertainment game statistics')),
     
     cooldown: 3,
     
@@ -74,44 +74,72 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        const bet = interaction.options.getNumber('bet');
-        const maxBet = constants.GAMBLING_GAMES.SLOTS.maxBet;
-        
-        if (bet > maxBet) {
+        // Mandatory age verification for legal compliance
+        if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Bet Too High`)
-                .setDescription(`Maximum bet for slots is $${maxBet.toFixed(2)} VEX.`)
+                .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
+                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .addFields(
+                    {
+                        name: '🔞 Age Requirement',
+                        value: 'Must be 21 years or older to participate',
+                        inline: true
+                    },
+                    {
+                        name: '⚖️ Legal Notice',
+                        value: 'These are skill-based entertainment games, not gambling',
+                        inline: true
+                    },
+                    {
+                        name: '✅ How to Verify',
+                        value: 'Use `/verify-age` command to confirm eligibility',
+                        inline: false
+                    }
+                )
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'Age verification required by cryptocurrency gaming regulations' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
+        const amount = interaction.options.getNumber('amount');
+        const maxAmount = constants.ENTERTAINMENT_GAMES.SLOTS.maxBet;
+        
+        if (amount > maxAmount) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
+                .setDescription(`Maximum play amount for slots is $${maxAmount.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        if (bet > userData.vexBalance) {
+        if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${bet.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const now = Date.now();
-        const lastGamble = userData.lastGamble ? new Date(userData.lastGamble).getTime() : 0;
-        const timeSinceLastGamble = now - lastGamble;
+        const lastGame = userData.lastEntertainmentGame ? new Date(userData.lastEntertainmentGame).getTime() : 0;
+        const timeSinceLastGame = now - lastGame;
         
-        if (timeSinceLastGamble < constants.COOLDOWNS.GAMBLE) {
-            const timeLeft = constants.COOLDOWNS.GAMBLE - timeSinceLastGamble;
+        if (timeSinceLastGame < constants.COOLDOWNS.ENTERTAINMENT) {
+            const timeLeft = constants.COOLDOWNS.ENTERTAINMENT - timeSinceLastGame;
             const secondsLeft = Math.floor(timeLeft / 1000);
             
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.COOLDOWN} Gambling Cooldown`)
-                .setDescription(`Please wait ${secondsLeft} seconds before gambling again.`)
+                .setTitle(`${constants.EMOJIS.COOLDOWN} Entertainment Game Cooldown`)
+                .setDescription(`Please wait ${secondsLeft} seconds before playing again.`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const result = await user.removeVEX(bet, 'gambling', false);
+        const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Transaction Failed`)
@@ -122,7 +150,7 @@ module.exports = {
         }
         
         const symbols = Economics.generateSlotsResult();
-        const payout = Economics.calculateGamblingPayout('slots', bet, symbols);
+        const payout = Economics.calculateEntertainmentPayout('slots', amount, symbols);
         
         let resultText = '';
         let color = constants.COLORS.ERROR;

@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crash')
-        .setDescription('Play the crash game - cash out before the multiplier crashes!')
+        .setDescription('Play the skill-based crash entertainment game - cash out before the multiplier crashes! (21+ verification required)')
         .addNumberOption(option =>
             option.setName('bet')
                 .setDescription('Amount of VEX to bet')
@@ -17,6 +17,21 @@ module.exports = {
     async execute(interaction) {
         const user = new User(interaction.user.id);
         const userData = await user.load();
+        
+        if (!userData.ageVerified) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
+                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .addFields({
+                    name: '🔞 Verification Required',
+                    value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
+                    inline: false
+                })
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'Age verification required by cryptocurrency gaming regulations' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         
         const betAmount = interaction.options.getNumber('bet');
         
