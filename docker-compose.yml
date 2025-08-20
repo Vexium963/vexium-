@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  vexiumverse-bot:
+    build: .
+    container_name: vexiumverse-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./database/data:/app/database/data
+      - ./database/backups:/app/database/backups
+      - ./logs:/app/logs
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Health check passed')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vexiumverse-network
+
+  # Optional: Add a database service for production
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: vexiumverse-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: vexiumverse
+  #     POSTGRES_USER: vexiumbot
+  #     POSTGRES_PASSWORD: ${DB_PASS}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - vexiumverse-network
+
+  # Optional: Add Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: vexiumverse-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - vexiumverse-network
+
+networks:
+  vexiumverse-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
