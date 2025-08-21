@@ -1,5 +1,6 @@
 const { Collection } = require('discord.js');
 const InteractionHandler = require('../handlers/interactionHandler');
+const OnboardingHandler = require('../handlers/onboardingHandler');
 
 const interactionHandler = new InteractionHandler();
 
@@ -80,12 +81,30 @@ module.exports = {
             }
         } else if (interaction.isSelectMenu() || interaction.isButton()) {
             try {
-                await interactionHandler.handleInteraction(interaction);
+                if (interaction.customId.startsWith('onboarding_') || 
+                    interaction.customId.startsWith('quick_') ||
+                    interaction.customId.startsWith('wallet_') ||
+                    interaction.customId.startsWith('claim_') ||
+                    interaction.customId.startsWith('start_') ||
+                    interaction.customId.startsWith('open_') ||
+                    interaction.customId.startsWith('tutorial_') ||
+                    interaction.customId.startsWith('step_') ||
+                    interaction.customId.startsWith('guide_') ||
+                    interaction.customId.includes('_tutorial')) {
+                    await OnboardingHandler.handleOnboardingInteraction(interaction);
+                } else {
+                    await interactionHandler.handleInteraction(interaction);
+                }
             } catch (error) {
                 console.error(`Error handling interaction ${interaction.customId}:`, error);
                 
                 if (!interaction.replied && !interaction.deferred) {
                     await interaction.reply({
+                        content: '❌ There was an error while processing your interaction!',
+                        ephemeral: true
+                    });
+                } else if (!interaction.replied) {
+                    await interaction.followUp({
                         content: '❌ There was an error while processing your interaction!',
                         ephemeral: true
                     });
