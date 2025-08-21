@@ -124,11 +124,11 @@ module.exports = {
         const activeWorkers = Math.floor(Math.random() * 25) + 10;
         
         let title = `${constants.EMOJIS.WORK} Work Complete!`;
-        let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **$${vexEarned.toFixed(2)} VEX** earned!`;
+        let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **${vexEarned.toFixed(2)} VEX** earned!`;
         
         if (isWorkExpert) {
             title = `👑 WORK MASTER IN ACTION!`;
-            description = `🏆 **${totalWorkSessions} work sessions completed!** You're a productivity legend!\n💰 **$${vexEarned.toFixed(2)} VEX** earned with expert efficiency!`;
+            description = `🏆 **${totalWorkSessions} work sessions completed!** You're a productivity legend!\n💰 **${vexEarned.toFixed(2)} VEX** earned with expert efficiency!`;
         } else if (isWorkNovice) {
             title = `🌟 BUILDING YOUR WORK EMPIRE!`;
             description += `\n🚀 **Building your reputation!** (${totalWorkSessions}/100 sessions)`;
@@ -136,12 +136,12 @@ module.exports = {
         
         if (gotBonus) {
             title = `🎉 EXCEPTIONAL PERFORMANCE!`;
-            description += `\n✨ **PERFORMANCE BONUS: +$${bonusAmount} VEX!**`;
+            description += `\n✨ **PERFORMANCE BONUS: +${bonusAmount} VEX!**`;
             await user.addVEX(bonusAmount, 'performance_bonus');
         }
         
         if (urgencyBonus > 0) {
-            description += `\n⚡ **PRODUCTIVITY SURGE: +$${urgencyBonus} VEX!** You're on fire!`;
+            description += `\n⚡ **PRODUCTIVITY SURGE: +${urgencyBonus} VEX!** You're on fire!`;
             await user.addVEX(urgencyBonus, 'productivity_surge');
         }
         
@@ -183,8 +183,8 @@ module.exports = {
             .setDescription(description + `\n\n✨ ${randomMotivation}\n📈 **${Math.floor(Math.random() * 50) + 20} players** are working right now!`)
             .addFields(
                 { name: '💼 Career', value: `${jobData.name} (Level ${userData.jobLevel})`, inline: true },
-                { name: '💰 Total Earned', value: `$${(vexEarned + bonusAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Earned', value: `${(vexEarned + bonusAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Job Progress', value: `${Math.floor(jobProgress * 100)}% to next level`, inline: false },
                 { name: '🔥 Work Streak', value: `${workStreak} days ${workStreak >= 10 ? '👑' : ''}`, inline: true },
                 { name: '⏰ Next Work', value: `<t:${Math.floor((now + workCooldown) / 1000)}:R>`, inline: true }
@@ -212,7 +212,7 @@ module.exports = {
                 .setTitle(`⬆️ Level Up!`)
                 .setDescription(`⬆️ You've reached **Level ${xpResult.newLevel}**!\n\n🎉 **New opportunities unlocked!** Check out...`)
                 .addFields(
-                    { name: '🎁 Level Reward', value: `$${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD);
             
@@ -227,7 +227,7 @@ module.exports = {
                 .setTitle(`${constants.EMOJIS.TROPHY} Job Level Up!`)
                 .setDescription(`🏆 Your **${jobData.name}** skills improved to Level ${userData.jobLevel}!\n\n💸 **Higher earning...`)
                 .addFields(
-                    { name: '🎁 Bonus', value: `$${jobBonus.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Bonus', value: `${jobBonus.toFixed(2)} VEX`, inline: true }
                 )
                 .setColor(constants.COLORS.INFO);
             
@@ -251,7 +251,7 @@ module.exports = {
         
         const jobOptions = availableJobs.slice(0, 25).map(job => ({
             label: job.name,
-            description: `$${job.minPay.toFixed(2)}-$${job.maxPay.toFixed(2)} VEX | Level ${job.requiredLevel}+`,
+            description: `${job.minPay.toFixed(2)}-${job.maxPay.toFixed(2)} VEX | Level ${job.requiredLevel}+`,
             value: job.id
         }));
         

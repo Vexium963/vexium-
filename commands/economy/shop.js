@@ -120,7 +120,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${co...`)
+                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -130,7 +130,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Supply`)
-                .setDescription(`🔥 Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n⏳ **${Math.floor(Math.random...`)
+                .setDescription(`🔥 Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n⏳ **${Math.floor(Math.random() * 50) + 10} players** are trying to buy this right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -169,11 +169,11 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Purchase Successful!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.AN...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your empire grows stronger!**\n\n🔥 ${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50)}`)
             .addFields(
-                { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
-                { name: '🔥 Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
+                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -285,7 +285,7 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} VexiumVerse Marketplace`)
             .setDescription(`**${interaction.user.username}**, welcome to the ultimate shopping experience!\n\n` +
-                `${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n` +
+                `${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n` +
                 `${constants.ANIMATED_EMOJIS.CELEBRATION} **Items Available:** ${Object.keys(constants.SHOP_ITEMS).length}\n` +
                 `${constants.ANIMATED_EMOJIS.PULSE} **${Math.floor(Math.random() * 50) + 20} players** shopping now!\n\n` +
                 `**Categories:**`)
@@ -402,7 +402,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHOP} VexiumVerse Marketplace - ${category.charAt(0).toUpperCase() + category.slice(1)}`)
-            .setDescription(`💰 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** D...`)
+            .setDescription(`💰 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** Don't miss out!`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
 
@@ -410,7 +410,7 @@ module.exports = {
             const timeLeft = this.getTimeUntilMidnight();
             embed.addFields({
                 name: '⏰ FLASH SALE - ENDS IN ' + timeLeft,
-                value: limitedOffers.map(item => `🔥 **${item.name}** - ~~$${item.originalPrice}~~ **$${item.price.toFixed(2)} VEX** (${item.discount}% OFF!)`).join('\n'),
+                value: limitedOffers.map(item => `🔥 **${item.name}** - ~~${item.originalPrice} VEX~~ **${item.price.toFixed(2)} VEX** (${item.discount}% OFF!)`).join('\n'),
                 inline: false
             });
         }
@@ -418,7 +418,7 @@ module.exports = {
         if (featuredItems.length > 0) {
             embed.addFields({
                 name: '⭐ RECOMMENDED FOR YOU',
-                value: featuredItems.map(item => `${this.getCategoryEmoji(category)} **${item.name}** - $${item.price.toFixed(2)} VEX\n*${item.personalizedReason}*`).join('\n\n'),
+                value: featuredItems.map(item => `${this.getCategoryEmoji(category)} **${item.name}** - ${item.price.toFixed(2)} VEX\n*${item.personalizedReason}*`).join('\n\n'),
                 inline: false
             });
         }
@@ -430,7 +430,7 @@ module.exports = {
             const popularityEmoji = this.getPopularityIndicator(item);
             
             itemsText += `**${globalIndex}.** ${this.getCategoryEmoji(category)} **${item.name}** ${popularityEmoji}\n`;
-            itemsText += `💰 $${item.price.toFixed(2)} VEX ${affordableEmoji}\n`;
+            itemsText += `💰 ${item.price.toFixed(2)} VEX ${affordableEmoji}\n`;
             itemsText += `📝 *${item.description}*\n`;
             
             if (item.effect === 'work_boost') {
@@ -479,7 +479,7 @@ module.exports = {
                 const urgencyText = this.isLimitedOffer(item) ? ' ⏰ LIMITED!' : '';
                 
                 selectMenu.addOptions({
-                    label: `${item.name} - $${item.price.toFixed(2)} VEX ${affordableEmoji}${urgencyText}`,
+                    label: `${item.name} - ${item.price.toFixed(2)} VEX ${affordableEmoji}${urgencyText}`,
                     description: `${item.description.substring(0, 80)}...`,
                     value: itemId,
                     emoji: this.getCategoryEmoji(category)

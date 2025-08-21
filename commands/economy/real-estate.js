@@ -138,7 +138,7 @@ module.exports = {
             .addFields(
                 { 
                     name: '🏘️ Market Intelligence', 
-                    value: `**${availableProperties.length}** prime properties available\n🔥 **Hot Property:** ${hotProperty.name}\n📊 **Average ROI:** 12-25% annually\n💰 **Your Portfolio:** $${userPortfolioValue.toFixed(0)} VEX\n📈 **${propertiesSoldToday} properties** sold today!`, 
+                    value: `**${availableProperties.length}** prime properties available\n🔥 **Hot Property:** ${hotProperty.name}\n📊 **Average ROI:** 12-25% annually\n💰 **Your Portfolio:** ${userPortfolioValue.toFixed(0)} VEX\n📈 **${propertiesSoldToday} properties** sold today!`, 
                     inline: false 
                 }
             )
@@ -151,7 +151,7 @@ module.exports = {
             
             embed.addFields({
                 name: `${property.emoji} ${property.name}`,
-                value: `**Price**: $${property.price.toFixed(2)} VEX\n**Daily Income**: $${property.dailyIncome.toFixed(2)} VEX\n**ROI**: ${roi}% annually\n**ID**: ${property.id}`,
+                value: `**Price**: ${property.price.toFixed(2)} VEX\n**Daily Income**: ${property.dailyIncome.toFixed(2)} VEX\n**ROI**: ${roi}% annually\n**ID**: ${property.id}`,
                 inline: true
             });
         }
@@ -226,7 +226,7 @@ module.exports = {
         if (userData.vexBalance < property.price) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: $${property.price.toFixed(2)} VEX\n${cons...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: ${property.price.toFixed(2)} VEX\n${constants.ANIMATED_EMOJIS.SPARKLES} **Your balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -267,10 +267,10 @@ module.exports = {
             .setDescription(`Congratulations! You now own **${property.name}**!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '🏠 Property', value: `${property.emoji} ${property.name}`, inline: true },
-                { name: '💰 Purchase Price', value: `$${property.price.toFixed(2)} VEX`, inline: true },
-                { name: '📈 Daily Income', value: `$${property.dailyIncome.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Purchase Price', value: `${property.price.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Daily Income', value: `${property.dailyIncome.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Annual ROI', value: `${annualROI}%`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🏆 Properties Owned', value: `${userData.stats.propertiesOwned}`, inline: true },
                 { name: '💡 Rental Income', value: 'Collect rental income every 24 hours\nUpgrade properties to increase income', inline: false },
                 { name: '📅 Next Collection', value: '<t:' + Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000) + ':R>', inline: false }
@@ -324,9 +324,9 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.REAL_ESTATE} ${interaction.user.displayName}'s Real Estate Portfolio`)
             .setDescription('Your virtual property investments and rental income')
             .addFields(
-                { name: '🏘️ Portfolio Summary', value: `**Properties Owned**: ${properties.length}\n**Total Value**: $${totalValue.toFixed(2)} VEX\n**Daily Income**: $${dailyIncome.toFixed(2)} VEX`, inline: true },
-                { name: '💰 Income Stats', value: `**Total Earned**: $${totalEarned.toFixed(2)} VEX\n**Monthly Income**: $${(dailyIncome * 30).toFixed(2)} VEX\n**Annual ROI**: ${totalValue > 0 ? ((dailyIncome * 365 / totalValue) * 100).toFixed(1) : '0.0'}%`, inline: true },
-                { name: '📊 Performance', value: `**Avg Property Value**: $${properties.length > 0 ? (totalValue / properties.length).toFixed(2) : '0.00'}\n**Avg Daily Income**: $${properties.length > 0 ? (dailyIncome / properties.length).toFixed(2) : '0.00'}\n**Portfolio Growth**: +${this.getPortfolioGrowth(userData)}%`, inline: true }
+                { name: '🏘️ Portfolio Summary', value: `**Properties Owned**: ${properties.length}\n**Total Value**: ${totalValue.toFixed(2)} VEX\n**Daily Income**: ${dailyIncome.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Income Stats', value: `**Total Earned**: ${totalEarned.toFixed(2)} VEX\n**Monthly Income**: ${(dailyIncome * 30).toFixed(2)} VEX\n**Annual ROI**: ${totalValue > 0 ? ((dailyIncome * 365 / totalValue) * 100).toFixed(1) : '0.0'}%`, inline: true },
+                { name: '📊 Performance', value: `**Avg Property Value**: ${properties.length > 0 ? (totalValue / properties.length).toFixed(2) : '0.00'} VEX\n**Avg Daily Income**: ${properties.length > 0 ? (dailyIncome / properties.length).toFixed(2) : '0.00'} VEX\n**Portfolio Growth**: +${this.getPortfolioGrowth(userData)}%`, inline: true }
             )
             .setColor(constants.COLORS.REAL_ESTATE)
             .setThumbnail(interaction.user.displayAvatarURL())
@@ -345,7 +345,7 @@ module.exports = {
             if (availableIncome > 0) {
                 embed.addFields({
                     name: '💰 Income Ready to Collect',
-                    value: `$${availableIncome.toFixed(2)} VEX available!\nUse \`/real-estate collect\` to claim your rental income.`,
+                    value: `${availableIncome.toFixed(2)} VEX available!\nUse \`/real-estate collect\` to claim your rental income.`,
                     inline: false
                 });
             }
@@ -357,7 +357,7 @@ module.exports = {
                 
                 embed.addFields({
                     name: `${property.emoji} ${property.name} (Lv.${property.level})`,
-                    value: `**Daily Income**: $${(property.dailyIncome * property.level).toFixed(2)} VEX\n**Status**: ${status}\n**Next**: ${nextCollection}`,
+                    value: `**Daily Income**: ${(property.dailyIncome * property.level).toFixed(2)} VEX\n**Status**: ${status}\n**Next**: ${nextCollection}`,
                     inline: true
                 });
             }
@@ -389,7 +389,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const portfolioProgress = Math.min(totalValue / 50000, 1); // Progress towards 50k portfolio
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Portfolio Value: $${totalValue.toFixed(0)} VEX`,
+            `Portfolio Value: ${totalValue.toFixed(0)} VEX`,
             portfolioProgress,
             constants.COLORS.REAL_ESTATE
         );
@@ -452,10 +452,10 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Rental Income Collected!`)
             .setDescription(`Successfully collected rental income from your properties!`)
             .addFields(
-                { name: '💰 Income Collected', value: `$${availableIncome.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Income Collected', value: `${availableIncome.toFixed(2)} VEX`, inline: true },
                 { name: '🏠 Properties', value: `${propertiesCollected} properties`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Total Real Estate Income', value: `$${userData.stats.totalRealEstateIncome.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Total Real Estate Income', value: `${userData.stats.totalRealEstateIncome.toFixed(2)} VEX`, inline: true },
                 { name: '🏆 Collections', value: `${userData.stats.incomeCollections}`, inline: true },
                 { name: '📅 Next Collection', value: '<t:' + Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000) + ':R>', inline: true }
             )
@@ -481,7 +481,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const incomeProgress = Math.min(totalIncome / 1000, 1); // Progress visualization
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Income Collected: $${totalIncome.toFixed(2)} VEX`,
+            `Income Collected: ${totalIncome.toFixed(2)} VEX`,
             incomeProgress,
             constants.COLORS.SUCCESS
         );

@@ -93,7 +93,7 @@ module.exports = {
         
         if (isFirstTime) {
             title = `🌟 SETTINGS UNLOCKED! Welcome to Power!`;
-            description = `✨ **FIRST TIME BONUS!** You're taking control of your empire!${surpriseBonus > 0 ? `\n💰 **SURPRISE REWARD: +$${surpriseBonus} VEX** for being proactive!` : ''}`;
+            description = `✨ **FIRST TIME BONUS!** You're taking control of your empire!${surpriseBonus > 0 ? `\n💰 **SURPRISE REWARD: +${surpriseBonus} VEX** for being proactive!` : ''}`;
         } else if (isSettingsPro) {
             title = `👑 SETTINGS MASTER! Ultimate Control!`;
             description = `💎 **OPTIMIZATION LEGEND!** ${settingsUsage} customizations completed!\n🔥 **${optimizationStreak}-session streak** - You're unstoppable!`;
@@ -166,7 +166,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOCK} Privacy Settings`)
-            .setDescription(`🔒 Control who can see your information and interact with you\n\n🔥 ${fomoMessage}\n✨ ${socialPro...`)
+            .setDescription(`🔒 Control who can see your information and interact with you\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Customize your VexiumVerse experience!**`)
             .addFields(
                 { name: '👁️ Profile Visibility', value: privacy.profilePublic ? '🌐 Public' : '🔒 Private', inline: true },
                 { name: '💰 Balance Visibility', value: privacy.balancePublic ? '🌐 Public' : '🔒 Private', inline: true },
@@ -235,7 +235,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.PALETTE} Display Settings`)
-            .setDescription(`🌈 Customize how information is displayed to you\n\n⬆️ ${milestoneMessage}\n✨ ${socialProofMessag...`)
+            .setDescription(`🌈 Customize how information is displayed to you\n\n⬆️ ${milestoneMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Personalize your VexiumVerse interface!**`)
             .addFields(
                 { name: '🎨 Theme', value: display.theme || 'Default', inline: true },
                 { name: '🌍 Timezone', value: display.timezone || 'UTC', inline: true },

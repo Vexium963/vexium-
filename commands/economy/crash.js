@@ -59,7 +59,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}\n\n✨ **Pro Tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n📈 **Quick earnings:** Most players earn $50+ VEX in 10 minutes!`)
+                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${socialProof}\n\n✨ **Pro Tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n📈 **Quick earnings:** Most players earn 50+ VEX in 10 minutes!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -111,9 +111,9 @@ module.exports = {
             .setTitle(title)
             .setDescription(`🚀 ${description}\n\n🔥 **LIVE ACTION:** Multiplier climbing fast!\n💸 **Big wins happening now!**`)
             .addFields(
-                { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Current Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💎 Potential Winnings', value: `$${(playAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true },
+                { name: '💎 Potential Winnings', value: `${(playAmount * game.currentMultiplier).toFixed(2)} VEX`, inline: true },
                 { name: '🎯 Your Stats', value: `🎮 **${totalCrashGames}** games\n🏆 **${winRate}%** win rate\n🔥 **${isExpert ? 'Expert' : isNovice ? 'Novice' : 'Experienced'}** player`, inline: true },
                 { name: '⚡ Live Action', value: `🚀 **${activePlayers}** players active\n💥 **High stakes** entertainment\n⏰ **Real-time** multiplier`, inline: true },
                 { name: '🎲 Pro Tip', value: hotStreak ? '🔥 **You\'re hot!** Trust your instincts!' : isExpert ? '👑 **Master timing** wins big!' : '💡 **Start conservative** and learn!', inline: true }
@@ -237,12 +237,12 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Cashed Out!`)
             .setDescription(`🎉 You successfully cashed out at ${game.currentMultiplier.toFixed(2)}x!\n\n💸 **PERFECT TIMING!*...`)
             .addFields(
-                { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Cash Out Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💎 Winnings', value: `$${winnings.toFixed(2)} VEX`, inline: true },
-                { name: '💸 House Edge', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Net Profit', value: `$${(winnings - game.playAmount - burnAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💎 Winnings', value: `${winnings.toFixed(2)} VEX`, inline: true },
+                { name: '💸 House Edge', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Net Profit', value: `${(winnings - game.playAmount - burnAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Great timing! You avoided the crash!' })
@@ -271,13 +271,13 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ERROR} Crashed!`)
-            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!\n\n🔄 **So close!** You were ${(game.cra...`)
+            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!\n\n🔄 **So close!** You were ${(game.crashPoint - 0.1).toFixed(2)}x away from cashing out!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Try again and beat the crash!**`)
             .addFields(
-                { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💥 Crash Point', value: `${game.crashPoint.toFixed(2)}x`, inline: true },
                 { name: '📈 Your Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
-                { name: '💸 Lost', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💸 Lost', value: `${game.playAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.ERROR)
             .setFooter({ text: 'Better luck next time! Try cashing out earlier.' })

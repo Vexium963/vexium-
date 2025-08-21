@@ -204,13 +204,13 @@ module.exports = {
             .setDescription(`Your loan application has been approved and funds have been disbursed!${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🆔 Loan ID', value: loanId, inline: true },
-                { name: '💰 Loan Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Loan Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Interest Rate', value: `${(interestRate * 100).toFixed(2)}% APR`, inline: true },
                 { name: '📅 Term', value: `${termMonths} months`, inline: true },
-                { name: '💳 Monthly Payment', value: `$${monthlyPayment.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Total Repayment', value: `$${totalRepayment.toFixed(2)} VEX`, inline: true },
+                { name: '💳 Monthly Payment', value: `${monthlyPayment.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Total Repayment', value: `${totalRepayment.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Credit Score', value: `${creditScore}/850`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '📅 First Payment Due', value: '<t:' + Math.floor(new Date(newLoan.nextPaymentDue).getTime() / 1000) + ':R>', inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -234,7 +234,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Loan Progress: $${amount.toFixed(2)} VEX`,
+            `Loan Progress: ${amount.toFixed(2)} VEX`,
             1.0,
             constants.COLORS.SUCCESS
         );
@@ -259,7 +259,7 @@ module.exports = {
             .setDescription('Your financial creditworthiness and borrowing capacity')
             .addFields(
                 { name: '📊 Credit Score', value: `**${creditScore}/850**\n${creditRating}`, inline: true },
-                { name: '💰 Max Loan Amount', value: `$${maxLoanAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Max Loan Amount', value: `${maxLoanAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Interest Rate', value: `${(this.getInterestRate(creditScore) * 100).toFixed(2)}% APR`, inline: true },
                 { name: '🏦 Credit Factors', value: this.getCreditFactors(userData), inline: false },
                 { name: '📋 Credit History', value: this.getCreditHistory(userData), inline: false },
@@ -310,7 +310,7 @@ module.exports = {
             .setDescription(`Personalized financial advice for ${interaction.user.displayName}`)
             .addFields(
                 { name: '📊 Financial Health Score', value: `**${analysis.healthScore}/100**\n${analysis.healthRating}`, inline: true },
-                { name: '💰 Net Worth', value: `$${(userData.networth || 0).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Net Worth', value: `${(userData.networth || 0).toFixed(2)} VEX`, inline: true },
                 { name: '📈 Monthly Growth', value: `${analysis.monthlyGrowth >= 0 ? '+' : ''}${analysis.monthlyGrowth.toFixed(1)}%`, inline: true },
                 { name: '🎯 Recommendations', value: analysis.recommendations, inline: false },
                 { name: '⚠️ Risk Assessment', value: analysis.riskAssessment, inline: false },

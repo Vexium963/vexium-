@@ -18,7 +18,7 @@ module.exports = {
         if (userData.onboardingCompleted) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SUCCESS} Welcome Back, VEX Legend!`)
-                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.l...`)
+                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.level} Entrepreneur\n• ${userData.vexBalance.toFixed(2)} VEX in your vault\n• Ready to expand your wealth!`)
                 .addFields(
                     { name: '💰 Daily Empire Growth', value: '`/daily` - Claim streak bonuses', inline: true },
                     { name: '⚒️ Wealth Generation', value: '`/work` - Earn premium VEX', inline: true },
@@ -46,15 +46,15 @@ module.exports = {
             const welcomeBackEmbed = new EmbedBuilder()
                 .setTitle(`🎉 ${netWorthTier.icon} WELCOME BACK, ${netWorthTier.title}!`)
                 .setDescription(`**${interaction.user.username}**, your empire awaits your return! 🎉\n\n` +
-                    `${comebackBonus > 0 ? `💸 **COMEBACK BONUS:** +$${comebackBonus} VEX!\n` : ''}` +
-                    `✨ **Empire Status:** $${userData.networth.toFixed(2)} VEX\n` +
+                    `${comebackBonus > 0 ? `💸 **COMEBACK BONUS:** +${comebackBonus} VEX!\n` : ''}` +
+                    `✨ **Empire Status:** ${userData.networth.toFixed(2)} VEX\n` +
                     `🔥 **Daily Streak:** ${userData.dailyStreak} days ${userData.dailyStreak >= 7 ? '🏆' : ''}\n\n` +
                     `⬆️ **Level ${userData.level}**\n\n` +
                     `⚡ **Quick Actions:** ${Math.floor(Math.random() * 200) + 100} players online now!`)
                 .addFields(
-                    { name: '💰 Current Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                    { name: '🏦 Bank Savings', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true },
-                    { name: '📈 Net Worth', value: `$${userData.networth.toFixed(2)} VEX`, inline: true }
+                    { name: '💰 Current Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                    { name: '🏦 Bank Savings', value: `${userData.bankBalance.toFixed(2)} VEX`, inline: true },
+                    { name: '📈 Net Worth', value: `${userData.networth.toFixed(2)} VEX`, inline: true }
                 )
                 .setColor(netWorthTier.color)
                 .setThumbnail(interaction.user.displayAvatarURL())
@@ -107,10 +107,18 @@ module.exports = {
         
         const onboardingEmbed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Welcome to VexiumVerse Empire! ${constants.ANIMATED_EMOJIS.ROCKET}`)
-            .setDescription(`
-**🎯 CONGRATULATIONS!** You've just joined the most exclusive financial empire on Discord!
+            .setDescription(`**🎯 CONGRATULATIONS!** You've just joined the most exclusive financial empire on Discord!
 
-${co...`)
+${constants.ANIMATED_EMOJIS.FIRE} **BREAKING:** You're among the first 1,000 empire builders to receive **DOUBLE STARTING VEX!**
+
+${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Empire Status:**
+• **Starting Capital:** ${totalStarting.toFixed(2)} VEX (+ bonus pending!)
+• **Entrepreneur Level:** ${userData.level}
+• **Empire ID:** #${userData.level.toString().padStart(4, '0')}
+
+${constants.ANIMATED_EMOJIS.SPARKLES} **LIVE STATS:** ${Math.floor(Math.random() * 500) + 200} active builders earning **real money** right now!
+
+${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom wallet to unlock premium earning potential!`)
             .addFields(
                 { 
                     name: `${constants.ANIMATED_EMOJIS.ROCKET} Your Empire Blueprint`, 
@@ -160,7 +168,7 @@ ${co...`)
                 .setTitle(`✨ PRO TIP: The First 24 Hours`)
                 .setDescription(`**${interaction.user.username}**, players who complete the tutorial in their first session earn **3x more VEX** in their first week!\n\n` +
                     `🔥 **Current online:** ${Math.floor(Math.random() * 200) + 150} players\n` +
-                    `📈 **Today's top earner:** $${(Math.random() * 500 + 200).toFixed(2)} VEX\n` +
+                    `📈 **Today's top earner:** ${(Math.random() * 500 + 200).toFixed(2)} VEX\n` +
                     `🚀 **Your potential:** Unlimited\n\n` +
                     `**Ready to connect your wallet and secure your fortune?**`)
                 .setColor(constants.COLORS.GOLD)

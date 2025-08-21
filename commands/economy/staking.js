@@ -118,7 +118,7 @@ module.exports = {
         if (amount < pool.minStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Stake Required`)
-                .setDescription(`🔥 **${pool.name}** requires a minimum of $${pool.minStake.toFixed(2)} VEX to join the wealth bui...`)
+                .setDescription(`🔥 **${pool.name}** requires a minimum of ${pool.minStake.toFixed(2)} VEX to join the wealth building revolution! 💎 Start your passive income empire today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -127,7 +127,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${amount.toFixed(2)} VEX but have $${userData.vexBalance.toFixed(2)}. Earn more with ...`)
+                .setDescription(`⏳ You need ${amount.toFixed(2)} VEX but have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily to fuel your staking empire! 🚀`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -170,14 +170,14 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} 🚀 STAKING EMPIRE ACTIVATED!`)
-            .setDescription(`💎 **LEGENDARY MOVE!** You've staked $${amount.toFixed(2)} VEX in **${pool.name}**!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`💎 **LEGENDARY MOVE!** You've staked ${amount.toFixed(2)} VEX in **${pool.name}**!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🆔 Stake ID', value: stakeId, inline: true },
-                { name: '💰 Amount Staked', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Staked', value: `${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 APY', value: `${(pool.apy * 100).toFixed(1)}%`, inline: true },
                 { name: '⏰ Lock Period', value: pool.lockPeriod ? `${pool.lockPeriod} days` : 'Flexible', inline: true },
-                { name: '💎 Daily Rewards', value: `~$${this.calculateDailyRewards(amount, pool.apy).toFixed(4)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💎 Daily Rewards', value: `~${this.calculateDailyRewards(amount, pool.apy).toFixed(4)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
@@ -196,7 +196,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const stakingProgress = Math.min(userData.stats.totalStaked / 10000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Staking Power: $${userData.stats.totalStaked.toFixed(2)} VEX`,
+            `Staking Power: ${userData.stats.totalStaked.toFixed(2)} VEX`,
             stakingProgress,
             constants.COLORS.SUCCESS
         );
@@ -266,11 +266,11 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Unstaking Complete!`)
             .setDescription(`Successfully unstaked from **${pool.name}**!`)
             .addFields(
-                { name: '💰 Principal', value: `$${stake.amount.toFixed(2)} VEX`, inline: true },
-                { name: '💎 Rewards', value: `$${pendingRewards.toFixed(4)} VEX`, inline: true },
-                { name: '💸 Penalty', value: `$${earlyWithdrawalPenalty.toFixed(2)} VEX`, inline: true },
-                { name: '💵 Total Received', value: `$${totalReturn.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Principal', value: `${stake.amount.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Rewards', value: `${pendingRewards.toFixed(4)} VEX`, inline: true },
+                { name: '💸 Penalty', value: `${earlyWithdrawalPenalty.toFixed(2)} VEX`, inline: true },
+                { name: '💵 Total Received', value: `${totalReturn.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '⏰ Staking Duration', value: this.formatDuration(Date.now() - stake.startTime), inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -324,7 +324,7 @@ module.exports = {
         if (totalRewards === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAKING} No Rewards Available`)
-                .setDescription(`Minimum claim amount: $${constants.STAKING.MIN_CLAIM_AMOUNT.toFixed(4)} VEX`)
+                .setDescription(`Minimum claim amount: ${constants.STAKING.MIN_CLAIM_AMOUNT.toFixed(4)} VEX`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -348,10 +348,10 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} 💰 PASSIVE INCOME HARVESTED!`)
             .setDescription(`🔥 **WEALTH MACHINE ACTIVATED!** Claimed rewards from ${claimedStakes} stake${claimedStakes > 1 ? 's' : ''}!\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
             .addFields(
-                { name: '💎 Total Rewards', value: `$${totalRewards.toFixed(4)} VEX`, inline: true },
-                { name: '💸 Tax (10%)', value: `$${taxAmount.toFixed(4)} VEX`, inline: true },
-                { name: '💰 Net Received', value: `$${netRewards.toFixed(4)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💎 Total Rewards', value: `${totalRewards.toFixed(4)} VEX`, inline: true },
+                { name: '💸 Tax (10%)', value: `${taxAmount.toFixed(4)} VEX`, inline: true },
+                { name: '💰 Net Received', value: `${netRewards.toFixed(4)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Keep staking to earn more rewards!' })
@@ -361,7 +361,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const rewardProgress = Math.min(totalRewards / 100, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Rewards Claimed: $${totalRewards.toFixed(4)} VEX`,
+            `Rewards Claimed: ${totalRewards.toFixed(4)} VEX`,
             rewardProgress,
             constants.COLORS.GOLD
         );
@@ -403,8 +403,8 @@ module.exports = {
             
             stakeFields.push({
                 name: `${pool.name} (${stakeId})`,
-                value: `**Staked**: $${stake.amount.toFixed(2)} VEX\n` +
-                       `**Pending**: $${pendingRewards.toFixed(4)} VEX\n` +
+                value: `**Staked**: ${stake.amount.toFixed(2)} VEX\n` +
+                       `**Pending**: ${pendingRewards.toFixed(4)} VEX\n` +
                        `**Duration**: ${this.formatDuration(stakingDuration)}\n` +
                        `**Status**: ${timeInfo}`,
                 inline: true
@@ -415,9 +415,9 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.STAKING} Your Staking Portfolio`)
             .setDescription(`Managing ${Object.keys(userData.stakes).length} active stake${Object.keys(userData.stakes).length}`)
             .addFields(
-                { name: '💰 Total Staked', value: `$${totalStaked.toFixed(2)} VEX`, inline: true },
-                { name: '💎 Pending Rewards', value: `$${totalPendingRewards.toFixed(4)} VEX`, inline: true },
-                { name: '📊 Total Value', value: `$${(totalStaked + totalPendingRewards).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Staked', value: `${totalStaked.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Pending Rewards', value: `${totalPendingRewards.toFixed(4)} VEX`, inline: true },
+                { name: '📊 Total Value', value: `${(totalStaked + totalPendingRewards).toFixed(2)} VEX`, inline: true },
                 ...stakeFields
             )
             .setColor(constants.COLORS.PRIMARY)
@@ -428,7 +428,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const portfolioProgress = Math.min(totalStaked / 50000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Portfolio Value: $${(totalStaked + totalPendingRewards).toFixed(2)} VEX`,
+            `Portfolio Value: ${(totalStaked + totalPendingRewards).toFixed(2)} VEX`,
             portfolioProgress,
             constants.COLORS.PRIMARY
         );
@@ -445,7 +445,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STAKING} 💎 PASSIVE WEALTH EMPIRE`)
-            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMes...`)
+            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Start earning passive income today!**`)
             .setColor(constants.COLORS.PRIMARY);
         
         for (const [poolId, pool] of Object.entries(constants.STAKING_POOLS)) {
@@ -455,7 +455,7 @@ module.exports = {
                 name: `${pool.name}`,
                 value: `**APY**: ${(pool.apy * 100).toFixed(1)}%\n` +
                        `**Lock Period**: ${pool.lockPeriod ? `${pool.lockPeriod} days` : 'Flexible'}\n` +
-                       `**Min Stake**: $${pool.minStake.toFixed(2)} VEX\n` +
+                       `**Min Stake**: ${pool.minStake.toFixed(2)} VEX\n` +
                        `**Daily Rate**: ${dailyRate.toFixed(4)} VEX per 100 VEX\n` +
                        `**Risk Level**: ${pool.riskLevel || 'Low'}`,
                 inline: true

@@ -111,7 +111,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Wallet Address`)
-                .setDescription(`💥 Invalid wallet format detected! Double-check your address - ${Math.floor(Math.random() * 50) +...`)
+                .setDescription(`💥 Invalid wallet format detected! Double-check your address - ${Math.floor(Math.random() * 50) + 10} players have successfully linked wallets today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -195,7 +195,7 @@ module.exports = {
         
         if (isLateLink) {
             embed.addFields(
-                { name: '💸 Migration Fee', value: `$${migrationFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Migration Fee', value: `${migrationFee.toFixed(2)} VEX`, inline: true },
                 { name: '💡 Note', value: 'Linking wallets early avoids fees!', inline: false }
             );
         }
@@ -240,7 +240,7 @@ module.exports = {
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} Wallet Disconnected`)
-            .setDescription(`${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet has been disconnected.\n\n${so...`)
+            .setDescription(`${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet has been disconnected.\n\n${socialProof}\n\n🔄 **Ready to reconnect anytime!**`)
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
         

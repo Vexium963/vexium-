@@ -163,7 +163,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 Creating a guild costs $${creationCost.toFixed(2)} VEX but you only have $${userData.vexBalanc...`)
+                .setDescription(`💸 Creating a guild costs ${creationCost.toFixed(2)} VEX but you only have ${userData.vexBalance.toFixed(2)} VEX!\n\n💡 **Tip:** Earn more VEX with /daily or /work to afford guild creation!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -231,9 +231,9 @@ module.exports = {
                 { name: '🆔 Guild ID', value: guildId, inline: true },
                 { name: '👑 Leader', value: interaction.user.username, inline: true },
                 { name: '👥 Members', value: '1', inline: true },
-                { name: '💰 Creation Cost', value: `$${creationCost.toFixed(2)} VEX`, inline: true },
-                { name: '🔥 Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Creation Cost', value: `${creationCost.toFixed(2)} VEX`, inline: true },
+                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -315,7 +315,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Joined Guild!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.SPARK...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined the guild!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Welcome to your new guild family!**\n\n${constants.ANIMATED_EMOJIS.FIRE} Start collaborating and earning together!`)
             .addFields(
                 { name: '🏰 Guild', value: guild.name, inline: true },
                 { name: '👥 Members', value: `${guild.members.length}/${constants.GUILD.MAX_MEMBERS}`, inline: true },
@@ -371,7 +371,7 @@ module.exports = {
                 { name: '👑 Leader', value: leaderData.username || 'Unknown', inline: true },
                 { name: '👥 Members', value: `${guild.members.length}/${constants.GUILD.MAX_MEMBERS}`, inline: true },
                 { name: '📊 Guild Level', value: `${guild.level}`, inline: true },
-                { name: '💰 Treasury', value: `$${guild.treasury.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Treasury', value: `${guild.treasury.toFixed(2)} VEX`, inline: true },
                 { name: '📅 Created', value: `<t:${Math.floor(guild.createdAt / 1000)}:R>`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
@@ -423,11 +423,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHIELD} Available Guilds`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} Browse and join public guilds!\n\n${constants.ANIMATED_EMOJIS...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} Browse and join public guilds!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Find your perfect guild community!**\n\n${constants.ANIMATED_EMOJIS.FIRE} Start collaborating today!`)
             .setColor(constants.COLORS.PRIMARY);
         
         if (guilds.length === 0) {
-            embed.setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} No public guilds available. Create the first one!\n\n${consta...`);
+            embed.setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} No public guilds available. Create the first one!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Be a pioneer and start the guild revolution!**`);
         } else {
             const guildList = guilds.slice(0, 10).map(guild => 
                 `**${guild.name}** (${guild.id})\n` +

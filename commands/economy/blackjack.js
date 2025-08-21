@@ -71,7 +71,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n✨ **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n🔄 ${comebackMessage}\n📈 ${socialProofMessage}`)
+                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)}.\n\n✨ **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n🔄 ${comebackMessage}\n📈 ${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -108,7 +108,7 @@ module.exports = {
         
         if (isHighStakes) {
             title = `💎 HIGH-STAKES BLACKJACK!`;
-            description += `\n🔥 **BIG MONEY PLAY: $${playAmount} VEX!** The table is watching!`;
+            description += `\n🔥 **BIG MONEY PLAY: ${playAmount} VEX!** The table is watching!`;
         }
         
         if (hotStreak) {
@@ -116,7 +116,7 @@ module.exports = {
         }
         
         if (luckBonus > 0) {
-            description += `\n✨ **LUCK BONUS: +$${luckBonus} VEX** if you win this hand!`;
+            description += `\n✨ **LUCK BONUS: +${luckBonus} VEX** if you win this hand!`;
         }
         
         const socialProof = Math.random() < 0.4;
@@ -131,7 +131,7 @@ module.exports = {
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${this.calculateHandValue(game.playerHand)}`, inline: true },
                 { name: '🏠 Dealer Hand', value: this.formatDealerHand(game.dealerHand), inline: true },
-                { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Choose your action!' });
@@ -377,8 +377,8 @@ module.exports = {
             .addFields(
                 { name: '🃏 Your Hand', value: `${this.formatHand(game.playerHand)} (${playerValue})`, inline: true },
                 { name: '🏠 Dealer Hand', value: `${this.formatHand(game.dealerHand)} (${dealerValue})`, inline: true },
-                { name: '💰 Winnings', value: `$${(winnings - game.playAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Winnings', value: `${(winnings - game.playAmount).toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)
             .setTimestamp();

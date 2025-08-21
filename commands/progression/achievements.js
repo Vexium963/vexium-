@@ -86,7 +86,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(`${description}\n\n📈 **Achievement hunters earn 2x more VEX!**\n🔥 **${Math.floor(Math.random() *...`)
+            .setDescription(`${description}\n\n📈 **Achievement hunters earn 2x more VEX!**\n🔥 **${Math.floor(Math.random() * 50) + 20} users unlocked achievements today!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Keep pushing your limits!**`)
             .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
             .setThumbnail(targetUser.displayAvatarURL())
             .setTimestamp();
@@ -108,7 +108,7 @@ module.exports = {
             
             if (isUnlocked) {
                 totalRewards += achievement.reward;
-                rarityGroups[rarity].push(`${achievement.icon} **${achievement.name}** - $${achievement.reward.toFixed(2)} VEX`);
+                rarityGroups[rarity].push(`${achievement.icon} **${achievement.name}** - ${achievement.reward.toFixed(2)} VEX`);
             }
         }
         
@@ -140,7 +140,7 @@ module.exports = {
         } else {
             embed.addFields({
                 name: '💰 Total Rewards Earned',
-                value: `$${totalRewards.toFixed(2)} VEX`,
+                value: `${totalRewards.toFixed(2)} VEX`,
                 inline: true
             });
         }
@@ -148,7 +148,7 @@ module.exports = {
         const lockedAchievements = constants.ACHIEVEMENTS.filter(a => !unlockedAchievements.includes(a.id));
         if (lockedAchievements.length > 0 && isOwnAchievements) {
             const nextAchievements = lockedAchievements.slice(0, 3).map(a => 
-                `${a.icon} **${a.name}** - ${a.description} ($${a.reward.toFixed(2)} VEX)`
+                `${a.icon} **${a.name}** - ${a.description} (${a.reward.toFixed(2)} VEX)`
             ).join('\n');
             
             embed.addFields({

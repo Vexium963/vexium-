@@ -147,7 +147,7 @@ module.exports = {
             
             embed.addFields({
                 name: `${crypto.emoji} ${crypto.symbol}`,
-                value: `**${crypto.name}**\n**Price**: $${crypto.price.toFixed(4)} VEX\n**24h**: ${changeEmoji} ${changeSign}${crypto.change.toFixed(2)}%`,
+                value: `**${crypto.name}**\n**Price**: ${crypto.price.toFixed(4)} VEX\n**24h**: ${changeEmoji} ${changeSign}${crypto.change.toFixed(2)}%`,
                 inline: true
             });
         }
@@ -213,7 +213,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`🔥 **INSUFFICIENT FUNDS!** You need more VEX to join the crypto revolution!\n\n💰 **Required:** $${totalCost.toFixed(2)} VEX (including 2% fee)\n💸 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/daily\` or \`/work\` to earn more VEX instantly!`)
+                .setDescription(`🔥 **INSUFFICIENT FUNDS!** You need more VEX to join the crypto revolution!\n\n💰 **Required:** ${totalCost.toFixed(2)} VEX (including 2% fee)\n💸 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/daily\` or \`/work\` to earn more VEX instantly!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -223,7 +223,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **PURCHASE FAILED!** ${result.reason}\n\n${constants.ANIMA...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **PURCHASE FAILED!** ${result.reason}\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Don't give up - the crypto market rewards persistence!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -263,10 +263,10 @@ module.exports = {
             .addFields(
                 { name: '💎 Cryptocurrency', value: `${crypto.emoji} ${crypto.name} (${currency})`, inline: true },
                 { name: '🔢 Amount Purchased', value: `${cryptoAmount.toFixed(6)} ${currency}`, inline: true },
-                { name: '💰 Price per Unit', value: `$${crypto.price.toFixed(4)} VEX`, inline: true },
+                { name: '💰 Price per Unit', value: `${crypto.price.toFixed(4)} VEX`, inline: true },
                 { name: '💸 VEX Spent', value: `$${vexAmount.toFixed(2)}`, inline: true },
                 { name: '💳 Trading Fee', value: `$${tradingFee.toFixed(2)}`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Portfolio Position', value: `**Total ${currency}**: ${userData.crypto[currency].amount.toFixed(6)}\n**Avg Price**: $${userData.crypto[currency].avgPrice.toFixed(4)}`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -359,8 +359,8 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.CRYPTO} ${interaction.user.displayName}'s Crypto Portfolio`)
             .setDescription('Your virtual cryptocurrency investments and performance')
             .addFields(
-                { name: '💼 Portfolio Summary', value: `**Total Value**: $${totalValue.toFixed(2)} VEX\n**Total Invested**: $${totalInvested.toFixed(2)} VEX\n**Holdings**: ${positions.length}`, inline: true },
-                { name: '📊 Performance', value: `**Gain/Loss**: ${totalGainLoss >= 0 ? '+' : ''}$${totalGainLoss.toFixed(2)} VEX\n**Return**: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%\n**Trades**: ${userData.stats.cryptoPurchases || 0}`, inline: true }
+                { name: '💼 Portfolio Summary', value: `**Total Value**: ${totalValue.toFixed(2)} VEX\n**Total Invested**: ${totalInvested.toFixed(2)} VEX\n**Holdings**: ${positions.length}`, inline: true },
+                { name: '📊 Performance', value: `**Gain/Loss**: ${totalGainLoss >= 0 ? '+' : ''}${totalGainLoss.toFixed(2)} VEX\n**Return**: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%\n**Trades**: ${userData.stats.cryptoPurchases || 0}`, inline: true }
             )
             .setColor(totalGainLoss >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setThumbnail(interaction.user.displayAvatarURL())

@@ -139,7 +139,7 @@ module.exports = {
         if (userData.friends.requests.sent.includes(targetUser.id)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Request Already Sent`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Request already sent to **${targetUser.username}**!\n\n${con...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Request already sent to **${targetUser.username}**!\n\n${constants.ANIMATED_EMOJIS.CLOCK} **Please wait for them to respond!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Patience makes friendships stronger!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

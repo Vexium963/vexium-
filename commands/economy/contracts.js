@@ -95,7 +95,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`🔥 **URGENT:** You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}!\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n📈 **${Math.floor(Math.random() * 50) + 25} players** are creating contracts right now!`)
+                .setDescription(`🔥 **URGENT:** You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX!\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n📈 **${Math.floor(Math.random() * 50) + 25} players** are creating contracts right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -136,7 +136,7 @@ module.exports = {
             description = `🌟 **CONGRATULATIONS!** Your first smart contract is LIVE!\n🚀 **You're now part of the VEX elite trading community!**`;
         } else if (isHighValueDeal) {
             title = `💎 HIGH-VALUE DEAL! Elite Status!`;
-            description = `🔥 **BIG MONEY MOVES!** $${amount.toFixed(2)} VEX contract created!\n👑 **You're playing in the major leagues now!**`;
+            description = `🔥 **BIG MONEY MOVES!** ${amount.toFixed(2)} VEX contract created!\n👑 **You're playing in the major leagues now!**`;
         }
         
         if (variableReward) {
@@ -161,7 +161,7 @@ module.exports = {
                 { name: '🆔 Contract ID', value: contractId, inline: true },
                 { name: '📝 Type', value: type.charAt(0).toUpperCase() + type.slice(1), inline: true },
                 { name: '👤 Counterparty', value: `<@${counterparty.id}>`, inline: true },
-                { name: '💰 Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Status', value: 'Pending Acceptance', inline: true },
                 { name: '📜 Terms', value: contract.terms, inline: false }
             )
@@ -192,7 +192,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const totalValue = activeContracts.reduce((sum, c) => sum + c.amount, 0);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Active Contracts Value: $${totalValue.toFixed(2)} VEX`,
+            `Active Contracts Value: ${totalValue.toFixed(2)} VEX`,
             Math.min(totalValue / 10000, 1),
             constants.COLORS.PRIMARY
         );
@@ -203,7 +203,7 @@ module.exports = {
             .addFields(
                 activeContracts.slice(0, 10).map(contract => ({
                     name: `📋 ${contract.id}`,
-                    value: `**Type:** ${contract.type}\n**Amount:** $${contract.amount.toFixed(2)} VEX\n**Status:** ${contract.status}\n**Created:** ${new Date(contract.createdAt).toLocaleDateString()}`,
+                    value: `**Type:** ${contract.type}\n**Amount:** ${contract.amount.toFixed(2)} VEX\n**Status:** ${contract.status}\n**Created:** ${new Date(contract.createdAt).toLocaleDateString()}`,
                     inline: true
                 }))
             )
@@ -263,9 +263,9 @@ module.exports = {
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Contract Executed Successfully!`)
             .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} **DEAL COMPLETED!** Contract ${contractId} executed flawl...`)
             .addFields(
-                { name: '💰 Amount Released', value: `$${contract.amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Released', value: `${contract.amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Status', value: 'Completed', inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -299,13 +299,13 @@ module.exports = {
     getContractTerms(type, amount) {
         switch (type) {
             case 'escrow':
-                return `Escrow agreement for $${amount.toFixed(2)} VEX. Funds held until both parties confirm completion.`;
+                return `Escrow agreement for ${amount.toFixed(2)} VEX. Funds held until both parties confirm completion.`;
             case 'payment':
-                return `Payment plan for $${amount.toFixed(2)} VEX. Structured payment schedule with defined milestones.`;
+                return `Payment plan for ${amount.toFixed(2)} VEX. Structured payment schedule with defined milestones.`;
             case 'service':
-                return `Service agreement worth $${amount.toFixed(2)} VEX. Payment upon satisfactory service completion.`;
+                return `Service agreement worth ${amount.toFixed(2)} VEX. Payment upon satisfactory service completion.`;
             default:
-                return `Standard contract for $${amount.toFixed(2)} VEX with mutual agreement terms.`;
+                return `Standard contract for ${amount.toFixed(2)} VEX with mutual agreement terms.`;
         }
     }
 };

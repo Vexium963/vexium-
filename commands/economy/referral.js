@@ -121,8 +121,8 @@ module.exports = {
         embed.addFields(
             { name: '🔗 Your Referral Code', value: `\`${referralStats.code}\``, inline: true },
             { name: '👥 Total Referrals', value: `${referralStats.referrals.length}`, inline: true },
-            { name: '💰 Total Earned', value: `$${referralStats.totalEarned.toFixed(2)} VEX`, inline: true },
-            { name: '💎 Pending Rewards', value: `$${referralStats.pendingRewards.toFixed(2)} VEX`, inline: true }
+            { name: '💰 Total Earned', value: `${referralStats.totalEarned.toFixed(2)} VEX`, inline: true },
+            { name: '💎 Pending Rewards', value: `${referralStats.pendingRewards.toFixed(2)} VEX`, inline: true }
         );
         
         if (referralStats.referredBy) {
@@ -135,7 +135,7 @@ module.exports = {
         
         const rewardTiers = this.getRewardTiers();
         const tierInfo = rewardTiers.map(tier => 
-            `**${tier.referrals} referrals**: $${tier.bonus.toFixed(2)} VEX bonus`
+            `**${tier.referrals} referrals**: ${tier.bonus.toFixed(2)} VEX bonus`
         ).join('\n');
         
         embed.addFields({
@@ -146,7 +146,7 @@ module.exports = {
         
         if (referralStats.referrals.length > 0) {
             const recentReferrals = referralStats.referrals.slice(-3).map(ref => 
-                `${ref.username} - $${ref.earned.toFixed(2)} VEX earned`
+                `${ref.username} - ${ref.earned.toFixed(2)} VEX earned`
             ).join('\n');
             
             embed.addFields({
@@ -221,8 +221,8 @@ module.exports = {
             .setDescription(`🚀 Share this code with friends to earn massive rewards!\n\n🔥 **VIRAL OPPORTUNITY:** Each friend...`)
             .addFields(
                 { name: '🔗 Referral Code', value: `\`${userData.referral.code}\``, inline: false },
-                { name: '💰 Reward per Referral', value: `$${constants.REFERRAL.REFERRER_REWARD.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Friend Bonus', value: `$${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Reward per Referral', value: `${constants.REFERRAL.REFERRER_REWARD.toFixed(2)} VEX`, inline: true },
+                { name: '🎁 Friend Bonus', value: `${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -245,7 +245,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Rewards`)
-                .setDescription(`⏳ You need at least $${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pend...`)
+                .setDescription(`⏳ You need at least ${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pend...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -274,11 +274,11 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Referral Rewards Claimed!`)
             .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully claimed your referral rewards!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **MASSIVE PAYOUT!** Your network is generating serious wealth!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}\n\n${constants.ANIMATED_EMOJIS.ROCKET} Keep building your empire - the sky's the limit!`)
             .addFields(
-                { name: '💎 Gross Rewards', value: `$${claimAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Tax (5%)', value: `$${taxAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💰 Net Received', value: `$${netAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Total Lifetime Earned', value: `$${referralStats.totalEarned.toFixed(2)} VEX`, inline: true }
+                { name: '💎 Gross Rewards', value: `${claimAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Tax (5%)', value: `${taxAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Net Received', value: `${netAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Total Lifetime Earned', value: `${referralStats.totalEarned.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Keep referring friends to earn more!' })
@@ -292,7 +292,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Referral Leaderboard`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.TROPHY} **LEGENDARY REFERRAL CHAMPIONS!**\n\n${constants.ANIMATED_EMO...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.TROPHY} **LEGENDARY REFERRAL CHAMPIONS!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **These users are building the VexiumVerse community!**`)
             .setColor(constants.COLORS.GOLD);
         
         if (topReferrers.length === 0) {
@@ -300,7 +300,7 @@ module.exports = {
         } else {
             const leaderboardText = topReferrers.map((referrer, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-                return `${medal} **${referrer.username}** - ${referrer.referrals} referrals ($${referrer.earned.toFixed(2)} VEX)`;
+                return `${medal} **${referrer.username}** - ${referrer.referrals} referrals (${referrer.earned.toFixed(2)} VEX)`;
             }).join('\n');
             
             embed.addFields({
@@ -402,8 +402,8 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Referral Code Redeemed!`)
             .setDescription(`Welcome to VexiumVerse! You've been referred by **${referrerData.username}**!`)
             .addFields(
-                { name: '🎁 Welcome Bonus', value: `$${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '🎁 Welcome Bonus', value: `${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🤝 Referred By', value: referrerData.username, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)

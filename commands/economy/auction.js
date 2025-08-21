@@ -147,7 +147,7 @@ module.exports = {
             
             embed.addFields({
                 name: `${auction.item.name} (ID: ${auction.id})`,
-                value: `**Current Bid**: $${auction.currentBid.toFixed(2)} VEX\n` +
+                value: `**Current Bid**: ${auction.currentBid.toFixed(2)} VEX\n` +
                        `**Bidder**: ${auction.highestBidder || 'None'}\n` +
                        `**Time Left**: ${timeLeftStr}\n` +
                        `**Seller**: ${auction.seller}`,
@@ -208,7 +208,7 @@ module.exports = {
         if (listingFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${listingFee.toFixed(2)} VEX for the listing fee but only have $${userData.vexBalance.t...`)
+                .setDescription(`You need ${listingFee.toFixed(2)} VEX for the listing fee but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -263,9 +263,9 @@ module.exports = {
             .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your auction for **${item.name}** is now live!`)
             .addFields(
                 { name: '🆔 Auction ID', value: auctionId, inline: true },
-                { name: '💰 Starting Bid', value: `$${startingBid.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Starting Bid', value: `${startingBid.toFixed(2)} VEX`, inline: true },
                 { name: '⏰ Duration', value: `${duration} hours`, inline: true },
-                { name: '💸 Listing Fee', value: `$${listingFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX`, inline: true },
                 { name: '📅 End Time', value: `<t:${Math.floor(endTime / 1000)}:F>`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -318,7 +318,7 @@ module.exports = {
         if (bidAmount < minBid) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bid Too Low`)
-                .setDescription(`Minimum bid is $${minBid.toFixed(2)} VEX.`)
+                .setDescription(`Minimum bid is ${minBid.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -327,7 +327,7 @@ module.exports = {
         if (bidAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${bidAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need ${bidAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -372,10 +372,10 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Bid Placed!`)
             .setDescription(`You're now the highest bidder on **${auction.item.name}**!`)
             .addFields(
-                { name: '💰 Your Bid', value: `$${bidAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Your Bid', value: `${bidAmount.toFixed(2)} VEX`, inline: true },
                 { name: '🏆 Status', value: 'Highest Bidder', inline: true },
                 { name: '⏰ Time Left', value: timeLeftStr, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'You\'ll be refunded if someone outbids you.' })
@@ -407,7 +407,7 @@ module.exports = {
         if (userAuctions.length > 0) {
             const auctionList = userAuctions.slice(0, 3).map(auction => {
                 const timeLeft = this.formatTimeLeft(auction.endTime - Date.now());
-                return `**${auction.item.name}** - $${auction.currentBid.toFixed(2)} VEX (${timeLeft})`;
+                return `**${auction.item.name}** - ${auction.currentBid.toFixed(2)} VEX (${timeLeft})`;
             }).join('\n');
             
             embed.addFields({
@@ -421,7 +421,7 @@ module.exports = {
             const bidList = userBids.slice(0, 3).map(auction => {
                 const isWinning = auction.highestBidderId === interaction.user.id;
                 const status = isWinning ? '🏆 Winning' : '❌ Outbid';
-                return `**${auction.item.name}** - $${auction.currentBid.toFixed(2)} VEX ${status}`;
+                return `**${auction.item.name}** - ${auction.currentBid.toFixed(2)} VEX ${status}`;
             }).join('\n');
             
             embed.addFields({

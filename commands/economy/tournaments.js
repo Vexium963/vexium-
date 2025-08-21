@@ -124,14 +124,14 @@ module.exports = {
         const hotTournament = activeTournaments.find(t => t.participants.length >= t.maxPlayers * 0.8);
         
         let title = `${constants.EMOJIS.TOURNAMENT} Tournament Arena`;
-        let description = `🏆 **COMPETE FOR GLORY!** ${activeTournaments.length} tournaments active!\n💰 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+        let description = `🏆 **COMPETE FOR GLORY!** ${activeTournaments.length} tournaments active!\n💰 **Total Prize Pool: ${totalPrizePool.toLocaleString()} VEX**`;
         
         if (isChampion) {
             title = `👑 CHAMPION'S ARENA!`;
-            description = `🏆 **WELCOME BACK, CHAMPION!** ${activeTournaments.length} tournaments await your dominance!\n💎 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+            description = `🏆 **WELCOME BACK, CHAMPION!** ${activeTournaments.length} tournaments await your dominance!\n💎 **Total Prize Pool: ${totalPrizePool.toLocaleString()} VEX**`;
         } else if (isCompetitor) {
             title = `🔥 COMPETITOR'S BATTLEGROUND!`;
-            description = `🏆 **SEASONED WARRIOR!** ${activeTournaments.length} tournaments ready for battle!\n💰 **Total Prize Pool: $${totalPrizePool.toLocaleString()} VEX**`;
+            description = `🏆 **SEASONED WARRIOR!** ${activeTournaments.length} tournaments ready for battle!\n💰 **Total Prize Pool: ${totalPrizePool.toLocaleString()} VEX**`;
         }
         
         if (hotTournament) {
@@ -167,7 +167,7 @@ module.exports = {
                 
                 embed.addFields({
                     name: `🏆 ${tournament.name}`,
-                    value: `**ID**: ${tournament.id}\n**Game**: ${tournament.gameType}\n**Entry**: $${tournament.entryFee} VEX\n**Players**: ${tournament.participants.length}/${tournament.maxPlayers}\n**Prize Pool**: $${prizePool} VEX\n**Ends**: ${timeLeft}`,
+                    value: `**ID**: ${tournament.id}\n**Game**: ${tournament.gameType}\n**Entry**: ${tournament.entryFee} VEX\n**Players**: ${tournament.participants.length}/${tournament.maxPlayers}\n**Prize Pool**: ${prizePool} VEX\n**Ends**: ${timeLeft}`,
                     inline: true
                 });
             }
@@ -261,7 +261,7 @@ module.exports = {
         if (userData.vexBalance < tournament.entryFee) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Entry fee: $${tournament.entryFee} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Entry fee: ${tournament.entryFee} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -299,9 +299,9 @@ module.exports = {
             .addFields(
                 { name: '🏆 Tournament', value: tournament.name, inline: true },
                 { name: '🎮 Game Type', value: tournament.gameType.charAt(0).toUpperCase() + tournament.gameType.slice(1), inline: true },
-                { name: '💰 Entry Fee', value: `$${tournament.entryFee} VEX`, inline: true },
+                { name: '💰 Entry Fee', value: `${tournament.entryFee} VEX`, inline: true },
                 { name: '👥 Players', value: `${tournament.participants.length}/${tournament.maxPlayers}`, inline: true },
-                { name: '🏆 Prize Pool', value: `$${prizePool} VEX`, inline: true },
+                { name: '🏆 Prize Pool', value: `${prizePool} VEX`, inline: true },
                 { name: '⏰ Time Left', value: timeLeft, inline: true },
                 { name: '📋 How to Play', value: `Use entertainment commands to earn points\nHighest score wins the tournament!`, inline: false },
                 { name: '🏅 Prize Distribution', value: '🥇 1st: 50% of pool\n🥈 2nd: 30% of pool\n🥉 3rd: 20% of pool', inline: false }
@@ -368,7 +368,7 @@ module.exports = {
         if (userData.vexBalance < creationCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Tournament creation fee: $${creationCost.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.to...`)
+                .setDescription(`Tournament creation fee: ${creationCost.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -414,10 +414,10 @@ module.exports = {
             .addFields(
                 { name: '🆔 Tournament ID', value: tournamentId, inline: true },
                 { name: '🎮 Game Type', value: gameType.charAt(0).toUpperCase() + gameType.slice(1), inline: true },
-                { name: '💰 Entry Fee', value: `$${entryFee} VEX`, inline: true },
+                { name: '💰 Entry Fee', value: `${entryFee} VEX`, inline: true },
                 { name: '👥 Max Players', value: '20', inline: true },
                 { name: '⏰ Duration', value: '24 hours', inline: true },
-                { name: '💸 Creation Fee', value: `$${creationCost.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Creation Fee', value: `${creationCost.toFixed(2)} VEX`, inline: true },
                 { name: '📢 Share Tournament', value: `Tell others to use:\n\`/tournaments join ${tournamentId}\``, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)

@@ -58,22 +58,22 @@ module.exports = {
         if (isOwnWallet) {
             if (isWealthyUser) {
                 title = `💎 YOUR WEALTH EMPIRE!`;
-                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **$${userData.networth.toFixed(2)} VEX**!\n💸 **1 VEX = $1.00 USD** - Real money, real power!`;
+                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **${userData.networth.toFixed(2)} VEX**!\n💸 **1 VEX = $1.00 USD** - Real money, real power!`;
             } else if (isRisingStar) {
                 title = `🚀 RISING WEALTH STAR!`;
-                description = `✨ **You're building something AMAZING!** $${userData.networth.toFixed(2)} VEX and climbing!\n🔥 **Next milestone: $1,000 VEX** for Wealth Elite status!`;
+                description = `✨ **You're building something AMAZING!** ${userData.networth.toFixed(2)} VEX and climbing!\n🔥 **Next milestone: 1,000 VEX** for Wealth Elite status!`;
             } else {
                 title = `🌟 YOUR GROWING EMPIRE!`;
-                description = `✨ **Every legend starts somewhere!** You're at $${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: $100 VEX** for Rising Star status!`;
+                description = `✨ **Every legend starts somewhere!** You're at ${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: 100 VEX** for Rising Star status!`;
             }
             
             if (recentGrowth > 0) {
-                description += `\n📈 **+$${recentGrowth.toFixed(2)} VEX growth** in recent activity!`;
+                description += `\n📈 **+${recentGrowth.toFixed(2)} VEX growth** in recent activity!`;
             }
         } else {
             if (isWealthyUser) {
                 title = `👑 ${targetUser.username}'s WEALTH EMPIRE`;
-                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: $${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
+                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: ${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
             }
         }
         
@@ -100,17 +100,17 @@ module.exports = {
             .addFields(
                 { 
                     name: `${constants.EMOJIS.VEX} VEX Balance`, 
-                    value: `$${userData.vexBalance.toFixed(2)}`, 
+                    value: `${userData.vexBalance.toFixed(2)} VEX`, 
                     inline: true 
                 },
                 { 
                     name: `${constants.EMOJIS.BANK} Bank Balance`, 
-                    value: `$${userData.bankBalance.toFixed(2)}`, 
+                    value: `${userData.bankBalance.toFixed(2)} VEX`, 
                     inline: true 
                 },
                 { 
                     name: `${constants.EMOJIS.DIAMOND} Net Worth`, 
-                    value: `$${userData.networth.toFixed(2)}`, 
+                    value: `${userData.networth.toFixed(2)} VEX`, 
                     inline: true 
                 },
                 { 
@@ -146,17 +146,17 @@ module.exports = {
             walletEmbed.addFields(
                 { 
                     name: `${constants.EMOJIS.MONEY} Lifetime Earned`, 
-                    value: `$${userData.stats.totalEarned.toFixed(2)}`, 
+                    value: `${userData.stats.totalEarned.toFixed(2)} VEX`, 
                     inline: true 
                 },
                 { 
                     name: `${constants.EMOJIS.TAX} Taxes Paid`, 
-                    value: `$${userData.stats.totalTaxesPaid.toFixed(2)}`, 
+                    value: `${userData.stats.totalTaxesPaid.toFixed(2)} VEX`, 
                     inline: true 
                 },
                 { 
                     name: `${constants.EMOJIS.BURN} Total Burned`, 
-                    value: `$${userData.stats.totalBurned.toFixed(2)}`, 
+                    value: `${userData.stats.totalBurned.toFixed(2)} VEX`, 
                     inline: true 
                 }
             );

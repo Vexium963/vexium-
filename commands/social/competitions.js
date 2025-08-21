@@ -122,8 +122,8 @@ module.exports = {
                 embed.addFields({
                     name: `${comp.icon} ${comp.name} (${comp.id})`,
                     value: `**Type**: ${comp.type}\n` +
-                           `**Entry Fee**: $${comp.entryFee.toFixed(2)} VEX\n` +
-                           `**Prize Pool**: $${comp.prizePool.toFixed(2)} VEX\n` +
+                           `**Entry Fee**: ${comp.entryFee.toFixed(2)} VEX\n` +
+                           `**Prize Pool**: ${comp.prizePool.toFixed(2)} VEX\n` +
                            `**Participants**: ${comp.participants}/${comp.maxParticipants}\n` +
                            `**Registration Ends**: ${timeLeftStr}`,
                     inline: true
@@ -210,7 +210,7 @@ module.exports = {
         if (competition.entryFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💰 Entry fee is $${competition.entryFee.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}. ⚒️ Earn more VEX with \`/work\` or \`/daily\` to join this epic tournament!`)
+                .setDescription(`💰 Entry fee is ${competition.entryFee.toFixed(2)} VEX but you only have ${userData.vexBalance.toFixed(2)} VEX. ⚒️ Earn more VEX with \`/work\` or \`/daily\` to join this epic tournament!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -256,10 +256,10 @@ module.exports = {
             .setDescription(`🎉 Successfully registered for **${competition.name}**! 🔥\n\n${milestoneMessage}\n${socialProof} 🚀`)
             .addFields(
                 { name: '🏆 Competition', value: competition.name, inline: true },
-                { name: '💰 Entry Fee', value: `$${competition.entryFee.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Prize Pool', value: `$${competition.prizePool.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Entry Fee', value: `${competition.entryFee.toFixed(2)} VEX`, inline: true },
+                { name: '🎁 Prize Pool', value: `${competition.prizePool.toFixed(2)} VEX`, inline: true },
                 { name: '📅 Start Date', value: `<t:${Math.floor(competition.startTime / 1000)}:F>`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -400,7 +400,7 @@ module.exports = {
             { name: '🏆 Competitions Joined', value: `${totalCompetitions}`, inline: true },
             { name: '🥇 Wins', value: `${totalWins}`, inline: true },
             { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
-            { name: '💰 Total Earnings', value: `$${totalEarnings.toFixed(2)} VEX`, inline: true },
+            { name: '💰 Total Earnings', value: `${totalEarnings.toFixed(2)} VEX`, inline: true },
             { name: '🏅 Best Placement', value: stats.bestCompetitionPlacement || 'N/A', inline: true },
             { name: '🔥 Current Streak', value: `${stats.competitionStreak || 0}`, inline: true }
         );

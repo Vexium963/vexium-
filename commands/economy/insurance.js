@@ -89,10 +89,10 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
-                .setDescription(`💸 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
+                .setDescription(`💸 **Your ${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
                 .addFields(
-                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: $${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
-                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **$${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
+                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: ${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
+                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
                 )
                 .setColor(constants.COLORS.ERROR)
                 .setFooter({ text: '⏰ Don\'t wait until it\'s too late! Protect your empire NOW!' })
@@ -147,7 +147,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Insurance cost: $${totalCost.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Insurance cost: ${totalCost.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -190,7 +190,7 @@ module.exports = {
             .addFields(
                 { name: '🛡️ Policy Type', value: policy.name, inline: true },
                 { name: '📊 Coverage', value: `${(policy.coverage * 100)}% of losses`, inline: true },
-                { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
                 { name: '📅 Duration', value: `${months} month${months > 1 ? 's' : ''}`, inline: true },
                 { name: '📋 Claims Available', value: `${userData.insurance.maxClaims} claims`, inline: true },
                 { name: '⏰ Expires', value: `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>`, inline: true },
@@ -269,7 +269,7 @@ module.exports = {
         if (lossAmount > maxClaimAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Claim Too Large`)
-                .setDescription(`Maximum claim amount is $${maxClaimAmount.toFixed(2)} VEX per incident.\n\nFor larger losses, fil...`)
+                .setDescription(`Maximum claim amount is ${maxClaimAmount.toFixed(2)} VEX per incident.\n\nFor larger losses, file multiple claims.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -305,12 +305,12 @@ module.exports = {
             .setDescription(`Your claim has been processed and approved.${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🆔 Claim ID', value: claimId, inline: true },
-                { name: '💸 Loss Amount', value: `$${lossAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💰 Coverage Paid', value: `$${coverageAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Loss Amount', value: `${lossAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Coverage Paid', value: `${coverageAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📋 Reason', value: reason.charAt(0).toUpperCase() + reason.slice(1), inline: true },
                 { name: '📊 Coverage Rate', value: `${(userData.insurance.coverage * 100)}%`, inline: true },
                 { name: '🔢 Claims Remaining', value: `${userData.insurance.maxClaims - userData.insurance.claimsUsed}`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: false }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: `Claim #${claimId} • Funds have been added to your wallet` })
@@ -383,9 +383,9 @@ module.exports = {
                 { name: '📈 Coverage Rate', value: `${(userData.insurance.coverage * 100)}%`, inline: true },
                 { name: '📅 Purchased', value: `<t:${Math.floor(new Date(userData.insurance.purchasedAt).getTime() / 1000)}:R>`, inline: true },
                 { name: '⏰ Expires', value: `<t:${Math.floor(new Date(userData.insurance.expiresAt).getTime() / 1000)}:R>`, inline: true },
-                { name: '💰 Total Paid', value: `$${userData.insurance.totalPaid.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Paid', value: `${userData.insurance.totalPaid.toFixed(2)} VEX`, inline: true },
                 { name: '🔢 Claims Used', value: `${userData.insurance.claimsUsed}/${userData.insurance.maxClaims}`, inline: true },
-                { name: '💸 Total Claims', value: `$${this.getTotalClaims(userData.insurance.claims || []).toFixed(2)} VEX`, inline: true },
+                { name: '💸 Total Claims', value: `${this.getTotalClaims(userData.insurance.claims || []).toFixed(2)} VEX`, inline: true },
                 { name: '📊 Claim Success Rate', value: '100%', inline: true }
             )
             .setColor(isActive ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
@@ -397,7 +397,7 @@ module.exports = {
             const recentClaims = userData.insurance.claims
                 .sort((a, b) => new Date(b.filedAt) - new Date(a.filedAt))
                 .slice(0, 3)
-                .map(claim => `• $${claim.coverage.toFixed(2)} VEX - ${claim.reason}`)
+                .map(claim => `• ${claim.coverage.toFixed(2)} VEX - ${claim.reason}`)
                 .join('\n');
             
             embed.addFields({

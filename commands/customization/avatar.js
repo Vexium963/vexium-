@@ -123,7 +123,7 @@ module.exports = {
             let status = '';
             if (equipped) status = '✅ Equipped';
             else if (owned) status = '✅ Owned';
-            else status = `💰 $${frame.price.toFixed(2)} VEX`;
+            else status = `💰 ${frame.price.toFixed(2)} VEX`;
             
             embed.addFields({
                 name: `${frame.emoji} ${frame.name}`,

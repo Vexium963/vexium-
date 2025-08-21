@@ -148,7 +148,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 Pet adoption costs $${adoptionCost.toFixed(2)} VEX.\n\n💰 **Your balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Missing:** $${(adoptionCost - userData.vexBalance).toFixed(2)} VEX\n\n🚀 **Quick earn:** Use \`/work\` or \`/daily\` to get VEX fast!\n\n${socialProof}`)
+                .setDescription(`💸 Pet adoption costs ${adoptionCost.toFixed(2)} VEX.\n\n💰 **Your balance:** ${userData.vexBalance.toFixed(2)} VEX\n🔥 **Missing:** ${(adoptionCost - userData.vexBalance).toFixed(2)} VEX\n\n🚀 **Quick earn:** Use \`/work\` or \`/daily\` to get VEX fast!\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

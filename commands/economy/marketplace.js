@@ -99,7 +99,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} SURPRISE MARKETPLACE BONUS!`)
-                .setDescription(`🎉 **Lucky you!** You found a hidden marketplace bonus!\n💸 **+$${surpriseBonus} VEX** added to y...`)
+                .setDescription(`🎉 **Lucky you!** You found a hidden marketplace bonus!\n💸 **+${surpriseBonus} VEX** added to your wallet!`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: '✨ Random bonuses reward active traders!' });
             
@@ -113,7 +113,7 @@ module.exports = {
                 .setDescription(`🏆 **${totalTransactions} Total Transactions!**\n✨ You're becoming a marketplace legend!\n\n🔥 Le...`)
                 .addFields({
                     name: '🎁 Milestone Reward',
-                    value: `$${totalTransactions * 2} VEX bonus!`,
+                    value: `${totalTransactions * 2} VEX bonus!`,
                     inline: true
                 })
                 .setColor(constants.COLORS.GOLD);
@@ -192,7 +192,7 @@ module.exports = {
                 const timeLeft = this.getTimeLeft(listing.expiresAt);
                 embed.addFields({
                     name: `${listing.emoji} ${listing.name}`,
-                    value: `**Price**: $${listing.price.toFixed(2)} VEX\n**Seller**: ${listing.sellerName}\n**ID**: ${listing.id}\n**Expires**: ${timeLeft}`,
+                    value: `**Price**: ${listing.price.toFixed(2)} VEX\n**Seller**: ${listing.sellerName}\n**ID**: ${listing.id}\n**Expires**: ${timeLeft}`,
                     inline: true
                 });
             }
@@ -274,7 +274,7 @@ module.exports = {
         if (price > constants.LIMITS.MAX_MARKETPLACE_PRICE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Price Too High`)
-                .setDescription(`Maximum listing price is $${constants.LIMITS.MAX_MARKETPLACE_PRICE.toFixed(2)} VEX.`)
+                .setDescription(`Maximum listing price is ${constants.LIMITS.MAX_MARKETPLACE_PRICE.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -285,7 +285,7 @@ module.exports = {
         if (userData.vexBalance < listingFee) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Listing Fee`)
-                .setDescription(`Listing fee (5%): $${listingFee.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)}...`)
+                .setDescription(`Listing fee (5%): ${listingFee.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -335,10 +335,10 @@ module.exports = {
             .setDescription(`**${itemName}** is now available in the marketplace!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '📦 Item', value: itemName, inline: true },
-                { name: '💰 Price', value: `$${price.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price', value: `${price.toFixed(2)} VEX`, inline: true },
                 { name: '🔢 Quantity', value: `${quantity}`, inline: true },
                 { name: '🆔 Listing ID', value: listingId, inline: true },
-                { name: '💸 Listing Fee', value: `$${listingFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX`, inline: true },
                 { name: '⏰ Expires', value: '<t:' + Math.floor(new Date(listing.expiresAt).getTime() / 1000) + ':R>', inline: true },
                 { name: '📢 Share Listing', value: `Tell others to use:\n\`/marketplace buy ${listingId}\``, inline: false }
             )
@@ -417,7 +417,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Total cost: $${totalCost.toFixed(2)} VEX (including 2% fee)\nYour balance: $${userData.vexBalance...`)
+                .setDescription(`Total cost: ${totalCost.toFixed(2)} VEX (including 2% fee)\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -459,9 +459,9 @@ module.exports = {
             .addFields(
                 { name: '📦 Item', value: listing.itemName, inline: true },
                 { name: '🔢 Quantity', value: `${listing.quantity}`, inline: true },
-                { name: '💰 Price', value: `$${listing.price.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Transaction Fee', value: `$${transactionFee.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price', value: `${listing.price.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Transaction Fee', value: `${transactionFee.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '👤 Seller', value: listing.sellerName, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)

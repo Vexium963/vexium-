@@ -85,11 +85,11 @@ module.exports = {
         const activeParticipants = Math.floor(Math.random() * 200) + 150;
         
         let title = `${constants.EMOJIS.LOTTERY} MASSIVE JACKPOT ALERT!`;
-        let description = `💎 **$${lotteryData.jackpot.toFixed(2)} VEX JACKPOT** - Life-changing money awaits!\n🔥 **${activeParticipants} players competing RIGHT NOW!**`;
+        let description = `💎 **${lotteryData.jackpot.toFixed(2)} VEX JACKPOT** - Life-changing money awaits!\n🔥 **${activeParticipants} players competing RIGHT NOW!**`;
         
         if (isUrgent) {
             title = `🚨 URGENT: ${hoursLeft}H LEFT TO WIN!`;
-            description = `⏰ **FINAL HOURS!** Jackpot closes in ${hoursLeft} hours!\n💰 **$${lotteryData.jackpot.toFixed(2)} VEX** could be YOURS!\n🏃‍♂️ **Don't miss your chance at financial freedom!**`;
+            description = `⏰ **FINAL HOURS!** Jackpot closes in ${hoursLeft} hours!\n💰 **${lotteryData.jackpot.toFixed(2)} VEX** could be YOURS!\n🏃‍♂️ **Don't miss your chance at financial freedom!**`;
         }
         
         const lotteryUsage = userData.stats.lotteryTicketsBought || 0;
@@ -101,7 +101,7 @@ module.exports = {
         
         const surpriseBonus = Math.random() < 0.2 ? Math.floor(lotteryData.jackpot * 0.1) : 0;
         if (surpriseBonus > 0) {
-            description += `\n✨ **SURPRISE JACKPOT BOOST: +$${surpriseBonus} VEX!**`;
+            description += `\n✨ **SURPRISE JACKPOT BOOST: +${surpriseBonus} VEX!**`;
         }
         
         const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
@@ -118,8 +118,8 @@ module.exports = {
             .setDescription(`🔥 ${description} 💸\n\n🚨 **FOMO ALERT:** Every minute you wait, someone else could claim YOUR j...`)
             .setColor(isUrgent ? constants.COLORS.ERROR : constants.COLORS.GOLD)
             .addFields(
-                { name: '🎯 Current Jackpot', value: `$${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
-                { name: '🎫 Ticket Price', value: `$${constants.LOTTERY.TICKET_PRICE.toFixed(2)} VEX`, inline: true },
+                { name: '🎯 Current Jackpot', value: `${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
+                { name: '🎫 Ticket Price', value: `${constants.LOTTERY.TICKET_PRICE.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Tickets Sold', value: `${lotteryData.ticketsSold}`, inline: true },
                 { name: '⏰ Draw Time', value: `<t:${lotteryData.drawTime}:F>`, inline: false },
                 { name: '🏆 Prize Distribution', value: this.getPrizeDistribution(lotteryData.jackpot), inline: false },
@@ -140,7 +140,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const jackpotProgress = Math.min(lotteryData.jackpot / 10000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Jackpot Growth: $${lotteryData.jackpot.toFixed(2)} VEX`,
+            `Jackpot Growth: ${lotteryData.jackpot.toFixed(2)} VEX`,
             jackpotProgress,
             constants.COLORS.GOLD
         );
@@ -163,7 +163,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n⚠️ **WARNING:** While you're earning, others are buying YOUR winning tickets!`)
+                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n⚠️ **WARNING:** While you're earning, others are buying YOUR winning tickets!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -232,9 +232,9 @@ module.exports = {
             .setDescription(`🎉 ${description}\n\n🔥 **You're now in the running for LIFE-CHANGING money!** 💸\n\n📈 **Social ...`)
             .addFields(
                 { name: '🎫 Your Tickets', value: newTickets.join(', '), inline: false },
-                { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
-                { name: '🔥 Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
+                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Tickets This Week', value: `${userData.lotteryTickets[lotteryWeek].length}`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -272,11 +272,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOTTERY} Your Lottery Tickets`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You have ${userTickets.length} ticket${userTickets.length >...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You have ${userTickets.length} ticket${userTickets.length > 1 ? 's' : ''} for the current lottery!\n\n🎯 **Good luck in the next draw!**`)
             .addFields(
                 { name: '🎫 Your Tickets', value: userTickets.join(', '), inline: false },
                 { name: '🎯 Win Chance', value: `${winChance.toFixed(3)}%`, inline: true },
-                { name: '🏆 Potential Prize', value: `Up to $${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
+                { name: '🏆 Potential Prize', value: `Up to ${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
                 { name: '⏰ Draw Time', value: `<t:${lotteryData.drawTime}:R>`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
@@ -338,7 +338,7 @@ module.exports = {
         const second = jackpot * 0.3;
         const third = jackpot * 0.2;
         
-        return `🥇 1st Place: $${first.toFixed(2)} VEX\n🥈 2nd Place: $${second.toFixed(2)} VEX\n🥉 3rd Place: $${third.toFixed(2)} VEX`;
+        return `🥇 1st Place: ${first.toFixed(2)} VEX\n🥈 2nd Place: ${second.toFixed(2)} VEX\n🥉 3rd Place: ${third.toFixed(2)} VEX`;
     },
     
     getOddsInfo() {

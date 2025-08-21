@@ -111,7 +111,7 @@ module.exports = {
             await user.addVEX(surpriseBonus, 'governance_participation_bonus');
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ DEMOCRACY BONUS!`)
-                .setDescription(`🎉 **Surprise reward for governance participation!**\n💸 **+$${surpriseBonus} VEX** for being an ...`)
+                .setDescription(`🎉 **Surprise reward for governance participation!**\n💸 **+${surpriseBonus} VEX** for being an active democracy participant!`)
                 .setColor(constants.COLORS.SUCCESS);
             
             setTimeout(() => interaction.followUp({ embeds: [bonusEmbed], ephemeral: true }), 2000);
@@ -334,7 +334,7 @@ module.exports = {
         if (userData.vexBalance < requiredStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Stake`)
-                .setDescription(`You need ${requiredStake} VEX to create a proposal.\nYour balance: $${userData.vexBalance.toFixed...`)
+                .setDescription(`You need ${requiredStake} VEX to create a proposal.\nYour balance: $${userData.vexBalance.toFixed(2)}`)
                 .addFields(
                     { name: '💡 Why Staking?', value: 'Staking prevents spam and ensures serious proposals', inline: false },
                     { name: '💰 Stake Return', value: 'Your stake is returned when voting ends', inline: false }
@@ -385,7 +385,7 @@ module.exports = {
             .addFields(
                 { name: '🆔 Proposal ID', value: proposalId, inline: true },
                 { name: '📂 Category', value: category.charAt(0).toUpperCase() + category.slice(1), inline: true },
-                { name: '💰 Stake', value: `$${requiredStake.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Stake', value: `${requiredStake.toFixed(2)} VEX`, inline: true },
                 { name: '📝 Description', value: description, inline: false },
                 { name: '⏰ Voting Period', value: '7 days from now', inline: true },
                 { name: '🗳️ How to Vote', value: `/dao vote ${proposalId} <choice>`, inline: true }

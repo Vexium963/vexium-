@@ -172,7 +172,7 @@ module.exports = {
         const statusEmoji = this.getStatusEmoji(userData.profile.status || 'Active');
         
         embed.addFields(
-            { name: '💰 Net Worth', value: `$${userData.networth.toFixed(2)} VEX ${wealthRank}`, inline: true },
+            { name: '💰 Net Worth', value: `${userData.networth.toFixed(2)} VEX ${wealthRank}`, inline: true },
             { name: '🎯 Level Progress', value: `Level ${userData.level}\nSee progress bar below`, inline: true },
             { name: '📊 Status', value: `${statusEmoji} ${userData.profile.status || 'Active'}${recentActivity ? ' 🟢 ONLINE' : ''}`, inline: true }
         );
@@ -226,7 +226,7 @@ module.exports = {
         
         if (isOwnProfile) {
             embed.addFields(
-                { name: '📈 Total Earned', value: `$${userData.stats.totalEarned.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Total Earned', value: `${userData.stats.totalEarned.toFixed(2)} VEX`, inline: true },
                 { name: '🎮 Games Played', value: userData.stats.gamesPlayed.toString(), inline: true },
                 { name: '🤝 Trades Completed', value: userData.stats.tradesCompleted.toString(), inline: true }
             );
@@ -303,7 +303,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bio Too Long`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Bio must be 200 characters or less.\n\n${fomoMessage}\n\n${cons...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Bio must be 200 characters or less.\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Keep it concise and engaging!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -415,7 +415,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Status Updated!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} Your status is now: ${statusEmojis[status] || '⚪'} **${st...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} Your status is now: ${statusEmojis[status] || '⚪'} **${status.charAt(0).toUpperCase() + status.slice(1)}**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Your profile is looking amazing!**`)
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
             .setTimestamp();

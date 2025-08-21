@@ -112,9 +112,9 @@ module.exports = {
             .setTitle(`🎉 ${milestoneMessage ? '🏆 MILESTONE ACHIEVED!' : 'Rewards Claimed!'}`)
             .setDescription(`💸 You've claimed ${availableRewards.length} reward(s)!${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}${variableReward ? `\n✨ ${variableReward}` : ''}\n\n👥 ${socialProof}\n\n🔥 **Streak bonus active!** Keep claiming for bigger rewards!`)
             .addFields(
-                { name: '💰 Total Value', value: `$${totalValue.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Value', value: `${totalValue.toFixed(2)} VEX`, inline: true },
                 { name: '🎁 Rewards Claimed', value: availableRewards.map(r => `• ${r.name}: $${r.value.toFixed(2)}`).join('\n'), inline: false },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(milestoneMessage ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -132,7 +132,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.GIFT} Reward Status`)
-            .setDescription(`📈 Your current reward status and upcoming opportunities\n\n🔥 **${Math.floor(Math.random() * 50)...`)
+            .setDescription(`📈 Your current reward status and upcoming opportunities\n\n🔥 **${Math.floor(Math.random() * 50) + 20} users claimed rewards in the last hour!**`)
             .addFields(
                 { 
                     name: '🎁 Available Now', 
@@ -149,7 +149,7 @@ module.exports = {
                     inline: false 
                 },
                 { name: '📊 Total Claimed', value: `${userData.stats.rewardsClaimed || 0} rewards`, inline: true },
-                { name: '💎 Total Value', value: `$${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
+                { name: '💎 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
@@ -185,7 +185,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.HISTORY} Reward History`)
-            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** $${(userData.stats.totalRew...`)
+            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** ${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`)
             .addFields(
                 { 
                     name: '📜 Recent Claims', 
@@ -195,7 +195,7 @@ module.exports = {
                     inline: false 
                 },
                 { name: '🎁 Total Rewards', value: `${userData.stats.rewardsClaimed || 0}`, inline: true },
-                { name: '💰 Total Value', value: `$${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.INFO)
             .setTimestamp();

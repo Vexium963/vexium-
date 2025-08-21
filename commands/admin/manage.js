@@ -199,7 +199,7 @@ module.exports = {
         
         if (isLargeAmount) {
             title = `💎 MASSIVE BALANCE CHANGE!`;
-            description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed $${amount.toFixed(2)} VEX for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
+            description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed ${amount.toFixed(2)} VEX for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
         }
         
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
@@ -211,8 +211,8 @@ module.exports = {
             .addFields(
                 { name: '👤 Target User', value: `${targetUser.username} (<@${targetUser.id}>)`, inline: true },
                 { name: '⚙️ Admin Action', value: `${action.charAt(0).toUpperCase() + action.slice(1)} ${impactLevel}`, inline: true },
-                { name: '💰 Amount Changed', value: `$${amount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 New Balance', value: `$${newBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Changed', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `${newBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 Impact Level', value: `${impactLevel} ${isLargeAmount ? '🚀' : '⭐'}`, inline: true },
                 { name: '⏰ Executed By', value: `<@${interaction.user.id}>`, inline: true }
             )
@@ -319,9 +319,9 @@ module.exports = {
             .setDescription(`✨ Successfully reset account for ${targetUser.username}`)
             .addFields(
                 { name: '👤 User', value: targetUser.username, inline: true },
-                { name: '💰 Previous Balance', value: `$${backupData.oldBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Previous Balance', value: `${backupData.oldBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 Previous Level', value: backupData.oldLevel.toString(), inline: true },
-                { name: '📊 New Balance', value: `$${constants.VEX_TOKEN.STARTING_BALANCE.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `${constants.VEX_TOKEN.STARTING_BALANCE.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 New Level', value: '1', inline: true }
             )
             .setColor(constants.COLORS.WARNING)
@@ -341,7 +341,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.TREASURY} VexiumVerse Treasury`)
             .setDescription(`💰 Current treasury status and recent transactions - The heart of VexiumVerse wealth!`)
             .addFields(
-                { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
             )
             .setColor(constants.COLORS.TREASURY)

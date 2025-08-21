@@ -34,10 +34,10 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward Charging Up!`)
-                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(...`)
+                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **${nextReward.toFixed(2)} VEX** reward!`)
                 .addFields(
                     { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
-                    { name: '💰 Reward Building', value: `$${nextReward.toFixed(2)} VEX`, inline: true },
+                    { name: '💰 Reward Building', value: `${nextReward.toFixed(2)} VEX`, inline: true },
                     { name: '📊 Others Claiming', value: `${Math.floor(Math.random() * 50) + 20} players active now!`, inline: true }
                 )
                 .setColor(hoursLeft <= 2 ? constants.COLORS.VEX : constants.COLORS.WARNING)
@@ -84,11 +84,11 @@ module.exports = {
         const finalReward = roundedReward + surpriseBonus;
         
         let title = `${constants.EMOJIS.GIFT} Daily VEX Claimed!`;
-        let description = `💰 **$${finalReward.toFixed(2)} VEX** earned for day ${userData.dailyStreak}!`;
+        let description = `💰 **${finalReward.toFixed(2)} VEX** earned for day ${userData.dailyStreak}!`;
         
         if (userData.dailyStreak >= 7) {
             title = `🔥 STREAK MASTER! Daily Reward Claimed!`;
-            description = `💰 **$${finalReward.toFixed(2)} VEX** + **STREAK POWER BONUS**!`;
+            description = `💰 **${finalReward.toFixed(2)} VEX** + **STREAK POWER BONUS**!`;
         }
         
         if (isStreakMilestone) {
@@ -97,7 +97,7 @@ module.exports = {
         }
         
         if (surpriseBonus > 0) {
-            description += `\n✨ **SURPRISE BONUS: +$${surpriseBonus} VEX!**`;
+            description += `\n✨ **SURPRISE BONUS: +${surpriseBonus} VEX!**`;
         }
         
         const progressToNext = Math.min(userData.dailyStreak, 30) / 30;
@@ -123,7 +123,7 @@ module.exports = {
                 { name: '💰 Base Reward', value: `$${baseReward.toFixed(2)}`, inline: true },
                 { name: '🔥 Streak Power', value: `$${streakBonus.toFixed(2)} ${userData.dailyStreak >= 30 ? '👑' : ''}`, inline: true },
                 { name: '🎲 Lucky Bonus', value: `$${(randomBonus + surpriseBonus).toFixed(2)}`, inline: true },
-                { name: '📊 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 XP Gained', value: `+${xpGained} XP ${xpResult.leveledUp ? '🆙' : ''}`, inline: true },
                 { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
                 { name: '⏰ Next Reward', value: `<t:${Math.floor((Date.now() + 86400000) / 1000)}:R> - Don't break the chain!`, inline: false }
@@ -160,7 +160,7 @@ module.exports = {
                 .setTitle(`⬆️ Level Up!`)
                 .setDescription(`⬆️ Congratulations! You've reached **Level ${xpResult.newLevel}**!\n\n✨ Your empire grows stronge...`)
                 .addFields(
-                    { name: '🎁 Level Reward', value: `$${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD)
                 .setTimestamp();
@@ -174,7 +174,7 @@ module.exports = {
                     .setTitle(`🏆 Achievement Unlocked!`)
                     .setDescription(`🏆 **${achievement.name}**\n${achievement.description}\n\n✨ You're becoming a VexiumVerse legend!...`)
                     .addFields(
-                        { name: '💰 Reward', value: `$${achievement.reward.toFixed(2)} VEX`, inline: true }
+                        { name: '💰 Reward', value: `${achievement.reward.toFixed(2)} VEX`, inline: true }
                     )
                     .setColor(constants.COLORS.GOLD)
                     .setTimestamp();
@@ -191,7 +191,7 @@ module.exports = {
                 .setTitle(`${constants.EMOJIS.STAR} Weekly Streak Bonus!`)
                 .setDescription(`🔥 Amazing! You've maintained a ${userData.dailyStreak}-day streak!\n\n💸 Weekly bonuses are wher...`)
                 .addFields(
-                    { name: '🎁 Bonus Reward', value: `$${weeklyBonus.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Bonus Reward', value: `${weeklyBonus.toFixed(2)} VEX`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD)
                 .setTimestamp();

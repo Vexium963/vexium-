@@ -278,19 +278,19 @@ module.exports = {
     getUserValue(userData, category) {
         switch (category) {
             case 'networth':
-                return `$${userData.networth.toFixed(2)} VEX`;
+                return `${userData.networth.toFixed(2)} VEX`;
             case 'level':
                 return `Level ${userData.level} (${userData.xp} XP)`;
             case 'vexBalance':
-                return `$${userData.vexBalance.toFixed(2)} VEX`;
+                return `${userData.vexBalance.toFixed(2)} VEX`;
             case 'bankBalance':
-                return `$${userData.bankBalance.toFixed(2)} VEX`;
+                return `${userData.bankBalance.toFixed(2)} VEX`;
             case 'totalEarned':
-                return `$${(userData.stats?.totalEarned || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalEarned || 0).toFixed(2)} VEX`;
             case 'totalEntertainmentPlayed':
-                return `$${(userData.stats?.totalEntertainmentPlayed || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalEntertainmentPlayed || 0).toFixed(2)} VEX`;
             case 'totalInvested':
-                return `$${(userData.stats?.totalInvested || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalInvested || 0).toFixed(2)} VEX`;
             case 'gamesPlayed':
                 return `${userData.stats?.gamesPlayed || 0} games`;
             case 'tradesCompleted':

@@ -131,7 +131,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: $${userData.vexBala...`)
+                .setDescription(`⏳ You need ${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -192,9 +192,9 @@ module.exports = {
                 { name: '🆔 Token ID', value: `#${nftId}`, inline: true },
                 { name: '📝 Description', value: description, inline: false },
                 { name: '🎨 Traits', value: this.formatTraits(nft.traits), inline: false },
-                { name: '💰 Mint Cost', value: `$${cost.toFixed(2)} VEX`, inline: true },
-                { name: '📈 Est. Value', value: `$${nft.marketValue.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Mint Cost', value: `${cost.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(this.getRarityColor(rarity))
             .setFooter({ text: `NFT #${nftId} • VexiumVerse Collection` })
@@ -399,7 +399,7 @@ module.exports = {
     getMostValuable(nfts) {
         if (nfts.length === 0) return 'None';
         const most = nfts.reduce((max, nft) => nft.marketValue > max.marketValue ? nft : max);
-        return `**${most.name}**\n$${most.marketValue.toFixed(2)} VEX`;
+        return `**${most.name}**\n${most.marketValue.toFixed(2)} VEX`;
     },
     
     getRecentMints(nfts) {

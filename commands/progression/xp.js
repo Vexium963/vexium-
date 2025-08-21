@@ -108,7 +108,7 @@ module.exports = {
         const levelRewards = [];
         for (let level = userData.level + 1; level <= Math.min(userData.level + 5, 100); level++) {
             const reward = level * 0.50;
-            levelRewards.push(`**Level ${level}**: $${reward.toFixed(2)} VEX`);
+            levelRewards.push(`**Level ${level}**: ${reward.toFixed(2)} VEX`);
         }
         
         if (levelRewards.length > 0) {

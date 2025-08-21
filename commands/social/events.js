@@ -231,7 +231,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Event Joined!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined **${event.name}**!\n\n${constants.AN...`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined **${event.name}**!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Get ready for an amazing experience!**\n\n${constants.ANIMATED_EMOJIS.FIRE} Event starts soon!`)
             .addFields(
                 { name: '🎯 Event', value: event.name, inline: true },
                 { name: '📝 Objective', value: event.objective, inline: true },
@@ -408,7 +408,7 @@ module.exports = {
             const reward = event.rewardAmount || 50;
             totalRewards += reward;
             claimedEvents++;
-            rewardDetails.push(`${event.icon} **${event.name}**: $${reward.toFixed(2)} VEX`);
+            rewardDetails.push(`${event.icon} **${event.name}**: ${reward.toFixed(2)} VEX`);
             
             eventData.rewardsClaimed = true;
         }
@@ -437,8 +437,8 @@ module.exports = {
             .setDescription(`Successfully claimed rewards from ${claimedEvents} completed event${claimedEvents > 1 ? 's' : ''}!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🎁 Rewards Claimed', value: rewardDetails.join('\n'), inline: false },
-                { name: '💰 Total Earned', value: `$${totalRewards.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Earned', value: `${totalRewards.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Keep participating in events for more rewards!' })
@@ -447,7 +447,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Rewards Claimed: $${totalRewards.toFixed(2)} VEX`,
+            `Rewards Claimed: ${totalRewards.toFixed(2)} VEX`,
             1.0,
             constants.COLORS.SUCCESS
         );
@@ -511,7 +511,7 @@ module.exports = {
     formatRequirements(requirements) {
         const reqs = [];
         if (requirements.minLevel) reqs.push(`Level ${requirements.minLevel}+`);
-        if (requirements.minBalance) reqs.push(`$${requirements.minBalance.toFixed(2)} VEX balance`);
+        if (requirements.minBalance) reqs.push(`${requirements.minBalance.toFixed(2)} VEX balance`);
         return reqs.join('\n') || 'None';
     },
     

@@ -52,7 +52,7 @@ module.exports = {
         
         if (urgencyBonus > 0) {
             await interaction.followUp({
-                content: `✨ **SURPRISE PRESTIGE BONUS!** +$${urgencyBonus} VEX added to your prestige reward for being an active player!`,
+                content: `✨ **SURPRISE PRESTIGE BONUS!** +${urgencyBonus} VEX added to your prestige reward for being an active player!`,
                 ephemeral: true
             });
         }
@@ -128,7 +128,7 @@ module.exports = {
         
         if (prestigeData.canPrestige) {
             embed.addFields(
-                { name: '💰 VEX Bonus', value: `$${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
+                { name: '💰 VEX Bonus', value: `${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
                 { name: '⭐ Prestige Level', value: `${userData.prestige || 0} → ${(userData.prestige || 0) + 1}`, inline: true },
                 { name: '🎯 Current Level', value: `${userData.level}`, inline: true },
                 { name: '🔄 Reset To', value: 'Level 1', inline: true },
@@ -227,13 +227,13 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CROWN} Prestige Complete!`)
-            .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ ${milestoneMes...`)
+            .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ **You've unlocked exclusive prestige benefits and multipliers!**`)
             .addFields(
-                { name: '💰 VEX Bonus Received', value: `$${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
+                { name: '💰 VEX Bonus Received', value: `${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
                 { name: '⭐ New Prestige Level', value: `${userData.prestige}`, inline: true },
                 { name: '🔄 Level Reset', value: `${oldLevel} → 1`, inline: true },
                 { name: '💎 Earning Multiplier', value: `+${(prestigeData.multiplierBonus * 100).toFixed(1)}%`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🏆 Exclusive Perks', value: prestigeData.perks.join('\n'), inline: false }
             )
             .setColor(constants.COLORS.GOLD)

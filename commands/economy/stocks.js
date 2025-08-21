@@ -201,7 +201,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} 💔 SO CLOSE TO WEALTH!`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SO CLOSE TO WEALTH!**\n\n**You need:** $${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** $${userData.vexBalance.toFixed(2)} VEX\n\n${constants.ANIMATED_EMOJIS.EXPLOSION} **FOMO ALERT:** ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!\n\n${constants.ANIMATED_EMOJIS.ROCKET} **DON'T MISS OUT ON MILLIONS!**`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SO CLOSE TO WEALTH!**\n\n**You need:** ${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** ${userData.vexBalance.toFixed(2)} VEX\n\n${constants.ANIMATED_EMOJIS.EXPLOSION} **FOMO ALERT:** ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!\n\n${constants.ANIMATED_EMOJIS.ROCKET} **DON'T MISS OUT ON MILLIONS!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -344,8 +344,8 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.STOCKS} ${interaction.user.displayName}'s Stock Portfolio`)
             .setDescription('Your virtual stock investments and performance')
             .addFields(
-                { name: '💼 Portfolio Summary', value: `**Total Value**: $${totalValue.toFixed(2)} VEX\n**Total Invested**: $${totalInvested.toFixed(2)} VEX\n**Positions**: ${positions.length}`, inline: true },
-                { name: '📊 Performance', value: `**Gain/Loss**: ${totalGainLoss >= 0 ? '+' : ''}$${totalGainLoss.toFixed(2)} VEX\n**Return**: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%\n**Stocks Owned**: ${userData.stats.stocksPurchased || 0}`, inline: true }
+                { name: '💼 Portfolio Summary', value: `**Total Value**: ${totalValue.toFixed(2)} VEX\n**Total Invested**: ${totalInvested.toFixed(2)} VEX\n**Positions**: ${positions.length}`, inline: true },
+                { name: '📊 Performance', value: `**Gain/Loss**: ${totalGainLoss >= 0 ? '+' : ''}${totalGainLoss.toFixed(2)} VEX\n**Return**: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%\n**Stocks Owned**: ${userData.stats.stocksPurchased || 0}`, inline: true }
             )
             .setColor(totalGainLoss >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setThumbnail(interaction.user.displayAvatarURL())

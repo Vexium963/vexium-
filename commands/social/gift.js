@@ -124,7 +124,7 @@ module.exports = {
         if (vexAmount > constants.LIMITS.MAX_GIFT) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Gift Too Large`)
-                .setDescription(`💸 Whoa there, big spender! Maximum gift is $${constants.LIMITS.MAX_GIFT.toFixed(2)} VEX. Save so...`)
+                .setDescription(`💸 Whoa there, big spender! Maximum gift is ${constants.LIMITS.MAX_GIFT.toFixed(2)} VEX. Save some for yourself!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -133,7 +133,7 @@ module.exports = {
         if (vexAmount > 0 && vexAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`💳 Your heart is bigger than your wallet! You only have $${userData.vexBalance.toFixed(2)} VEX. E...`)
+                .setDescription(`💳 Your heart is bigger than your wallet! You only have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -201,7 +201,7 @@ module.exports = {
         
         let giftDescription = '';
         if (vexAmount > 0) {
-            giftDescription += `💰 $${vexAmount.toFixed(2)} VEX`;
+            giftDescription += `💰 ${vexAmount.toFixed(2)} VEX`;
         }
         if (itemId) {
             if (giftDescription) giftDescription += '\n';
@@ -245,7 +245,7 @@ module.exports = {
         if (giftTax > 0) {
             embed.addFields({
                 name: '💸 Gift Tax',
-                value: `$${giftTax.toFixed(2)} VEX (2%)`,
+                value: `${giftTax.toFixed(2)} VEX (2%)`,
                 inline: true
             });
         }
@@ -369,7 +369,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Random Gift Sent!`)
-            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage...`)
+            .setDescription(`You anonymously sent **${amount.toFixed(2)} VEX** to a random active user!\n\n${constants.ANIMATED_EMOJIS.GIFT} **Your kindness makes the community stronger!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Keep spreading the love!`)
             .addFields(
                 { name: '🎯 Impact', value: 'Your kindness helps build the VexiumVerse community!', inline: false }
             )
@@ -386,7 +386,7 @@ module.exports = {
             const targetUser = await interaction.client.users.fetch(randomUser.userId);
             const anonymousEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} Anonymous Gift Received!`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.MYSTERY} Someone in the VexiumVerse community sent you **$${amount.to...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MYSTERY} Someone in the VexiumVerse community sent you **${amount.toFixed(2)} VEX**!\n\n${constants.ANIMATED_EMOJIS.HEART} **A random act of kindness!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Pay it forward when you can!`)
                 .addFields(
                     { name: '💝 Message', value: 'A kind soul wanted to brighten your day!', inline: false }
                 )

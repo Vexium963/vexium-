@@ -88,7 +88,7 @@ module.exports = {
         }
         
         if (hasUnclaimed) {
-            description += `\n\n💰 **URGENT:** $${totalRewards.toFixed(2)} VEX waiting to be claimed!`;
+            description += `\n\n💰 **URGENT:** ${totalRewards.toFixed(2)} VEX waiting to be claimed!`;
         }
         
         const timeLeft = this.getTimeUntilMidnight();
@@ -107,7 +107,7 @@ module.exports = {
         
         for (const challenge of dailyChallenges) {
             const status = challenge.completed ? (challenge.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${challenge.progress}/${challenge.target}`;
-            const reward = `$${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
+            const reward = `${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
             
             embed.addFields({
                 name: `${challenge.emoji} ${challenge.name}`,
@@ -119,7 +119,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💰 Unclaimed Rewards',
-                value: `$${totalRewards.toFixed(2)} VEX available to claim!`,
+                value: `${totalRewards.toFixed(2)} VEX available to claim!`,
                 inline: false
             });
         }
@@ -182,7 +182,7 @@ module.exports = {
         
         for (const challenge of weeklyChallenges) {
             const status = challenge.completed ? (challenge.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${challenge.progress}/${challenge.target}`;
-            const reward = `$${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
+            const reward = `${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
             embed.addFields({
                 name: `${challenge.emoji} ${challenge.name}`,
                 value: `${challenge.description}\n**Progress**: ${challenge.progress}/${challenge.target}\n**Reward**: ${reward}\n**Status**: ${status}`,
@@ -193,7 +193,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💎 Unclaimed Weekly Rewards',
-                value: `$${totalRewards.toFixed(2)} VEX + bonus XP available!`,
+                value: `${totalRewards.toFixed(2)} VEX + bonus XP available!`,
                 inline: false
             });
         }

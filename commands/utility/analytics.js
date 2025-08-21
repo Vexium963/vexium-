@@ -100,7 +100,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ANALYTICS} ${interaction.user.displayName}'s Analytics Dashboard`)
-            .setDescription(`🚀 **Your Empire at a Glance** - Comprehensive overview of your VexiumVerse domination!\n\n${mile...`)
+            .setDescription(`🚀 **Your Empire at a Glance** - Comprehensive overview of your VexiumVerse domination!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Track your progress and optimize your strategy!**`)
             .addFields(
                 { name: '💰 Wealth Overview', value: this.formatWealthStats(userData), inline: true },
                 { name: '📊 Activity Summary', value: this.formatActivityStats(stats), inline: true },
@@ -158,11 +158,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Analytics`)
-            .setDescription(`💸 **Master Your Wealth Strategy** - Detailed analysis of your economic domination!\n\n${variable...`)
+            .setDescription(`💸 **Master Your Wealth Strategy** - Detailed analysis of your economic domination!\n\n${variableReward || ''}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Optimize your wealth-building strategy!**`)
             .addFields(
                 { name: '💵 Income Sources', value: this.formatIncomeBreakdown(stats), inline: true },
                 { name: '💸 Spending Categories', value: this.formatSpendingBreakdown(stats), inline: true },
-                { name: '📊 Key Metrics', value: `**Total Earned**: $${totalEarned.toFixed(2)}\n**Total Spent**: $${totalSpent.toFixed(2)}\n**Net Profit**: $${netProfit.toFixed(2)}\n**Avg Daily**: $${avgDailyEarnings.toFixed(2)}`, inline: true },
+                { name: '📊 Key Metrics', value: `**Total Earned**: $${(stats.totalEarned || 0).toFixed(2)}\n**Total Spent**: $${(stats.totalSpent || 0).toFixed(2)}\n**Net Profit**: $${((stats.totalEarned || 0) - (stats.totalSpent || 0)).toFixed(2)}\n**Avg Daily**: $${((stats.totalEarned || 0) / Math.max(stats.daysActive || 1, 1)).toFixed(2)}`, inline: true },
                 { name: '🏦 Banking Activity', value: this.formatBankingStats(stats), inline: true },
                 { name: '📈 Investment Performance', value: this.formatInvestmentStats(userData), inline: true },
                 { name: '🎯 Efficiency Ratings', value: this.formatEfficiencyStats(stats), inline: true }

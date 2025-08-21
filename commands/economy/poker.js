@@ -137,7 +137,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💰 You need $${tournament.buyIn.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}....`)
+                .setDescription(`💰 You need ${tournament.buyIn.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX....`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -184,11 +184,11 @@ module.exports = {
             .setDescription(`**${tournament.name}** tournament completed!`)
             .addFields(
                 { name: '🏆 Final Placement', value: `${placement}/${tournament.maxPlayers}`, inline: true },
-                { name: '💰 Buy-in', value: `$${tournament.buyIn.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Prize Won', value: `$${prize.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Rake', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Net Result', value: `${prize - tournament.buyIn >= 0 ? '+' : ''}$${(prize - tournament.buyIn).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Buy-in', value: `${tournament.buyIn.toFixed(2)} VEX`, inline: true },
+                { name: '🎁 Prize Won', value: `${prize.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Rake', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Net Result', value: `${prize - tournament.buyIn >= 0 ? '+' : ''}${(prize - tournament.buyIn).toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(placement <= 3 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setImage('attachment://progress.png')
@@ -213,10 +213,10 @@ module.exports = {
             
             embed.addFields({
                 name: `${tournament.name}`,
-                value: `**Buy-in**: $${tournament.buyIn.toFixed(2)} VEX\n` +
+                value: `**Buy-in**: ${tournament.buyIn.toFixed(2)} VEX\n` +
                        `**Players**: ${tournament.maxPlayers}\n` +
-                       `**Prize Pool**: $${prizePool.toFixed(2)} VEX\n` +
-                       `**1st Place**: $${firstPlace.toFixed(2)} VEX\n` +
+                       `**Prize Pool**: ${prizePool.toFixed(2)} VEX\n` +
+                       `**1st Place**: ${firstPlace.toFixed(2)} VEX\n` +
                        `**Skill Level**: ${tournament.skillLevel}`,
                 inline: true
             });
@@ -265,7 +265,7 @@ module.exports = {
                 { name: '🎯 Tournaments Played', value: `${tournaments}`, inline: true },
                 { name: '🏆 Top 3 Finishes', value: `${wins}`, inline: true },
                 { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
-                { name: '💰 Total Winnings', value: `$${(stats.pokerWinnings || 0).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Winnings', value: `${(stats.pokerWinnings || 0).toFixed(2)} VEX`, inline: true },
                 { name: '🎲 Best Finish', value: stats.pokerBestFinish ? `${stats.pokerBestFinish}` : 'N/A', inline: true },
                 { name: '🔥 Current Streak', value: `${stats.pokerStreak || 0}`, inline: true }
             )

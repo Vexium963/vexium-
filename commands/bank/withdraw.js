@@ -47,7 +47,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Bank Funds`)
-                .setDescription(`⏳ You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.\n\n${fomoMessage}\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX instantly!\n📈 **${Math.floor(Math.random() * 30) + 15} players** are earning VEX right now!`)
+                .setDescription(`⏳ You only have ${userData.bankBalance.toFixed(2)} VEX in your bank account.\n\n${fomoMessage}\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX instantly!\n📈 **${Math.floor(Math.random() * 30) + 15} players** are earning VEX right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -92,7 +92,7 @@ module.exports = {
         if (amount > availableAmount && !force) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Funds Locked`)
-                .setDescription(`⏳ Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n🔥 $${lockedAmount.toFixe...`)
+                .setDescription(`⏳ Only ${availableAmount.toFixed(2)} VEX is available for withdrawal.\n🔥 ${lockedAmount.toFixed(2)}`)
                 .addFields(
                     { name: '💡 Options', value: 'Use `force: true` to withdraw locked funds with 10% penalty', inline: false }
                 )
@@ -116,10 +116,10 @@ module.exports = {
         if (totalCost > userData.bankBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Fees`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Total cost including taxes and penalties: $${totalCost.toFix...`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Total cost including taxes and penalties: ${totalCost.toFixed(2)} VEX\n💰 Your bank balance: ${userData.bankBalance.toFixed(2)} VEX\n\n💡 **Tip:** Consider the withdrawal fees before proceeding!`)
                 .addFields(
-                    { name: '💰 Withdrawal', value: `$${amount.toFixed(2)}`, inline: true },
-                    { name: '💸 Tax', value: `$${taxResult.taxAmount.toFixed(2)}`, inline: true },
+                    { name: '💰 Withdrawal', value: `${amount.toFixed(2)}`, inline: true },
+                    { name: '💸 Tax', value: `${taxResult.taxAmount.toFixed(2)}`, inline: true },
                     { name: '⚠️ Penalty', value: `$${earlyWithdrawalPenalty.toFixed(2)}`, inline: true }
                 )
                 .setColor(constants.COLORS.ERROR);
@@ -172,18 +172,18 @@ module.exports = {
         const socialProof = Math.random() < 0.3;
         
         let title = `${constants.EMOJIS.SUCCESS} Withdrawal Successful!`;
-        let description = `💰 **$${amount.toFixed(2)} VEX** successfully moved to your wallet!`;
+        let description = `💰 **${amount.toFixed(2)} VEX** successfully moved to your wallet!`;
         
         if (isFrequentUser) {
             title = `🏆 VIP WITHDRAWAL COMPLETE!`;
-            description = `💎 **Expert Trader Alert!** $${amount.toFixed(2)} VEX withdrawn!\n👑 **${withdrawalCount} withdrawals completed** - You're a financial master!`;
+            description = `💎 **Expert Trader Alert!** ${amount.toFixed(2)} VEX withdrawn!\n👑 **${withdrawalCount} withdrawals completed** - You're a financial master!`;
         } else if (isNewUser) {
             description += `\n🌟 **Building your financial empire!** (${withdrawalCount}/10 withdrawals)`;
         }
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'withdrawal_loyalty_bonus');
-            description += `\n✨ **LOYALTY BONUS: +$${surpriseBonus} VEX!** Thanks for being awesome!`;
+            description += `\n✨ **LOYALTY BONUS: +${surpriseBonus} VEX!** Thanks for being awesome!`;
         }
         
         if (socialProof) {
@@ -195,11 +195,11 @@ module.exports = {
             .setTitle(title)
             .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${description}\n\n${constants.ANIMATED_EMOJIS.CHART} **W...`)
             .addFields(
-                { name: '💰 Withdrawn Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Tax Paid', value: `$${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Withdrawn Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Tax Paid', value: `${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Tax Rate', value: `${(taxResult.effectiveRate * 100).toFixed(2)}%`, inline: true },
-                { name: '💼 New Wallet Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '🏦 Remaining Bank Balance', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Wallet Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '🏦 Remaining Bank Balance', value: `${userData.bankBalance.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Withdrawal Stats', value: `🤝 **${withdrawalCount}** completed\n🏅 **${isFrequentUser ? 'Expert' : isNewUser ? 'Beginner' : 'Experienced'}** trader`, inline: true }
             )
             .setColor(isFrequentUser ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
@@ -208,7 +208,7 @@ module.exports = {
         if (earlyWithdrawalPenalty > 0) {
             embed.addFields({
                 name: '⚠️ Early Withdrawal Penalty',
-                value: `$${earlyWithdrawalPenalty.toFixed(2)} VEX (10%)`,
+                value: `${earlyWithdrawalPenalty.toFixed(2)} VEX (10%)`,
                 inline: true
             });
         }

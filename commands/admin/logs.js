@@ -92,9 +92,9 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TREASURY} Treasury Transaction Logs`)
-            .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${so...`)
+            .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Monitor the economic pulse of VexiumVerse!**`)
             .addFields(
-                { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
             )
             .setColor(constants.COLORS.TREASURY)
@@ -314,7 +314,7 @@ module.exports = {
             const totalBurned = burns.reduce((sum, burn) => sum + burn.amount, 0);
             embed.addFields({
                 name: '📊 Total Burned (shown)',
-                value: `$${totalBurned.toFixed(2)} VEX`,
+                value: `${totalBurned.toFixed(2)} VEX`,
                 inline: true
             });
         } else {

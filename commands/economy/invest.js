@@ -105,7 +105,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`🎉 INVESTMENT NEWBIE BONUS!`)
-                .setDescription(`🎉 **Welcome to wealth building!** Here's $${bonusAmount} VEX to boost your first investments!\n\...`)
+                .setDescription(`🎉 **Welcome to wealth building!** Here's ${bonusAmount} VEX to boost your first investments!\n\n🚀 **Smart move!** New investors who start early see 300% better returns!\n\n💡 **Pro tip:** Diversify across crypto, stocks, and real estate for maximum gains!`)
                 .setColor(constants.COLORS.SUCCESS)
                 .setTimestamp();
             
@@ -138,7 +138,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💥 **Investment opportunity slipping away!** You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **Hurry:** Market conditions change every hour!`)
+                .setDescription(`💥 **Investment opportunity slipping away!** You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${fomoMessage}\n\n🚀 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **Hurry:** Market conditions change every hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,7 +159,7 @@ module.exports = {
         if (amount < assetData.minInvestment) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is $${assetD...`)
+                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is ${assetData.minInvestment.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -205,7 +205,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const investmentProgress = Math.min(userData.stats.totalInvested / 10000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Investment Portfolio: $${userData.stats.totalInvested.toFixed(0)} VEX`,
+            `Investment Portfolio: ${userData.stats.totalInvested.toFixed(0)} VEX`,
             investmentProgress,
             constants.COLORS.SUCCESS
         );
@@ -214,12 +214,12 @@ module.exports = {
             .setTitle(`📈 Investment Purchased!`)
             .setDescription(`🎉 **Investment secured!** Successfully invested in **${assetData.name}**${variableReward ? `\n\n✨ ${variableReward}` : ''}${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}\n\n🔥 ${socialProof}\n\n🚀 **Your wealth empire grows stronger!**`)
             .addFields(
-                { name: '💰 Amount Invested', value: `$${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Invested', value: `${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Asset', value: `${assetData.name} (${assetData.symbol})`, inline: true },
                 { name: '📈 Expected Return', value: `${(assetData.baseReturn * 100).toFixed(1)}% annually`, inline: true },
                 { name: '⚠️ Volatility', value: `${(assetData.volatility * 100).toFixed(1)}%`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Total Invested', value: `$${userData.stats.totalInvested.toFixed(2)}`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 Total Invested', value: `${userData.stats.totalInvested.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -298,12 +298,12 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.MONEY} Investment Sold!`)
             .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Profits secured!** Successfully sold ${percentage}% of ...`)
             .addFields(
-                { name: '💰 Gross Sale', value: `$${sellAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Tax (2%)', value: `$${taxAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💵 Net Received', value: `$${netAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📈 Profit/Loss', value: `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Gross Sale', value: `${sellAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Tax (2%)', value: `${taxAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💵 Net Received', value: `${netAmount.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Profit/Loss', value: `${profit >= 0 ? '+' : ''}${profit.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Days Held', value: `${daysSincePurchase} days`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(profit >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setTimestamp();
@@ -365,7 +365,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CHART} Your Investment Portfolio`)
-            .setDescription(`**Total Portfolio Value**: $${totalInvestmentValue.toFixed(2)} VEX`)
+            .setDescription(`**Total Portfolio Value**: ${totalInvestmentValue.toFixed(2)} VEX`)
             .addFields(
                 { name: '💰 Total Invested', value: `$${totalInvested.toFixed(2)}`, inline: true },
                 { name: '📈 Total Profit/Loss', value: `${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`, inline: true },
@@ -380,7 +380,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const portfolioProgress = Math.min(totalInvestmentValue / 50000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Portfolio Value: $${totalInvestmentValue.toFixed(0)} VEX`,
+            `Portfolio Value: ${totalInvestmentValue.toFixed(0)} VEX`,
             portfolioProgress,
             totalProfit >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
         );

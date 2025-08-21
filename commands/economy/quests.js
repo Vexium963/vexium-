@@ -71,7 +71,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ SURPRISE QUEST BONUS!`)
-                .setDescription(`🎉 **Lucky you!** Random quest bonus activated!\n💸 **+$${urgencyBonus} VEX** for being an active...`)
+                .setDescription(`🎉 **Lucky you!** Random quest bonus activated!\n💸 **+${urgencyBonus} VEX** for being an active quester!`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: 'Random bonuses reward dedicated questers!' });
             
@@ -117,7 +117,7 @@ module.exports = {
         
         if (hasUrgentQuests) {
             title = `🔥 URGENT! Rewards Ready!`;
-            description = `⚡ **CLAIM YOUR REWARDS NOW!** Don't let them expire!\n\n💰 **$${totalRewards.toFixed(2)} VEX** waiting for you!`;
+            description = `⚡ **CLAIM YOUR REWARDS NOW!** Don't let them expire!\n\n💰 **${totalRewards.toFixed(2)} VEX** waiting for you!`;
         }
         
         if (questStreak >= 7) {
@@ -156,7 +156,7 @@ module.exports = {
         } else {
             for (const quest of activeQuests) {
                 const status = quest.completed ? (quest.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${quest.progress}/${quest.target}`;
-                const reward = `$${quest.reward.toFixed(2)} VEX + ${quest.xp} XP`;
+                const reward = `${quest.reward.toFixed(2)} VEX + ${quest.xp} XP`;
                 
                 embed.addFields({
                     name: `${quest.emoji} ${quest.name}`,
@@ -169,7 +169,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💰 Unclaimed Rewards',
-                value: `$${totalRewards.toFixed(2)} VEX + bonus XP available!`,
+                value: `${totalRewards.toFixed(2)} VEX + bonus XP available!`,
                 inline: false
             });
         }
@@ -341,7 +341,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.HISTORY} ${interaction.user.displayName}'s Quest History`)
             .setDescription('Your quest completion achievements and rewards')
             .addFields(
-                { name: '📊 Quest Statistics', value: `**Completed**: ${questsCompleted}\n**Total Rewards**: $${totalRewards.toFixed(2)} VEX\n**Average Reward**: $${questsCompleted > 0 ? (totalRewards / questsCompleted).toFixed(2) : '0.00'}`, inline: true },
+                { name: '📊 Quest Statistics', value: `**Completed**: ${questsCompleted}\n**Total Rewards**: ${totalRewards.toFixed(2)} VEX\n**Average Reward**: ${questsCompleted > 0 ? (totalRewards / questsCompleted).toFixed(2) : '0.00'} VEX`, inline: true },
                 { name: '🏆 Quest Mastery', value: `**Completion Rate**: ${this.getCompletionRate(userData)}%\n**Quest Rank**: ${this.getQuestRank(questsCompleted)}\n**Streak**: ${userData.stats.questStreak || 0}`, inline: true },
                 { name: '🎯 Categories', value: this.getQuestCategories(completedQuests), inline: true }
             )
@@ -364,7 +364,7 @@ module.exports = {
             for (const quest of recentQuests) {
                 embed.addFields({
                     name: `${quest.emoji} ${quest.name}`,
-                    value: `**Reward**: $${quest.reward.toFixed(2)} VEX + ${quest.xp} XP\n**Completed**: <t:${Math.floor(new Date(quest.completedAt).getTime() / 1000)}:R>`,
+                    value: `**Reward**: ${quest.reward.toFixed(2)} VEX + ${quest.xp} XP\n**Completed**: <t:${Math.floor(new Date(quest.completedAt).getTime() / 1000)}:R>`,
                     inline: true
                 });
             }

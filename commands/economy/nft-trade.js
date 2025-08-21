@@ -149,7 +149,7 @@ module.exports = {
         if (price > constants.LIMITS.MAX_NFT_PRICE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Price Too High`)
-                .setDescription(`Maximum NFT price is $${constants.LIMITS.MAX_NFT_PRICE.toFixed(2)} VEX.`)
+                .setDescription(`Maximum NFT price is ${constants.LIMITS.MAX_NFT_PRICE.toFixed(2)} VEX.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -193,10 +193,10 @@ module.exports = {
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: `${rarityEmojis[nft.rarity]} ${nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1)}`, inline: true },
-                { name: '💰 Price', value: `$${price.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price', value: `${price.toFixed(2)} VEX`, inline: true },
                 { name: '🆔 NFT ID', value: `#${nft.id}`, inline: true },
                 { name: '📋 Listing ID', value: `#${listingId}`, inline: true },
-                { name: '📈 Est. Value', value: `$${nft.marketValue.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX`, inline: true },
                 { name: '📝 Description', value: nft.description, inline: false },
                 { name: '🎨 Traits', value: this.formatTraits(nft.traits), inline: false }
             )
@@ -266,7 +266,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX (including 2% trading fee).\nYour balance: $${userData.vexB...`)
+                .setDescription(`You need ${totalCost.toFixed(2)} VEX (including 2% trading fee).\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -330,9 +330,9 @@ module.exports = {
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1), inline: true },
                 { name: '🆔 NFT ID', value: `#${nft.id}`, inline: true },
-                { name: '💰 Purchase Price', value: `$${listing.price.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Trading Fee', value: `$${tradingFee.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Purchase Price', value: `${listing.price.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Trading Fee', value: `${tradingFee.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '👤 Previous Owner', value: listing.sellerName, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -406,7 +406,7 @@ module.exports = {
             if (nft) {
                 const rarityEmoji = this.getRarityEmoji(nft.rarity);
                 embed.addFields({
-                    name: `${rarityEmoji} ${nft.name} - $${listing.price.toFixed(2)} VEX`,
+                    name: `${rarityEmoji} ${nft.name} - ${listing.price.toFixed(2)} VEX`,
                     value: `**ID**: #${listing.id}\n**Rarity**: ${nft.rarity}\n**Seller**: ${listing.sellerName}`,
                     inline: true
                 });

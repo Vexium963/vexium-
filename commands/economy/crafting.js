@@ -251,7 +251,7 @@ module.exports = {
         if (userData.vexBalance < totalVexCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`💸 **Insufficient VEX for this legendary craft!**\n\n💰 **Required:** $${totalVexCost.toFixed(2)} VEX\n💳 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n⚡ **${Math.floor(Math.random() * 20) + 5} players** just earned VEX in the last hour!`)
+                .setDescription(`💸 **Insufficient VEX for this legendary craft!**\n\n💰 **Required:** ${totalVexCost.toFixed(2)} VEX\n💳 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n⚡ **${Math.floor(Math.random() * 20) + 5} players** just earned VEX in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

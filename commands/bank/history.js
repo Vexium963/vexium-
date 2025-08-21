@@ -209,9 +209,9 @@ module.exports = {
             const totalTaxes = records.reduce((sum, r) => sum + (r.taxAmount || 0), 0);
             
             embed.addFields(
-                { name: '💰 Total Earned', value: `$${totalEarned.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Total Spent', value: `$${totalSpent.toFixed(2)} VEX`, inline: true },
-                { name: '🏛️ Total Taxes', value: `$${totalTaxes.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Earned', value: `${totalEarned.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Total Spent', value: `${totalSpent.toFixed(2)} VEX`, inline: true },
+                { name: '🏛️ Total Taxes', value: `${totalTaxes.toFixed(2)} VEX`, inline: true }
             );
         }
         
