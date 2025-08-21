@@ -32,6 +32,7 @@ class InteractionHandler {
         this.handlers.set('progression_goals', this.handleProgressionGoals.bind(this));
 
         this.handlers.set('select_job', this.handleJobSelection.bind(this));
+        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
 
         this.handlers.set('help_category_select', this.handleHelpCategorySelect.bind(this));
 
