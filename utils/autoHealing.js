@@ -65,15 +65,39 @@ class AutoHealingSystem {
 
     async checkDatabaseHealth() {
         try {
-            const PostgreSQLDatabase = require('../database/postgresql');
-            const db = new PostgreSQLDatabase();
-            const isHealthy = await db.healthCheck();
+            const databaseType = process.env.DATABASE_TYPE || 'json';
             
-            return {
-                healthy: isHealthy,
-                message: isHealthy ? 'Database responsive' : 'Database connection failed',
-                timestamp: Date.now()
-            };
+            if (databaseType === 'postgresql') {
+                const PostgreSQLDatabase = require('../database/postgresql');
+                const db = new PostgreSQLDatabase();
+                const isHealthy = await db.healthCheck();
+                
+                return {
+                    healthy: isHealthy,
+                    message: isHealthy ? 'PostgreSQL responsive' : 'PostgreSQL connection failed',
+                    timestamp: Date.now()
+                };
+            } else {
+                const fs = require('fs');
+                const path = require('path');
+                const dbPath = path.join(__dirname, '../database/data');
+                
+                try {
+                    await fs.promises.access(dbPath);
+                    return {
+                        healthy: true,
+                        message: 'JSON database accessible',
+                        timestamp: Date.now()
+                    };
+                } catch {
+                    await fs.promises.mkdir(dbPath, { recursive: true });
+                    return {
+                        healthy: true,
+                        message: 'JSON database initialized',
+                        timestamp: Date.now()
+                    };
+                }
+            }
         } catch (error) {
             return {
                 healthy: false,
@@ -186,10 +210,20 @@ class AutoHealingSystem {
     async healDatabase() {
         try {
             console.log('🔧 Attempting database reconnection...');
-            const PostgreSQLDatabase = require('../database/postgresql');
-            const db = new PostgreSQLDatabase();
-            await db.initialize();
-            console.log('✅ Database healing successful');
+            const databaseType = process.env.DATABASE_TYPE || 'json';
+            
+            if (databaseType === 'postgresql') {
+                const PostgreSQLDatabase = require('../database/postgresql');
+                const db = new PostgreSQLDatabase();
+                await db.initialize();
+                console.log('✅ PostgreSQL database healing successful');
+            } else {
+                const fs = require('fs');
+                const path = require('path');
+                const dbPath = path.join(__dirname, '../database/data');
+                await fs.promises.mkdir(dbPath, { recursive: true });
+                console.log('✅ JSON database healing successful');
+            }
         } catch (error) {
             console.error('❌ Database healing failed:', error);
         }
