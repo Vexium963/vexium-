@@ -35,6 +35,9 @@ class InteractionHandler {
         this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
         this.handlers.set('business_purchase_select', this.handleBusinessPurchaseSelect.bind(this));
         this.handlers.set('business_financing_calculator', this.handleBusinessFinancingCalculator.bind(this));
+        
+        this.handlers.set('business_finance_36', this.handleBusinessFinance36.bind(this));
+        this.handlers.set('business_performance_preview', this.handleBusinessPerformancePreview.bind(this));
 
         this.handlers.set('help_category_select', this.handleHelpCategorySelect.bind(this));
 
@@ -1824,7 +1827,27 @@ class InteractionHandler {
         } catch (error) {
             console.error('Error in handleBusinessFinancingCalculator:', error);
         }
+    },
+
+    async handleBusinessFinance36(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handleFinancePurchase(interaction, businessType, 36);
+        } catch (error) {
+            console.error('Error in handleBusinessFinance36:', error);
+        }
+    },
+
+    async handleBusinessPerformancePreview(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handlePerformancePreview(interaction, businessType);
+        } catch (error) {
+            console.error('Error in handleBusinessPerformancePreview:', error);
+        }
     }
-}
+};
 
 module.exports = InteractionHandler;
