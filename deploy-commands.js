@@ -4,27 +4,35 @@ const fs = require('fs');
 const path = require('path');
 
 const commands = [];
-const commandCategories = {
-    'economy': ['start', 'daily', 'work', 'wallet', 'invest', 'shop', 'trade', 'linkwallet', 'use', 'auction', 'banking', 'bonds', 'contracts', 'crafting', 'crypto', 'insurance', 'lottery', 'marketplace', 'mining', 'nft-mint', 'nft-trade', 'pets', 'prestige', 'quests', 'real-estate', 'referral', 'rewards', 'staking', 'stocks', 'tournaments'],
-    'entertainment': ['blackjack', 'crash', 'poker', 'roulette'],
-    'bank': ['deposit', 'withdraw', 'balance', 'history', 'interest'],
-    'social': ['profile', 'leaderboard', 'gift', 'friends', 'guild', 'competitions', 'duel', 'events'],
-    'progression': ['achievements', 'challenges', 'progression', 'xp'],
-    'customization': ['avatar'],
-    'utility': ['help', 'settings', 'analytics', 'immersion', 'leaderboards', 'verify-age', 'ping'],
-    'admin': ['manage', 'logs', 'dao', 'performance']
-};
+
+const commandCategories = {};
+const commandFolders = fs.readdirSync('./commands');
+for (const folder of commandFolders) {
+    const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+    commandCategories[folder] = commandFiles.map(file => file.replace('.js', ''));
+}
+
+console.log('Discovered command categories:', Object.keys(commandCategories));
+console.log('Total command files found:', Object.values(commandCategories).flat().length);
 
 for (const [category, commandNames] of Object.entries(commandCategories)) {
+    console.log(`\nProcessing category: ${category}`);
     for (const commandName of commandNames) {
         const filePath = path.join(__dirname, 'commands', category, `${commandName}.js`);
         if (fs.existsSync(filePath)) {
-            const command = require(filePath);
-            if ('data' in command && 'execute' in command) {
-                commands.push(command.data.toJSON());
-            } else {
-                console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+            try {
+                const command = require(filePath);
+                if ('data' in command && 'execute' in command) {
+                    commands.push(command.data.toJSON());
+                    console.log(`✅ Loaded: ${category}/${commandName}`);
+                } else {
+                    console.log(`❌ Invalid structure: ${category}/${commandName} - missing data or execute property`);
+                }
+            } catch (error) {
+                console.log(`❌ Error loading ${category}/${commandName}:`, error.message);
             }
+        } else {
+            console.log(`❌ File not found: ${filePath}`);
         }
     }
 }
