@@ -1827,7 +1827,7 @@ class InteractionHandler {
         } catch (error) {
             console.error('Error in handleBusinessFinancingCalculator:', error);
         }
-    },
+    }
 
     async handleBusinessFinance36(interaction) {
         try {
@@ -1837,7 +1837,7 @@ class InteractionHandler {
         } catch (error) {
             console.error('Error in handleBusinessFinance36:', error);
         }
-    },
+    }
 
     async handleBusinessPerformancePreview(interaction) {
         try {
