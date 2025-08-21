@@ -81,6 +81,8 @@ module.exports = {
             }
         } else if (interaction.isSelectMenu() || interaction.isButton()) {
             try {
+                let handled = false;
+                
                 if (interaction.customId.startsWith('onboarding_') || 
                     interaction.customId.startsWith('quick_') ||
                     interaction.customId.startsWith('wallet_') ||
@@ -92,22 +94,32 @@ module.exports = {
                     interaction.customId.startsWith('guide_') ||
                     interaction.customId.includes('_tutorial')) {
                     await OnboardingHandler.handleOnboardingInteraction(interaction);
+                    handled = true;
                 } else {
                     await interactionHandler.handleInteraction(interaction);
+                    handled = true;
                 }
             } catch (error) {
                 console.error(`Error handling interaction ${interaction.customId}:`, error);
                 
                 if (!interaction.replied && !interaction.deferred) {
-                    await interaction.reply({
-                        content: '❌ There was an error while processing your interaction!',
-                        ephemeral: true
-                    });
+                    try {
+                        await interaction.reply({
+                            content: '❌ There was an error while processing your interaction!',
+                            ephemeral: true
+                        });
+                    } catch (replyError) {
+                        console.error('Failed to send error reply:', replyError);
+                    }
                 } else if (!interaction.replied) {
-                    await interaction.followUp({
-                        content: '❌ There was an error while processing your interaction!',
-                        ephemeral: true
-                    });
+                    try {
+                        await interaction.followUp({
+                            content: '❌ There was an error while processing your interaction!',
+                            ephemeral: true
+                        });
+                    } catch (followUpError) {
+                        console.error('Failed to send error followUp:', followUpError);
+                    }
                 }
             }
         }

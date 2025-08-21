@@ -56,7 +56,9 @@ module.exports = {
                 .setColor(constants.COLORS.WARNING)
                 .setTimestamp();
             
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            if (!interaction.replied && !interaction.deferred) {
+                return interaction.reply({ embeds: [embed], ephemeral: true });
+            }
         }
         
         if (!userData.job) {
@@ -210,10 +212,12 @@ module.exports = {
         
         workEmbed.setImage('attachment://progress.png');
 
-        await interaction.reply({ 
-            embeds: [workEmbed],
-            files: [{ attachment: jobProgressBuffer, name: 'progress.png' }]
-        });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ 
+                embeds: [workEmbed],
+                files: [{ attachment: jobProgressBuffer, name: 'progress.png' }]
+            });
+        }
         
         if (xpResult.leveledUp) {
             const levelEmbed = new EmbedBuilder()
@@ -224,7 +228,9 @@ module.exports = {
                 )
                 .setColor(constants.COLORS.GOLD);
             
-            await interaction.followUp({ embeds: [levelEmbed] });
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ embeds: [levelEmbed] });
+            }
         }
         
         if (jobLevelUp) {
@@ -240,7 +246,9 @@ module.exports = {
                 )
                 .setColor(constants.COLORS.INFO);
             
-            await interaction.followUp({ embeds: [jobLevelEmbed] });
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ embeds: [jobLevelEmbed] });
+            }
         }
     },
     
@@ -255,7 +263,9 @@ module.exports = {
                 .setDescription(`⏳ You need to reach level 1 to unlock jobs.\n\n🚀 ${comebackMessage}\n\n✨ **Quick Start:** Use \`/daily\` to gain XP and level up fast!`)
                 .setColor(constants.COLORS.ERROR);
             
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            if (!interaction.replied && !interaction.deferred) {
+                return interaction.reply({ embeds: [embed], ephemeral: true });
+            }
         }
         
         const jobOptions = availableJobs.slice(0, 25).map(job => ({
@@ -292,11 +302,13 @@ module.exports = {
 
         embed.setImage('attachment://progress.png');
 
-        await interaction.reply({ 
-            embeds: [embed], 
-            components: [row], 
-            files: [{ attachment: levelProgressBuffer, name: 'progress.png' }],
-            ephemeral: true 
-        });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: [row], 
+                files: [{ attachment: levelProgressBuffer, name: 'progress.png' }],
+                ephemeral: true 
+            });
+        }
     }
 };
