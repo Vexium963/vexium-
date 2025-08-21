@@ -1,6 +1,8 @@
 const { Collection } = require('discord.js');
 const InteractionHandler = require('../handlers/interactionHandler');
 const OnboardingHandler = require('../handlers/onboardingHandler');
+const constants = require('../utils/constants');
+const TransactionManager = require('../utils/TransactionManager');
 
 const interactionHandler = new InteractionHandler();
 
@@ -23,7 +25,10 @@ module.exports = {
 
             const now = Date.now();
             const timestamps = cooldowns.get(command.data.name);
-            const defaultCooldownDuration = 3;
+            
+            const commandCategory = this.getCommandCategory(interaction.commandName);
+            const rateLimitMs = constants.RATE_LIMITS[commandCategory] || constants.RATE_LIMITS.ECONOMY;
+            const defaultCooldownDuration = Math.max(3, rateLimitMs / 1000);
             const cooldownAmount = (command.cooldown ?? defaultCooldownDuration) * 1000;
 
             if (timestamps.has(interaction.user.id)) {
@@ -129,4 +134,22 @@ module.exports = {
             }
         }
     },
+
+    getCommandCategory(commandName) {
+        const categories = {
+            GAMBLING: ['gamble', 'blackjack', 'roulette', 'crash', 'poker', 'lottery'],
+            TRADING: ['trade', 'marketplace', 'auction', 'nft-trade'],
+            ADMIN: ['manage', 'logs', 'dao', 'market', 'forecast'],
+            SOCIAL: ['gift', 'leaderboard', 'profile', 'guild', 'friends', 'events'],
+            PROGRESSION: ['xp', 'achievements', 'challenges', 'progression'],
+            ECONOMY: ['work', 'daily', 'invest', 'shop', 'wallet', 'bank', 'start']
+        };
+
+        for (const [category, commands] of Object.entries(categories)) {
+            if (commands.includes(commandName)) {
+                return category;
+            }
+        }
+        return 'ECONOMY'; // default
+    }
 };
