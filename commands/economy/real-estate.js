@@ -504,14 +504,14 @@ module.exports = {
     
     getAvailableProperties() {
         return [
-            { id: 'STUDIO_01', name: 'Downtown Studio', emoji: '🏢', price: Economics.getPeggedVEXPrice(25), dailyIncome: Economics.getPeggedVEXPrice(0.05), type: 'residential' },
-            { id: 'HOUSE_01', name: 'Suburban House', emoji: '🏠', price: Economics.getPeggedVEXPrice(50), dailyIncome: Economics.getPeggedVEXPrice(0.08), type: 'residential' },
-            { id: 'CONDO_01', name: 'Luxury Condo', emoji: '🏙️', price: Economics.getPeggedVEXPrice(80), dailyIncome: Economics.getPeggedVEXPrice(0.12), type: 'residential' },
-            { id: 'SHOP_01', name: 'Corner Shop', emoji: '🏪', price: Economics.getPeggedVEXPrice(100), dailyIncome: Economics.getPeggedVEXPrice(0.15), type: 'commercial' },
-            { id: 'OFFICE_01', name: 'Office Building', emoji: '🏢', price: Economics.getPeggedVEXPrice(150), dailyIncome: Economics.getPeggedVEXPrice(0.25), type: 'commercial' },
-            { id: 'MALL_01', name: 'Shopping Mall', emoji: '🏬', price: Economics.getPeggedVEXPrice(250), dailyIncome: Economics.getPeggedVEXPrice(0.40), type: 'commercial' },
-            { id: 'HOTEL_01', name: 'Boutique Hotel', emoji: '🏨', price: Economics.getPeggedVEXPrice(350), dailyIncome: Economics.getPeggedVEXPrice(0.55), type: 'hospitality' },
-            { id: 'RESORT_01', name: 'Beach Resort', emoji: '🏖️', price: Economics.getPeggedVEXPrice(500), dailyIncome: Economics.getPeggedVEXPrice(0.80), type: 'hospitality' }
+            { id: 'STUDIO_01', name: 'Downtown Studio', emoji: '🏢', price: Economics.getPeggedVEXPrice(25), dailyIncome: 0.05, type: 'residential' },
+            { id: 'HOUSE_01', name: 'Suburban House', emoji: '🏠', price: Economics.getPeggedVEXPrice(50), dailyIncome: 0.08, type: 'residential' },
+            { id: 'CONDO_01', name: 'Luxury Condo', emoji: '🏙️', price: Economics.getPeggedVEXPrice(80), dailyIncome: 0.12, type: 'residential' },
+            { id: 'SHOP_01', name: 'Corner Shop', emoji: '🏪', price: Economics.getPeggedVEXPrice(100), dailyIncome: 0.15, type: 'commercial' },
+            { id: 'OFFICE_01', name: 'Office Building', emoji: '🏢', price: Economics.getPeggedVEXPrice(150), dailyIncome: 0.25, type: 'commercial' },
+            { id: 'MALL_01', name: 'Shopping Mall', emoji: '🏬', price: Economics.getPeggedVEXPrice(250), dailyIncome: 0.40, type: 'commercial' },
+            { id: 'HOTEL_01', name: 'Boutique Hotel', emoji: '🏨', price: Economics.getPeggedVEXPrice(350), dailyIncome: 0.55, type: 'hospitality' },
+            { id: 'RESORT_01', name: 'Beach Resort', emoji: '🏖️', price: Economics.getPeggedVEXPrice(500), dailyIncome: 0.80, type: 'hospitality' }
         ];
     },
     

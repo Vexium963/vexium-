@@ -42,7 +42,7 @@ module.exports = {
         const maxLoanAmount = bankingCommand.getMaxLoanAmount(creditScore, userData);
         const currentLoans = userData.loans || [];
         const totalLoanAmount = currentLoans.reduce((sum, loan) => sum + loan.remainingBalance, 0);
-        const availableWithdrawAmount = userData.bankBalance;
+        const availableWithdrawAmount = userData.bankBalance; // Full amount available without penalty for no-lock deposits
         
         const bankChecks = userData.stats.bankChecks || 0;
         const isObsessiveTracker = bankChecks >= 50;

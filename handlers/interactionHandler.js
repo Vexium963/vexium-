@@ -1688,44 +1688,6 @@ class InteractionHandler {
         }
     }
 
-    async handleInvestmentCategorySelect(interaction) {
-        try {
-            const selectedCategory = interaction.values[0];
-            
-            const categoryCommands = {
-                'crypto': '/crypto market',
-                'stocks': '/stocks market', 
-                'realestate': '/real-estate market',
-                'businesses': '/businesses market',
-                'staking': '/staking pools',
-                'bonds': '/bonds market'
-            };
-            
-            const { EmbedBuilder } = require('discord.js');
-            const embed = new EmbedBuilder()
-                .setTitle(`🚀 ${selectedCategory.toUpperCase()} Investment Marketplace`)
-                .setDescription(`**Welcome to the ${selectedCategory} marketplace!**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
-                .setColor('#FFD700');
-            
-            await interaction.update({ embeds: [embed] });
-            
-            const commandMap = {
-                'crypto': () => require('../commands/economy/crypto').handleMarket(interaction),
-                'stocks': () => require('../commands/economy/stocks').handleMarket(interaction),
-                'realestate': () => require('../commands/economy/real-estate').handleMarket(interaction),
-                'businesses': () => require('../commands/economy/businesses').handleMarket(interaction),
-                'staking': () => require('../commands/economy/staking').handlePools(interaction),
-                'bonds': () => require('../commands/economy/bonds').handleMarket(interaction)
-            };
-            
-            if (commandMap[selectedCategory]) {
-                await commandMap[selectedCategory]();
-            }
-        } catch (error) {
-            console.error('Error in handleInvestmentCategorySelect:', error);
-        }
-    }
-
     async handleInvestCrypto(interaction) {
         try {
             await interaction.deferUpdate();
