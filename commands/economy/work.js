@@ -34,20 +34,24 @@ module.exports = {
         const now = Date.now();
         const lastWork = userData.lastWork ? new Date(userData.lastWork).getTime() : 0;
         const timeSinceLastWork = now - lastWork;
-        const workCooldown = constants.COOLDOWNS.WORK;
+        const workCooldown = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
         
         if (timeSinceLastWork < workCooldown && !userData.inventory.energy_drink) {
             const timeLeft = workCooldown - timeSinceLastWork;
-            const minutesLeft = Math.floor(timeLeft / (60 * 1000));
+            const hoursLeft = Math.floor(timeLeft / (60 * 60 * 1000));
+            const minutesLeft = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
             
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             
+            const timeDisplay = hoursLeft > 0 ? `${hoursLeft}h ${minutesLeft}m` : `${minutesLeft}m`;
+            
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Work Cooldown Active`)
-                .setDescription(`⏳ You need to rest for **${minutesLeft} minutes** before working again.\n\n🔥 ${fomoMessage}\n📈 ...`)
+                .setDescription(`⏳ You need to rest for **${timeDisplay}** before working again.\n\n🔥 ${fomoMessage}\n📈 ${socialProofMessage}`)
                 .addFields(
-                    { name: '💡 Tip', value: 'Use an Energy Drink from `/shop` to skip cooldown!', inline: false }
+                    { name: '💡 Tip', value: 'Use an Energy Drink from `/shop` to skip cooldown!', inline: false },
+                    { name: '⏰ Next Work Available', value: `<t:${Math.floor((lastWork + workCooldown) / 1000)}:R>`, inline: false }
                 )
                 .setColor(constants.COLORS.WARNING)
                 .setTimestamp();
@@ -99,7 +103,8 @@ module.exports = {
         }
         
         userData.lastWork = new Date().toISOString();
-        userData.stats.commandsUsed++;
+        userData.stats.commandsUsed = (userData.stats.commandsUsed || 0) + 1;
+        userData.stats.workSessions = (userData.stats.workSessions || 0) + 1;
         
         if (userData.inventory.energy_drink && timeSinceLastWork < workCooldown) {
             userData.inventory.energy_drink--;

@@ -6,14 +6,50 @@ const Economics = require('../../utils/economics');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('start')
-        .setDescription(`🚀 Begin your VexiumVerse empire journey - Earn real VEX tokens! 💸 Join 50,000+ players building...`),
+        .setDescription(`🚀 Begin your VexiumVerse empire journey - Earn real VEX tokens! 💸 Join 50,000+ players building...`)
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('onboarding')
+                .setDescription('Complete your onboarding tasks to unlock all VexiumVerse features'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('tutorial')
+                .setDescription('🎓 Learn how to use VexiumVerse and build your empire')),
     
     async execute(interaction) {
+        const subcommand = interaction.options.getSubcommand(false);
+        
+        if (subcommand === 'onboarding') {
+            return this.handleOnboarding(interaction);
+        }else if (subcommand === 'tutorial') {
+            return this.handleTutorial(interaction);
+        }
+        
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'start', true);
+        }
+
+        const hasLinkedWallet = userData.linkedWallets && Object.keys(userData.linkedWallets).length > 0;
+        
+        if (!hasLinkedWallet) {
+            const embed = new EmbedBuilder()
+                .setTitle('🚀 Welcome to VexiumVerse!')
+                .setDescription('**Get started by linking your crypto wallet to unlock all features!**\n\n🔗 Click the button below to create a private ticket for secure wallet linking.')
+                .setColor(constants.COLORS.PRIMARY)
+                .setTimestamp();
+
+            const linkWalletButton = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('linkwallet_start')
+                        .setLabel('🔗 Link Wallet')
+                        .setStyle(ButtonStyle.Primary)
+                );
+
+            return interaction.reply({ embeds: [embed], components: [linkWalletButton] });
         }
         
         if (userData.onboardingCompleted) {
@@ -155,8 +191,8 @@ ${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom w
         const onboardingButtons = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
-                    .setCustomId('onboarding_phantom')
-                    .setLabel(`${constants.ANIMATED_EMOJIS.VEX} Link Phantom Wallet`)
+                    .setCustomId('linkwallet_start')
+                    .setLabel(`🔗 Link Wallet`)
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('quick_daily')
@@ -212,5 +248,88 @@ ${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom w
         if (networth >= 500) return { title: 'INVESTOR', icon: '📈', color: '#32CD32' };
         if (networth >= 100) return { title: 'TRADER', icon: '💰', color: '#1E90FF' };
         return { title: 'NEWCOMER', icon: '🌟', color: '#FFA500' };
+    },
+
+    async handleOnboarding(interaction) {
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+
+        const requiredTasks = [
+            { command: '/daily', completed: userData.stats?.dailyUsed > 0, description: 'Claim your daily VEX reward' },
+            { command: '/work', completed: userData.stats?.workSessions > 0, description: 'Complete a work session' },
+            { command: '/wallet', completed: userData.stats?.walletChecked > 0, description: 'Check your wallet balance' },
+            { command: '/bank', completed: userData.stats?.bankChecked > 0, description: 'View your bank account' },
+            { command: '/deposit', completed: userData.bankBalance > 0, description: 'Make a bank deposit' },
+            { command: '/withdraw', completed: userData.stats?.withdrawalsMade > 0, description: 'Make a withdrawal' },
+            { command: '/credit', completed: userData.stats?.creditChecked > 0, description: 'Check your credit score' }
+        ];
+
+        const completedTasks = requiredTasks.filter(task => task.completed).length;
+        const totalTasks = requiredTasks.length;
+        const isCompleted = completedTasks === totalTasks;
+
+        if (isCompleted && !userData.onboardingCompleted) {
+            userData.onboardingCompleted = true;
+            const completionReward = Economics.getPeggedVEXPrice(50);
+            await user.addVEX(completionReward, 'onboarding_completion');
+            Economics.updateVEXMarket('reward', completionReward);
+            await user.save(userData);
+
+            const completionEmbed = new EmbedBuilder()
+                .setTitle(`🎉 ONBOARDING COMPLETED!`)
+                .setDescription(`**Congratulations!** You've successfully completed all onboarding tasks!\n\n💰 **Completion Reward:** ${completionReward.toFixed(2)} VEX (~$${(completionReward * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n🚀 **You now have access to all VexiumVerse features!**\n\n📚 Use \`/help\` to view all available commands and start building your empire!`)
+                .setColor(constants.COLORS.SUCCESS)
+                .addFields(
+                    { name: '🎁 Reward', value: `${completionReward.toFixed(2)} VEX`, inline: true },
+                    { name: '📈 Status', value: 'Onboarding Complete ✅', inline: true },
+                    { name: '🔓 Access', value: 'All commands unlocked!', inline: true }
+                )
+                .setTimestamp();
+
+            return interaction.reply({ embeds: [completionEmbed] });
+        }
+
+        const progressBuffer = await this.createProgressBar(completedTasks, 0, totalTasks);
+
+        const taskList = requiredTasks.map(task => 
+            `${task.completed ? '✅' : '⏳'} ${task.command} - ${task.description}`
+        ).join('\n');
+
+        const onboardingEmbed = new EmbedBuilder()
+            .setTitle(`📋 Onboarding Progress (${completedTasks}/${totalTasks})`)
+            .setDescription(`Complete these essential tasks to unlock all VexiumVerse features:\n\n${taskList}\n\n${isCompleted ? '🎉 **Ready to claim completion reward!**' : '💡 **Complete all tasks to earn a special reward!**'}`)
+            .addFields(
+                { name: '🎯 Progress', value: `${completedTasks}/${totalTasks} tasks completed`, inline: true },
+                { name: '🎁 Reward', value: `${Economics.getPeggedVEXPrice(50).toFixed(2)} VEX (~$${(Economics.getPeggedVEXPrice(50) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🔓 Status', value: isCompleted ? 'Ready to Complete!' : 'In Progress', inline: true }
+            )
+            .setColor(isCompleted ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
+            .setFooter({ text: 'Complete all tasks to unlock your reward and full access!' })
+            .setTimestamp();
+
+        await interaction.reply({ 
+            embeds: [onboardingEmbed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
+    },
+
+    async handleTutorial(interaction) {
+        const tutorialEmbed = new EmbedBuilder()
+            .setTitle('🎓 VexiumVerse Tutorial')
+            .setDescription('Welcome to VexiumVerse! Here\'s how to build your virtual empire:')
+            .addFields(
+                { name: '💰 Getting Started', value: '• Use `/daily` to claim daily rewards\n• Use `/work` every 3 hours to earn VEX\n• Check `/wallet` to see your balance', inline: false },
+                { name: '🏦 Banking', value: '• Use `/deposit` to earn interest\n• Use `/withdraw` to access your funds\n• Check `/credit` for your credit score', inline: false },
+                { name: '📈 Investing', value: '• Use `/invest` to access investment options\n• Try `/crypto`, `/stocks`, `/real-estate`\n• Build `/businesses` for passive income', inline: false },
+                { name: '🛍️ Shopping', value: '• Use `/shop` to buy items and tools\n• Use `/use` to consume items\n• Items provide bonuses and unlock features', inline: false },
+                { name: '🎮 Entertainment', value: '• Use `/gamble` for quick games\n• Try `/poker`, `/blackjack`, `/roulette`\n• Join `/tournaments` for big prizes', inline: false },
+                { name: '👥 Social', value: '• Use `/profile` to customize your profile\n• Use `/gift` to send items to friends\n• Check `/leaderboard` to see top players', inline: false }
+            )
+            .setColor(constants.COLORS.PRIMARY)
+            .setFooter({ text: 'Use /help to see all available commands' })
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [tutorialEmbed] });
     }
 };

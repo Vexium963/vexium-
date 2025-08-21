@@ -78,7 +78,8 @@ module.exports = {
         
         const achievements = Progression.checkAchievements(userData, 'daily_claimed', userData.dailyStreak);
         
-        userData.stats.commandsUsed++;
+        userData.stats.commandsUsed = (userData.stats.commandsUsed || 0) + 1;
+        userData.stats.dailyUsed = (userData.stats.dailyUsed || 0) + 1;
         await user.save(userData);
         
         const isStreakMilestone = [7, 14, 30, 60, 100].includes(userData.dailyStreak);

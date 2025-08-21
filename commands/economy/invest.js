@@ -61,7 +61,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription(`🌈 Explore market opportunities - Discover trending assets before they moon!`)),
+                .setDescription(`🌈 Explore market opportunities - Discover trending assets before they moon!`))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('hub')
+                .setDescription('🚀 Access the main investment hub with all categories')),
     
     cooldown: 5,
     
@@ -124,6 +128,10 @@ module.exports = {
                 return this.handlePortfolio(interaction);
             case 'market':
                 return this.handleMarket(interaction);
+            case 'hub':
+                return this.handleHub(interaction);
+            default:
+                return this.handleHub(interaction);
         }
     },
     
@@ -431,6 +439,119 @@ module.exports = {
                         { label: 'Manhattan Real Estate', value: 'real_estate_manhattan', emoji: '🏢' }
                     ])
             )]
+        });
+    },
+
+    async handleHub(interaction) {
+        const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
+        
+        const embed = new EmbedBuilder()
+            .setTitle('🚀 **INVESTMENT HUB** - Your Gateway to Wealth')
+            .setDescription('```ansi\n\u001b[1;36m╔══════════════════════════════════════╗\n║    🌟 BUILD YOUR FINANCIAL EMPIRE 🌟    ║\n╚══════════════════════════════════════╝\u001b[0m\n```\n\n🎯 **Choose your investment strategy and watch your VEX multiply!**\n💎 **Real-time market simulation with dynamic pricing**\n📈 **Professional-grade portfolio management tools**')
+            .addFields(
+                { 
+                    name: '💎 **CRYPTO TRADING**', 
+                    value: '```diff\n+ High Risk, High Reward\n+ 24/7 Market Access\n+ Volatile Price Action\n```\n🔥 Trade Bitcoin, Ethereum, and more!\n📊 Advanced charts and analytics', 
+                    inline: true 
+                },
+                { 
+                    name: '📈 **STOCK MARKET**', 
+                    value: '```diff\n+ Stable Growth Potential\n+ Dividend Payments\n+ Blue Chip Companies\n```\n🏢 Invest in Fortune 500 companies\n💰 Quarterly dividend rewards', 
+                    inline: true 
+                },
+                { 
+                    name: '🏠 **REAL ESTATE**', 
+                    value: '```diff\n+ Passive Income Stream\n+ Property Appreciation\n+ Rental Collections\n```\n🏘️ Buy properties worldwide\n💸 Monthly rental income', 
+                    inline: true 
+                },
+                { 
+                    name: '🏢 **BUSINESSES**', 
+                    value: '```diff\n+ Active Management\n+ Scaling Opportunities\n+ High Profit Margins\n```\n🚀 Start tech companies, restaurants\n📊 Manage and grow your empire', 
+                    inline: true 
+                },
+                { 
+                    name: '🔒 **VEX STAKING**', 
+                    value: '```diff\n+ Guaranteed Returns\n+ Low Risk Investment\n+ Compound Interest\n```\n💎 Stake VEX for steady growth\n⏰ Flexible lock-up periods', 
+                    inline: true 
+                },
+                { 
+                    name: '💰 **BONDS & TREASURY**', 
+                    value: '```diff\n+ Government Backed\n+ Fixed Interest Rates\n+ Capital Preservation\n```\n🏛️ US Treasury and corporate bonds\n📅 Maturity-based returns', 
+                    inline: true 
+                }
+            )
+            .setColor('#FFD700')
+            .setFooter({ text: '⚡ Choose wisely - Your financial future starts here! | 🎯 Diversify for maximum returns' })
+            .setTimestamp();
+
+        const investmentSelect = new ActionRowBuilder()
+            .addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('investment_category_select')
+                    .setPlaceholder('🎯 Select Your Investment Category')
+                    .addOptions([
+                        {
+                            label: '💎 Crypto Trading',
+                            description: 'High-risk, high-reward cryptocurrency investments',
+                            value: 'crypto',
+                            emoji: '💎'
+                        },
+                        {
+                            label: '📈 Stock Market',
+                            description: 'Stable growth with dividend-paying stocks',
+                            value: 'stocks',
+                            emoji: '📈'
+                        },
+                        {
+                            label: '🏠 Real Estate',
+                            description: 'Property investments with rental income',
+                            value: 'realestate',
+                            emoji: '🏠'
+                        },
+                        {
+                            label: '🏢 Business Ventures',
+                            description: 'Start and manage profitable businesses',
+                            value: 'businesses',
+                            emoji: '🏢'
+                        },
+                        {
+                            label: '🔒 VEX Staking',
+                            description: 'Guaranteed returns through VEX staking',
+                            value: 'staking',
+                            emoji: '🔒'
+                        },
+                        {
+                            label: '💰 Bonds & Treasury',
+                            description: 'Safe government and corporate bonds',
+                            value: 'bonds',
+                            emoji: '💰'
+                        }
+                    ])
+            );
+
+        const quickActionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('investment_portfolio_overview')
+                    .setLabel('📊 Portfolio Overview')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('investment_market_analysis')
+                    .setLabel('📈 Market Analysis')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('investment_risk_calculator')
+                    .setLabel('⚖️ Risk Calculator')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('investment_education')
+                    .setLabel('🎓 Learn Investing')
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [investmentSelect, quickActionButtons] 
         });
     }
 };

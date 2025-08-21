@@ -62,6 +62,14 @@ module.exports = {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
+        userData.stats = userData.stats || {};
+        const subcommand = interaction.options.getSubcommand();
+        if (subcommand === 'credit') {
+            userData.stats.creditChecked = (userData.stats.creditChecked || 0) + 1;
+        }
+        userData.stats.bankChecked = (userData.stats.bankChecked || 0) + 1;
+        await user.save(userData);
+        
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'banking', true);
         }
@@ -74,8 +82,6 @@ module.exports = {
             };
             interaction.client.psychologyEngine.analyzeUserBehavior(interaction.user.id, 'banking', behaviorContext);
         }
-        
-        const subcommand = interaction.options.getSubcommand();
         
         const netWorth = userData.networth || 0;
         const isWhale = netWorth >= 50000;
@@ -193,7 +199,8 @@ module.exports = {
         
         userData.stats.loansApplied = (userData.stats.loansApplied || 0) + 1;
         userData.stats.totalBorrowed = (userData.stats.totalBorrowed || 0) + amount;
-        userData.stats.commandsUsed++;
+        userData.stats.commandsUsed = (userData.stats.commandsUsed || 0) + 1;
+        userData.stats.bankChecked = (userData.stats.bankChecked || 0) + 1;
         
         await user.save(userData);
         

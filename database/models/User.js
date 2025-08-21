@@ -67,7 +67,13 @@ class User {
                 giftsReceived: 0,
                 giftsSent: 0,
                 withdrawalCount: 0,
-                investmentReturns: 0.00
+                investmentReturns: 0.00,
+                dailyUsed: 0,
+                workSessions: 0,
+                walletChecked: 0,
+                bankChecked: 0,
+                withdrawalsMade: 0,
+                creditChecked: 0
             },
             settings: {
                 notifications: true,
@@ -86,6 +92,9 @@ class User {
             nftCollection: [],
             activeEffects: {},
             cooldowns: {},
+            ageVerified: false,
+            entertainmentUnlocked: false,
+            onboardingCompleted: false,
             createdAt: new Date().toISOString(),
             lastActive: new Date().toISOString()
         };

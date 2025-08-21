@@ -19,6 +19,12 @@ module.exports = {
         const user = new User(targetUser.id);
         const userData = await user.load();
         
+        if (isOwnWallet) {
+            userData.stats = userData.stats || {};
+            userData.stats.walletChecked = (userData.stats.walletChecked || 0) + 1;
+            await user.save(userData);
+        }
+        
         if (interaction.client.immersionEngine) {
             interaction.client.immersionEngine.trackCommand(interaction.user.id, 'wallet', true);
         }
@@ -214,7 +220,8 @@ module.exports = {
         });
         
         if (isOwnWallet) {
-            userData.stats.commandsUsed++;
+            userData.stats.commandsUsed = (userData.stats.commandsUsed || 0) + 1;
+            userData.stats.walletChecked = (userData.stats.walletChecked || 0) + 1;
             await user.save(userData);
         }
     },

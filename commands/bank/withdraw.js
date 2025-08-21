@@ -134,6 +134,7 @@ module.exports = {
         userData.stats.totalWithdrawn += amount;
         userData.stats.totalTaxesPaid += taxResult.taxAmount;
         userData.stats.withdrawalCount++;
+        userData.stats.withdrawalsMade = (userData.stats.withdrawalsMade || 0) + 1;
         userData.stats.commandsUsed++;
         
         if (taxResult.taxAmount > 0) {

@@ -98,6 +98,11 @@ class InteractionHandler {
         this.handlers.set('banking_loan_apply', this.handleBankingLoanApply.bind(this));
         this.handlers.set('banking_credit_history', this.handleBankingCreditHistory.bind(this));
         this.handlers.set('banking_savings_create', this.handleBankingSavingsCreate.bind(this));
+        this.handlers.set('ticket_link_wallet', this.handleTicketLinkWallet.bind(this));
+        this.handlers.set('ticket_verify_age', this.handleTicketVerifyAge.bind(this));
+        this.handlers.set('confirm_age_21', this.handleConfirmAge21.bind(this));
+        this.handlers.set('deny_age_21', this.handleDenyAge21.bind(this));
+        this.handlers.set('ticket_close', this.handleTicketClose.bind(this));
         this.handlers.set('banking_budget_planner', this.handleBankingBudgetPlanner.bind(this));
 
         this.handlers.set('tournaments_join_menu', this.handleTournamentsJoinMenu.bind(this));
@@ -200,9 +205,137 @@ class InteractionHandler {
         this.handlers.set('dao_all_proposals', this.handleDaoAllProposals.bind(this));
 
         this.handlers.set('invest_quick_buy', this.handleInvestQuickBuy.bind(this));
+        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
+        this.handlers.set('ticket_link_wallet', this.handleTicketLinkWallet.bind(this));
+        this.handlers.set('ticket_verify_age', this.handleTicketVerifyAge.bind(this));
+        this.handlers.set('confirm_age_21', this.handleConfirmAge21.bind(this));
+        this.handlers.set('deny_age_21', this.handleDenyAge21.bind(this));
+        this.handlers.set('ticket_close', this.handleTicketClose.bind(this));
+        
+        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
+        this.handlers.set('investment_portfolio_overview', this.handleInvestmentPortfolioOverview.bind(this));
+        this.handlers.set('investment_market_analysis', this.handleInvestmentMarketAnalysis.bind(this));
+        this.handlers.set('investment_risk_calculator', this.handleInvestmentRiskCalculator.bind(this));
+        this.handlers.set('investment_education', this.handleInvestmentEducation.bind(this));
+        this.handlers.set('investment_portfolio_overview', this.handleInvestmentPortfolioOverview.bind(this));
+        this.handlers.set('investment_market_analysis', this.handleInvestmentMarketAnalysis.bind(this));
+        this.handlers.set('investment_risk_calculator', this.handleInvestmentRiskCalculator.bind(this));
+        this.handlers.set('investment_education', this.handleInvestmentEducation.bind(this));
 
         this.handlers.set('entertainment_skill_analysis', this.handleEntertainmentSkillAnalysis.bind(this));
         this.handlers.set('entertainment_history', this.handleEntertainmentHistory.bind(this));
+
+        this.handlers.set('linkwallet_start', this.handleLinkWalletStart.bind(this));
+
+        this.handlers.set('ticket_link_wallet', this.handleTicketLinkWallet.bind(this));
+        this.handlers.set('ticket_verify_age', this.handleTicketVerifyAge.bind(this));
+        this.handlers.set('confirm_age_21', this.handleConfirmAge21.bind(this));
+        this.handlers.set('deny_age_21', this.handleDenyAge21.bind(this));
+        this.handlers.set('ticket_close', this.handleTicketClose.bind(this));
+        
+        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
+    }
+
+    async handleLinkWalletStart(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const TicketSystem = require('../utils/ticketSystem');
+            const ticketChannel = await TicketSystem.createWalletLinkingTicket(interaction);
+            
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle('🎫 Private Ticket Created')
+                .setDescription(`Your private wallet linking ticket has been created: ${ticketChannel}\n\nPlease check the channel for further instructions.`)
+                .setColor('#00FF00');
+            
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error('Error in handleLinkWalletStart:', error);
+        }
+    }
+
+    async handleTicketLinkWallet(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.handleWalletLinking(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketLinkWallet:', error);
+        }
+    }
+
+    async handleTicketVerifyAge(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.handleAgeVerification(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketVerifyAge:', error);
+        }
+    }
+
+    async handleConfirmAge21(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.confirmAge(interaction, true);
+        } catch (error) {
+            console.error('Error in handleConfirmAge21:', error);
+        }
+    }
+
+    async handleDenyAge21(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.confirmAge(interaction, false);
+        } catch (error) {
+            console.error('Error in handleDenyAge21:', error);
+        }
+    }
+
+    async handleTicketClose(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.closeTicket(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketClose:', error);
+        }
+    }
+
+    async handleInvestmentCategorySelect(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const selectedCategory = interaction.values[0];
+            
+            const categoryCommands = {
+                'crypto': '/crypto',
+                'stocks': '/stocks', 
+                'realestate': '/real-estate',
+                'businesses': '/businesses',
+                'staking': '/staking',
+                'bonds': '/bonds'
+            };
+            
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle(`🚀 ${selectedCategory.toUpperCase()} Investment Marketplace`)
+                .setDescription(`**Redirecting you to the ${selectedCategory} marketplace...**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
+                .setColor('#FFD700');
+            
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+            
+            const commandMap = {
+                'crypto': require('../commands/economy/crypto'),
+                'stocks': require('../commands/economy/stocks'),
+                'realestate': require('../commands/economy/real-estate'),
+                'businesses': require('../commands/economy/businesses'),
+                'staking': require('../commands/economy/staking'),
+                'bonds': require('../commands/economy/bonds')
+            };
+            
+            if (commandMap[selectedCategory]) {
+                await commandMap[selectedCategory].execute(interaction);
+            }
+        } catch (error) {
+            console.error('Error in handleInvestmentCategorySelect:', error);
+        }
     }
 
     async handleInteraction(interaction) {
@@ -1490,6 +1623,262 @@ class InteractionHandler {
         const forecastCommand = require('../commands/admin/forecast');
         await interaction.deferUpdate();
         await forecastCommand.handleOverview(interaction);
+    }
+
+    async handleLinkWalletStart(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            const ticketChannel = await TicketSystem.createWalletLinkingTicket(interaction);
+            
+            await interaction.reply({ 
+                content: `🎫 **Private ticket created!** Please check ${ticketChannel} to securely link your wallet and verify your age.`, 
+                ephemeral: true 
+            });
+        } catch (error) {
+            console.error('Error in handleLinkWalletStart:', error);
+            await interaction.reply({ 
+                content: '❌ **Error creating ticket.** Please contact an administrator for assistance.', 
+                ephemeral: true 
+            });
+        }
+    }
+
+    async handleTicketLinkWallet(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.handleWalletLinking(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketLinkWallet:', error);
+        }
+    }
+
+    async handleTicketVerifyAge(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.handleAgeVerification(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketVerifyAge:', error);
+        }
+    }
+
+    async handleConfirmAge21(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.confirmAge(interaction, true);
+        } catch (error) {
+            console.error('Error in handleConfirmAge21:', error);
+        }
+    }
+
+    async handleDenyAge21(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.confirmAge(interaction, false);
+        } catch (error) {
+            console.error('Error in handleDenyAge21:', error);
+        }
+    }
+
+    async handleTicketClose(interaction) {
+        try {
+            const TicketSystem = require('../utils/ticketSystem');
+            await TicketSystem.closeTicket(interaction);
+        } catch (error) {
+            console.error('Error in handleTicketClose:', error);
+        }
+    }
+
+    async handleInvestmentCategorySelect(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const selectedCategory = interaction.values[0];
+            
+            const categoryCommands = {
+                'crypto': '/crypto',
+                'stocks': '/stocks', 
+                'realestate': '/real-estate',
+                'businesses': '/businesses',
+                'staking': '/staking',
+                'bonds': '/bonds'
+            };
+            
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle(`🚀 ${selectedCategory.toUpperCase()} Investment Marketplace`)
+                .setDescription(`**Redirecting you to the ${selectedCategory} marketplace...**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
+                .setColor('#FFD700');
+            
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+            
+            const commandMap = {
+                'crypto': require('../commands/economy/crypto'),
+                'stocks': require('../commands/economy/stocks'),
+                'realestate': require('../commands/economy/real-estate'),
+                'businesses': require('../commands/economy/businesses'),
+                'staking': require('../commands/economy/staking'),
+                'bonds': require('../commands/economy/bonds')
+            };
+            
+            if (commandMap[selectedCategory]) {
+                await commandMap[selectedCategory].execute(interaction);
+            }
+        } catch (error) {
+            console.error('Error in handleInvestmentCategorySelect:', error);
+        }
+    }
+
+    async handleInvestCrypto(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const cryptoCommand = require('../commands/economy/crypto');
+            await cryptoCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestCrypto:', error);
+        }
+    }
+
+    async handleInvestStocks(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const stocksCommand = require('../commands/economy/stocks');
+            await stocksCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestStocks:', error);
+        }
+    }
+
+    async handleInvestBonds(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const bondsCommand = require('../commands/economy/bonds');
+            await bondsCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestBonds:', error);
+        }
+    }
+
+    async handleInvestRealEstate(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const realEstateCommand = require('../commands/economy/real-estate');
+            await realEstateCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestRealEstate:', error);
+        }
+    }
+
+    async handleInvestBusinesses(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestBusinesses:', error);
+        }
+    }
+
+    async handleInvestStaking(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const stakingCommand = require('../commands/economy/staking');
+            await stakingCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestStaking:', error);
+        }
+    }
+
+    async handleInvestBonds(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const bondsCommand = require('../commands/economy/bonds');
+            await bondsCommand.execute(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestBonds:', error);
+        }
+    }
+
+    async handleInvestmentCategorySelect(interaction) {
+        try {
+            const category = interaction.values[0];
+            await interaction.deferUpdate();
+            
+            switch (category) {
+                case 'crypto':
+                    const cryptoCommand = require('../commands/economy/crypto');
+                    await cryptoCommand.execute(interaction);
+                    break;
+                case 'stocks':
+                    const stocksCommand = require('../commands/economy/stocks');
+                    await stocksCommand.execute(interaction);
+                    break;
+                case 'realestate':
+                    const realEstateCommand = require('../commands/economy/real-estate');
+                    await realEstateCommand.execute(interaction);
+                    break;
+                case 'businesses':
+                    const businessesCommand = require('../commands/economy/businesses');
+                    await businessesCommand.execute(interaction);
+                    break;
+                case 'staking':
+                    const stakingCommand = require('../commands/economy/staking');
+                    await stakingCommand.execute(interaction);
+                    break;
+                case 'bonds':
+                    const bondsCommand = require('../commands/economy/bonds');
+                    await bondsCommand.execute(interaction);
+                    break;
+            }
+        } catch (error) {
+            console.error('Error in handleInvestmentCategorySelect:', error);
+        }
+    }
+
+    async handleInvestmentPortfolioOverview(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const investCommand = require('../commands/economy/invest');
+            await investCommand.handlePortfolio(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestmentPortfolioOverview:', error);
+        }
+    }
+
+    async handleInvestmentMarketAnalysis(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const investCommand = require('../commands/economy/invest');
+            await investCommand.handleMarket(interaction);
+        } catch (error) {
+            console.error('Error in handleInvestmentMarketAnalysis:', error);
+        }
+    }
+
+    async handleInvestmentRiskCalculator(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle('⚖️ Investment Risk Calculator')
+                .setDescription('Risk assessment tools coming soon! Calculate your portfolio risk tolerance and optimal asset allocation.')
+                .setColor('#FFA500');
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error('Error in handleInvestmentRiskCalculator:', error);
+        }
+    }
+
+    async handleInvestmentEducation(interaction) {
+        try {
+            await interaction.deferUpdate();
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle('🎓 Investment Education Center')
+                .setDescription('Learn the fundamentals of investing, risk management, and portfolio diversification. Educational content coming soon!')
+                .setColor('#4169E1');
+            await interaction.followUp({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error('Error in handleInvestmentEducation:', error);
+        }
     }
 }
 
