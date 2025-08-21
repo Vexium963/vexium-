@@ -33,6 +33,8 @@ class InteractionHandler {
 
         this.handlers.set('select_job', this.handleJobSelection.bind(this));
         this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
+        this.handlers.set('business_purchase_select', this.handleBusinessPurchaseSelect.bind(this));
+        this.handlers.set('business_financing_calculator', this.handleBusinessFinancingCalculator.bind(this));
 
         this.handlers.set('help_category_select', this.handleHelpCategorySelect.bind(this));
 
@@ -206,18 +208,12 @@ class InteractionHandler {
         this.handlers.set('dao_all_proposals', this.handleDaoAllProposals.bind(this));
 
         this.handlers.set('invest_quick_buy', this.handleInvestQuickBuy.bind(this));
-        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
         this.handlers.set('ticket_link_wallet', this.handleTicketLinkWallet.bind(this));
         this.handlers.set('ticket_verify_age', this.handleTicketVerifyAge.bind(this));
         this.handlers.set('confirm_age_21', this.handleConfirmAge21.bind(this));
         this.handlers.set('deny_age_21', this.handleDenyAge21.bind(this));
         this.handlers.set('ticket_close', this.handleTicketClose.bind(this));
         
-        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
-        this.handlers.set('investment_portfolio_overview', this.handleInvestmentPortfolioOverview.bind(this));
-        this.handlers.set('investment_market_analysis', this.handleInvestmentMarketAnalysis.bind(this));
-        this.handlers.set('investment_risk_calculator', this.handleInvestmentRiskCalculator.bind(this));
-        this.handlers.set('investment_education', this.handleInvestmentEducation.bind(this));
         this.handlers.set('investment_portfolio_overview', this.handleInvestmentPortfolioOverview.bind(this));
         this.handlers.set('investment_market_analysis', this.handleInvestmentMarketAnalysis.bind(this));
         this.handlers.set('investment_risk_calculator', this.handleInvestmentRiskCalculator.bind(this));
@@ -233,8 +229,6 @@ class InteractionHandler {
         this.handlers.set('confirm_age_21', this.handleConfirmAge21.bind(this));
         this.handlers.set('deny_age_21', this.handleDenyAge21.bind(this));
         this.handlers.set('ticket_close', this.handleTicketClose.bind(this));
-        
-        this.handlers.set('investment_category_select', this.handleInvestmentCategorySelect.bind(this));
     }
 
     async handleLinkWalletStart(interaction) {
@@ -321,18 +315,24 @@ class InteractionHandler {
             
             await interaction.update({ embeds: [embed] });
             
-            const commandMap = {
-                'crypto': () => require('../commands/economy/crypto').handleMarket(interaction),
-                'stocks': () => require('../commands/economy/stocks').handleMarket(interaction),
-                'realestate': () => require('../commands/economy/real-estate').handleMarket(interaction),
-                'businesses': () => require('../commands/economy/businesses').handleMarket(interaction),
-                'staking': () => require('../commands/economy/staking').handlePools(interaction),
-                'bonds': () => require('../commands/economy/bonds').handleMarket(interaction)
-            };
-            
-            if (commandMap[selectedCategory]) {
-                await commandMap[selectedCategory]();
-            }
+            setTimeout(async () => {
+                try {
+                    const commandMap = {
+                        'crypto': () => require('../commands/economy/crypto').handleMarket(interaction),
+                        'stocks': () => require('../commands/economy/stocks').handleMarket(interaction),
+                        'realestate': () => require('../commands/economy/real-estate').handleMarket(interaction),
+                        'businesses': () => require('../commands/economy/businesses').handleMarket(interaction),
+                        'staking': () => require('../commands/economy/staking').handlePools(interaction),
+                        'bonds': () => require('../commands/economy/bonds').handleMarket(interaction)
+                    };
+                    
+                    if (commandMap[selectedCategory]) {
+                        await commandMap[selectedCategory]();
+                    }
+                } catch (followUpError) {
+                    console.error('Error in investment category follow-up:', followUpError);
+                }
+            }, 1000);
         } catch (error) {
             console.error('Error in handleInvestmentCategorySelect:', error);
         }
@@ -1758,41 +1758,6 @@ class InteractionHandler {
         }
     }
 
-    async handleInvestmentCategorySelect(interaction) {
-        try {
-            const category = interaction.values[0];
-            await interaction.deferUpdate();
-            
-            switch (category) {
-                case 'crypto':
-                    const cryptoCommand = require('../commands/economy/crypto');
-                    await cryptoCommand.execute(interaction);
-                    break;
-                case 'stocks':
-                    const stocksCommand = require('../commands/economy/stocks');
-                    await stocksCommand.execute(interaction);
-                    break;
-                case 'realestate':
-                    const realEstateCommand = require('../commands/economy/real-estate');
-                    await realEstateCommand.execute(interaction);
-                    break;
-                case 'businesses':
-                    const businessesCommand = require('../commands/economy/businesses');
-                    await businessesCommand.execute(interaction);
-                    break;
-                case 'staking':
-                    const stakingCommand = require('../commands/economy/staking');
-                    await stakingCommand.execute(interaction);
-                    break;
-                case 'bonds':
-                    const bondsCommand = require('../commands/economy/bonds');
-                    await bondsCommand.execute(interaction);
-                    break;
-            }
-        } catch (error) {
-            console.error('Error in handleInvestmentCategorySelect:', error);
-        }
-    }
 
     async handleInvestmentPortfolioOverview(interaction) {
         try {
@@ -1839,6 +1804,25 @@ class InteractionHandler {
             await interaction.followUp({ embeds: [embed], ephemeral: true });
         } catch (error) {
             console.error('Error in handleInvestmentEducation:', error);
+        }
+    }
+
+    async handleBusinessPurchaseSelect(interaction) {
+        try {
+            const businessType = interaction.values[0];
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handlePurchaseFlow(interaction, businessType);
+        } catch (error) {
+            console.error('Error in handleBusinessPurchaseSelect:', error);
+        }
+    }
+
+    async handleBusinessFinancingCalculator(interaction) {
+        try {
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handleFinancingCalculator(interaction);
+        } catch (error) {
+            console.error('Error in handleBusinessFinancingCalculator:', error);
         }
     }
 }
