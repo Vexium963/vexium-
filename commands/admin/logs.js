@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 const fs = require('fs');
 const path = require('path');
 
@@ -94,7 +95,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.TREASURY} Treasury Transaction Logs`)
             .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Monitor the economic pulse of VexiumVerse!**`)
             .addFields(
-                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX (~$${(treasuryData.balance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
             )
             .setColor(constants.COLORS.TREASURY)
@@ -104,7 +105,7 @@ module.exports = {
             const transactionList = transactions.map(tx => {
                 const date = new Date(tx.timestamp).toLocaleDateString();
                 const time = new Date(tx.timestamp).toLocaleTimeString();
-                return `**+$${tx.amount.toFixed(2)}** from \`${tx.source}\`\n*${date} ${time}* | Balance: $${tx.balanceAfter.toFixed(2)}`;
+                return `**+${tx.amount.toFixed(2)} VEX** (~$${(tx.amount * Economics.getCurrentVEXPrice()).toFixed(2)}) from \`${tx.source}\`\n*${date} ${time}* | Balance: ${tx.balanceAfter.toFixed(2)} VEX (~$${(tx.balanceAfter * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             }).join('\n\n');
             
             embed.addFields({
@@ -202,12 +203,13 @@ module.exports = {
         if (transactions.length > 0) {
             const transactionList = transactions.map(tx => {
                 const emoji = this.getTransactionEmoji(tx.type);
-                const amount = tx.type === 'spend' ? `-$${tx.amount.toFixed(2)}` : `+$${tx.amount.toFixed(2)}`;
-                const tax = tx.taxAmount > 0 ? ` (Tax: $${tx.taxAmount.toFixed(2)})` : '';
+                const amount = tx.type === 'spend' ? `-${tx.amount.toFixed(2)}` : `+${tx.amount.toFixed(2)}`;
+                const usdAmount = tx.type === 'spend' ? `-$${(tx.amount * Economics.getCurrentVEXPrice()).toFixed(2)}` : `+$${(tx.amount * Economics.getCurrentVEXPrice()).toFixed(2)}`;
+                const tax = tx.taxAmount > 0 ? ` (Tax: ${tx.taxAmount.toFixed(2)} VEX / $${(tx.taxAmount * Economics.getCurrentVEXPrice()).toFixed(2)})` : '';
                 const date = new Date(tx.timestamp).toLocaleDateString();
                 const userInfo = filterUser ? '' : ` | User: ${tx.userId.slice(-4)}`;
                 
-                return `${emoji} **${amount}** VEX - ${tx.source}${tax}\n*${date}*${userInfo}`;
+                return `${emoji} **${amount} VEX** (${usdAmount}) - ${tx.source}${tax}\n*${date}*${userInfo}`;
             }).join('\n\n');
             
             embed.addFields({
@@ -302,7 +304,7 @@ module.exports = {
                 const date = new Date(burn.timestamp).toLocaleDateString();
                 const userInfo = filterUser ? '' : ` | User: ${burn.userId.slice(-4)}`;
                 
-                return `🔥 **$${burn.amount.toFixed(2)}** VEX - ${burn.reason}\n*${date}*${userInfo}`;
+                return `🔥 **${burn.amount.toFixed(2)} VEX** (~$${(burn.amount * Economics.getCurrentVEXPrice()).toFixed(2)}) - ${burn.reason}\n*${date}*${userInfo}`;
             }).join('\n\n');
             
             embed.addFields({
@@ -314,7 +316,7 @@ module.exports = {
             const totalBurned = burns.reduce((sum, burn) => sum + burn.amount, 0);
             embed.addFields({
                 name: '📊 Total Burned (shown)',
-                value: `${totalBurned.toFixed(2)} VEX`,
+                value: `${totalBurned.toFixed(2)} VEX (~$${(totalBurned * Economics.getCurrentVEXPrice()).toFixed(2)})`,
                 inline: true
             });
         } else {

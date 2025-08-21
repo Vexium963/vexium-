@@ -86,6 +86,8 @@ module.exports = {
             const User = require('../../database/models/User');
             const user = new User(interaction.user.id);
             await user.addVEX(surpriseBonus, 'help_bonus');
+            const Economics = require('../../utils/economics');
+            Economics.updateVEXMarket('reward', surpriseBonus);
         }
         
         if (helpCount === 0) {
@@ -237,7 +239,7 @@ module.exports = {
                     },
                     {
                         name: '💡 Pro Tips',
-                        value: '• VEX tokens are pegged 1:1 to USD\n• Bank deposits earn daily interest\n• Premium tiers reduce taxes\n• Link crypto wallets for future benefits',
+                        value: '• VEX tokens are dynamically pegged to USD\n• Bank deposits earn daily interest\n• Premium tiers reduce taxes\n• Link crypto wallets for future benefits',
                         inline: false
                     }
                 ]

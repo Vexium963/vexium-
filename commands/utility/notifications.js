@@ -45,6 +45,8 @@ module.exports = {
         
         if (urgencyBonus > 0) {
             await user.addVEX(urgencyBonus, 'notification_optimization_bonus');
+            const Economics = require('../../utils/economics');
+            Economics.updateVEXMarket('reward', urgencyBonus);
             userData.stats.notificationsOptimized = notificationUsage + 1;
         }
         

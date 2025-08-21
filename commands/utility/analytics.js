@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, AttachmentBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -162,7 +163,7 @@ module.exports = {
             .addFields(
                 { name: '💵 Income Sources', value: this.formatIncomeBreakdown(stats), inline: true },
                 { name: '💸 Spending Categories', value: this.formatSpendingBreakdown(stats), inline: true },
-                { name: '📊 Key Metrics', value: `**Total Earned**: $${(stats.totalEarned || 0).toFixed(2)}\n**Total Spent**: $${(stats.totalSpent || 0).toFixed(2)}\n**Net Profit**: $${((stats.totalEarned || 0) - (stats.totalSpent || 0)).toFixed(2)}\n**Avg Daily**: $${((stats.totalEarned || 0) / Math.max(stats.daysActive || 1, 1)).toFixed(2)}`, inline: true },
+                { name: '📊 Key Metrics', value: `**Total Earned**: ${(stats.totalEarned || 0).toFixed(2)} VEX (~$${((stats.totalEarned || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})\n**Total Spent**: ${(stats.totalSpent || 0).toFixed(2)} VEX (~$${((stats.totalSpent || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})\n**Net Profit**: ${((stats.totalEarned || 0) - (stats.totalSpent || 0)).toFixed(2)} VEX (~$${(((stats.totalEarned || 0) - (stats.totalSpent || 0)) * Economics.getCurrentVEXPrice()).toFixed(2)})\n**Avg Daily**: ${((stats.totalEarned || 0) / Math.max(stats.daysActive || 1, 1)).toFixed(2)} VEX (~$${(((stats.totalEarned || 0) / Math.max(stats.daysActive || 1, 1)) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏦 Banking Activity', value: this.formatBankingStats(stats), inline: true },
                 { name: '📈 Investment Performance', value: this.formatInvestmentStats(userData), inline: true },
                 { name: '🎯 Efficiency Ratings', value: this.formatEfficiencyStats(stats), inline: true }
@@ -319,7 +320,8 @@ module.exports = {
     
     formatWealthStats(userData) {
         const total = userData.vexBalance + userData.bankBalance;
-        return `**Total Wealth**: $${total.toFixed(2)}\n**Wallet**: $${userData.vexBalance.toFixed(2)}\n**Bank**: $${userData.bankBalance.toFixed(2)}\n**Net Worth**: $${userData.networth.toFixed(2)}`;
+        const vexPrice = Economics.getCurrentVEXPrice();
+        return `**Total Wealth**: ${total.toFixed(2)} VEX (~$${(total * vexPrice).toFixed(2)})\n**Wallet**: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * vexPrice).toFixed(2)})\n**Bank**: ${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * vexPrice).toFixed(2)})\n**Net Worth**: ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * vexPrice).toFixed(2)})`;
     },
     
     formatActivityStats(stats) {
@@ -328,7 +330,8 @@ module.exports = {
     
     formatPerformanceStats(stats) {
         const efficiency = ((stats.totalEarned || 0) / Math.max(1, stats.commandsUsed || 1)).toFixed(2);
-        return `**Efficiency**: $${efficiency}/cmd\n**Success Rate**: 95%\n**Avg Session**: 15 min\n**Peak Hour**: Evening`;
+        const vexPrice = Economics.getCurrentVEXPrice();
+        return `**Efficiency**: ${efficiency} VEX (~$${(efficiency * vexPrice).toFixed(2)})/cmd\n**Success Rate**: 95%\n**Avg Session**: 15 min\n**Peak Hour**: Evening`;
     },
     
     formatGrowthStats(userData, accountAge) {

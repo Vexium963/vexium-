@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -67,6 +68,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'leaderboard_engagement_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
         }
         
         await user.save(userData);
@@ -161,9 +163,10 @@ module.exports = {
                 const rank = i + 1;
                 const medal = this.getRankMedal(rank);
                 
+                const currentPrice = Economics.getCurrentVEXPrice();
                 embed.addFields({
                     name: `${medal} #${rank} ${player.username}`,
-                    value: `**Net Worth**: ${player.networth.toFixed(2)} VEX\n**Wallet**: ${player.vexBalance.toFixed(2)} VEX\n**Bank**: ${player.bankBalance.toFixed(2)} VEX`,
+                    value: `**Net Worth**: ${player.networth.toFixed(2)} VEX (~$${(player.networth * currentPrice).toFixed(2)})\n**Wallet**: ${player.vexBalance.toFixed(2)} VEX (~$${(player.vexBalance * currentPrice).toFixed(2)})\n**Bank**: ${player.bankBalance.toFixed(2)} VEX (~$${(player.bankBalance * currentPrice).toFixed(2)})`,
                     inline: true
                 });
             }
@@ -428,10 +431,26 @@ module.exports = {
     },
     
     async getTopPlayersByWealth() {
+        const baseUSDWealth = [15000, 12000, 9500];
         return [
-            { username: 'WealthMaster', networth: 1500000, vexBalance: 500000, bankBalance: 1000000 },
-            { username: 'CryptoKing', networth: 1200000, vexBalance: 400000, bankBalance: 800000 },
-            { username: 'VEXLord', networth: 950000, vexBalance: 350000, bankBalance: 600000 }
+            { 
+                username: 'WealthMaster', 
+                networth: Economics.getPeggedVEXPrice(baseUSDWealth[0]), 
+                vexBalance: Economics.getPeggedVEXPrice(baseUSDWealth[0] * 0.33), 
+                bankBalance: Economics.getPeggedVEXPrice(baseUSDWealth[0] * 0.67) 
+            },
+            { 
+                username: 'CryptoKing', 
+                networth: Economics.getPeggedVEXPrice(baseUSDWealth[1]), 
+                vexBalance: Economics.getPeggedVEXPrice(baseUSDWealth[1] * 0.33), 
+                bankBalance: Economics.getPeggedVEXPrice(baseUSDWealth[1] * 0.67) 
+            },
+            { 
+                username: 'VEXLord', 
+                networth: Economics.getPeggedVEXPrice(baseUSDWealth[2]), 
+                vexBalance: Economics.getPeggedVEXPrice(baseUSDWealth[2] * 0.37), 
+                bankBalance: Economics.getPeggedVEXPrice(baseUSDWealth[2] * 0.63) 
+            }
         ];
     },
     

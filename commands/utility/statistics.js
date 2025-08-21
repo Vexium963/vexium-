@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -135,8 +136,8 @@ module.exports = {
             .setDescription(`📈 Your complete journey through the VexiumVerse ecosystem\n\n🔥 ${socialProofMessage}${milestoneMessage ? `\n🏆 ${milestoneMessage}` : ''}\n⏳ ${fomoMessage}`)
             .addFields(
                 { name: '📊 General Statistics', value: `**Commands Used**: ${totalCommands.toLocaleString()}\n**Days Active**: ${daysActive}\n**Avg Commands/Day**: ${avgCommandsPerDay}\n**Account Level**: ${userData.level || 1}`, inline: true },
-                { name: '💰 Economic Overview', value: `**Net Worth**: ${(userData.networth || 0).toLocaleString()} VEX\n**Total Earned**: ${(stats.totalEarned || 0).toLocaleString()} VEX\n**Total Spent**: ${(stats.totalSpent || 0).toLocaleString()} VEX\n**Work Sessions**: ${stats.workSessions || 0}`, inline: true },
-                { name: '🎮 Entertainment Stats', value: `**Games Played**: ${(stats.entertainmentGamesPlayed || 0).toLocaleString()}\n**Total Winnings**: ${(stats.totalWinnings || 0).toLocaleString()} VEX\n**Win Rate**: ${this.calculateWinRate(stats)}%\n**Tournaments Won**: ${stats.tournamentsWon || 0}`, inline: true },
+                { name: '💰 Economic Overview', value: `**Net Worth**: ${(userData.networth || 0).toLocaleString()} VEX (~$${((userData.networth || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Total Earned**: ${(stats.totalEarned || 0).toLocaleString()} VEX (~$${((stats.totalEarned || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Total Spent**: ${(stats.totalSpent || 0).toLocaleString()} VEX (~$${((stats.totalSpent || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Work Sessions**: ${stats.workSessions || 0}`, inline: true },
+                { name: '🎮 Entertainment Stats', value: `**Games Played**: ${(stats.entertainmentGamesPlayed || 0).toLocaleString()}\n**Total Winnings**: ${(stats.totalWinnings || 0).toLocaleString()} VEX (~$${((stats.totalWinnings || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Win Rate**: ${this.calculateWinRate(stats)}%\n**Tournaments Won**: ${stats.tournamentsWon || 0}`, inline: true },
                 { name: '👥 Social Activity', value: `**Gifts Sent**: ${stats.giftsSent || 0}\n**Trades Completed**: ${stats.tradesCompleted || 0}\n**Friends**: ${(userData.friends || []).length}\n**Guild Rank**: ${userData.guildRank || 'None'}`, inline: true },
                 { name: '🏆 Achievements', value: `**Unlocked**: ${(userData.achievements || []).length}\n**Progress**: ${this.getAchievementProgress(userData)}%\n**Rare Achievements**: ${this.getRareAchievements(userData)}\n**Achievement Points**: ${stats.achievementPoints || 0}`, inline: true },
                 { name: '📈 Growth Metrics', value: `**Daily Streak**: ${userData.dailyStreak || 0}\n**XP Gained**: ${userData.xp || 0}\n**Prestige Level**: ${userData.prestigeLevel || 0}\n**Skill Points**: ${userData.skillPoints || 0}`, inline: true }
@@ -215,7 +216,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Statistics`)
             .setDescription(`Detailed financial analytics for ${interaction.user.displayName}\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
-                { name: '💼 Wallet & Banking', value: `**VEX Balance**: $${(userData.vexBalance || 0).toLocaleString()}\n**Bank Balance**: $${(userData.bankBalance || 0).toLocaleString()}\n**Total Deposits**: $${(stats.totalDeposits || 0).toLocaleString()}\n**Interest Earned**: $${(stats.interestEarned || 0).toLocaleString()}`, inline: true },
+                { name: '💼 Wallet & Banking', value: `**VEX Balance**: ${(userData.vexBalance || 0).toLocaleString()} VEX (~$${((userData.vexBalance || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Bank Balance**: ${(userData.bankBalance || 0).toLocaleString()} VEX (~$${((userData.bankBalance || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Total Deposits**: ${(stats.totalDeposits || 0).toLocaleString()} VEX (~$${((stats.totalDeposits || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})\n**Interest Earned**: ${(stats.interestEarned || 0).toLocaleString()} VEX (~$${((stats.interestEarned || 0) * Economics.getCurrentVEXPrice()).toLocaleString()})`, inline: true },
                 { name: '💼 Work & Income', value: `**Work Sessions**: ${stats.workSessions || 0}\n**Total Work Income**: $${(stats.totalWorkIncome || 0).toLocaleString()}\n**Daily Claims**: ${stats.dailyClaims || 0}\n**Avg Daily Earnings**: $${this.getAvgDailyEarnings(stats)}`, inline: true },
                 { name: '📈 Investments', value: `**Stock Portfolio**: $${(stats.totalStockValue || 0).toLocaleString()}\n**Bonds**: $${(stats.totalBondValue || 0).toLocaleString()}\n**Investment Returns**: $${(stats.totalInvestmentReturns || 0).toLocaleString()}\n**ROI**: ${this.calculateROI(stats)}%`, inline: true },
                 { name: '🏠 Real Estate', value: `**Properties Owned**: ${realEstate.length}\n**Total Value**: $${totalRealEstate.toLocaleString()}\n**Monthly Income**: $${this.getMonthlyRealEstateIncome(realEstate)}\n**Total Collected**: $${(stats.totalRealEstateIncome || 0).toLocaleString()}`, inline: true },

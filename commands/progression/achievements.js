@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -108,7 +109,7 @@ module.exports = {
             
             if (isUnlocked) {
                 totalRewards += achievement.reward;
-                rarityGroups[rarity].push(`${achievement.icon} **${achievement.name}** - ${achievement.reward.toFixed(2)} VEX`);
+                rarityGroups[rarity].push(`${achievement.icon} **${achievement.name}** - ${achievement.reward.toFixed(2)} VEX (~$${(achievement.reward * Economics.getCurrentVEXPrice()).toFixed(2)})`);
             }
         }
         
@@ -140,7 +141,7 @@ module.exports = {
         } else {
             embed.addFields({
                 name: '💰 Total Rewards Earned',
-                value: `${totalRewards.toFixed(2)} VEX`,
+                value: `${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)})`,
                 inline: true
             });
         }
@@ -148,7 +149,7 @@ module.exports = {
         const lockedAchievements = constants.ACHIEVEMENTS.filter(a => !unlockedAchievements.includes(a.id));
         if (lockedAchievements.length > 0 && isOwnAchievements) {
             const nextAchievements = lockedAchievements.slice(0, 3).map(a => 
-                `${a.icon} **${a.name}** - ${a.description} (${a.reward.toFixed(2)} VEX)`
+                `${a.icon} **${a.name}** - ${a.description} (${a.reward.toFixed(2)} VEX (~$${(a.reward * Economics.getCurrentVEXPrice()).toFixed(2)}))`
             ).join('\n');
             
             embed.addFields({

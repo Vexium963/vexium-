@@ -59,6 +59,8 @@ module.exports = {
             userData.stats.settingsStreak = 1;
             if (surpriseBonus > 0) {
                 await user.addVEX(surpriseBonus, 'settings_optimization_bonus');
+                const Economics = require('../../utils/economics');
+                Economics.updateVEXMarket('reward', surpriseBonus);
             }
             await user.save(userData);
         } else {

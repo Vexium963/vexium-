@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -91,7 +92,7 @@ module.exports = {
         const daoUsage = userData.stats?.daoVotes || 0;
         const isGovernanceNewbie = daoUsage === 0;
         const isGovernanceVeteran = daoUsage >= 20;
-        const surpriseBonus = Math.random() < 0.1 ? Math.floor(userData.vexBalance * 0.02) : 0;
+        const surpriseBonus = Math.random() < 0.1 ? Math.floor(Economics.getPeggedVEXPrice(userData.vexBalance * Economics.getCurrentVEXPrice() * 0.02)) : 0;
         
         if (isGovernanceNewbie && subcommand === 'proposals') {
             const welcomeEmbed = new EmbedBuilder()
@@ -109,6 +110,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'governance_participation_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ DEMOCRACY BONUS!`)
                 .setDescription(`🎉 **Surprise reward for governance participation!**\n💸 **+${surpriseBonus} VEX** for being an active democracy participant!`)
@@ -334,7 +336,7 @@ module.exports = {
         if (userData.vexBalance < requiredStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Stake`)
-                .setDescription(`You need ${requiredStake} VEX to create a proposal.\nYour balance: $${userData.vexBalance.toFixed(2)}`)
+                .setDescription(`You need ${requiredStake} VEX (~$${(requiredStake * Economics.getCurrentVEXPrice()).toFixed(2)}) to create a proposal.\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`)
                 .addFields(
                     { name: '💡 Why Staking?', value: 'Staking prevents spam and ensures serious proposals', inline: false },
                     { name: '💰 Stake Return', value: 'Your stake is returned when voting ends', inline: false }
@@ -353,6 +355,7 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        Economics.updateVEXMarket('stake', requiredStake);
         
         if (!global.daoProposals) global.daoProposals = [];
         
@@ -385,7 +388,7 @@ module.exports = {
             .addFields(
                 { name: '🆔 Proposal ID', value: proposalId, inline: true },
                 { name: '📂 Category', value: category.charAt(0).toUpperCase() + category.slice(1), inline: true },
-                { name: '💰 Stake', value: `${requiredStake.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Stake', value: `${requiredStake.toFixed(2)} VEX (~$${(requiredStake * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📝 Description', value: description, inline: false },
                 { name: '⏰ Voting Period', value: '7 days from now', inline: true },
                 { name: '🗳️ How to Vote', value: `/dao vote ${proposalId} <choice>`, inline: true }
@@ -425,7 +428,7 @@ module.exports = {
     
     calculateVotingPower(userData) {
         const baseVEX = userData.vexBalance + userData.bankBalance;
-        return Math.floor(baseVEX / 100); // 1 vote per 100 VEX
+        return Math.floor(baseVEX / Economics.getPeggedVEXPrice(10)); // 1 vote per $10 worth of VEX
     },
     
     generateProposalId() {

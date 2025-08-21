@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRow
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const CanvasRenderer = require('../../utils/canvasRenderer');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -294,7 +295,7 @@ module.exports = {
                 return `⛓️ **${chain.baseAchievement.toUpperCase()} CHAIN**\n` +
                        `📊 Step ${chain.currentStep}/${chain.totalSteps} (${progressPercent}%)\n` +
                        `⏰ ${timeLeft} remaining\n` +
-                       `🎁 Next: ${nextReward?.vex || 0} VEX + ${nextReward?.xp || 0} XP` +
+                       `🎁 Next: ${nextReward?.vex || 0} VEX (~$${((nextReward?.vex || 0) * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${nextReward?.xp || 0} XP` +
                        (nextReward?.special ? ` + ${nextReward.special}` : '');
             }).join('\n\n');
             
@@ -405,7 +406,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.GIFT} Welcome Back Bonus!`)
             .setDescription(`${comebackBonus.message}\n\n🎉 **You've been away for ${comebackBonus.daysAway} days!**`)
             .addFields(
-                { name: '💰 Comeback Bonus', value: `${comebackBonus.bonusAmount.toFixed(0)} VEX`, inline: true },
+                { name: '💰 Comeback Bonus', value: `${comebackBonus.bonusAmount.toFixed(0)} VEX (~$${(comebackBonus.bonusAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Bonus Multiplier', value: `${comebackBonus.bonusMultiplier.toFixed(1)}x`, inline: true },
                 { name: '⏰ Expires In', value: this.getTimeLeft(comebackBonus.expires), inline: true }
             )

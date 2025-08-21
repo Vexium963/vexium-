@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -88,7 +89,7 @@ module.exports = {
         }
         
         if (hasUnclaimed) {
-            description += `\n\n💰 **URGENT:** ${totalRewards.toFixed(2)} VEX waiting to be claimed!`;
+            description += `\n\n💰 **URGENT:** ${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)}) waiting to be claimed!`;
         }
         
         const timeLeft = this.getTimeUntilMidnight();
@@ -107,7 +108,7 @@ module.exports = {
         
         for (const challenge of dailyChallenges) {
             const status = challenge.completed ? (challenge.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${challenge.progress}/${challenge.target}`;
-            const reward = `${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
+            const reward = `${challenge.reward.toFixed(2)} VEX (~$${(challenge.reward * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${challenge.xp} XP`;
             
             embed.addFields({
                 name: `${challenge.emoji} ${challenge.name}`,
@@ -119,7 +120,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💰 Unclaimed Rewards',
-                value: `${totalRewards.toFixed(2)} VEX available to claim!`,
+                value: `${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)}) available to claim!`,
                 inline: false
             });
         }
@@ -182,7 +183,7 @@ module.exports = {
         
         for (const challenge of weeklyChallenges) {
             const status = challenge.completed ? (challenge.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${challenge.progress}/${challenge.target}`;
-            const reward = `${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
+            const reward = `${challenge.reward.toFixed(2)} VEX (~$${(challenge.reward * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${challenge.xp} XP`;
             embed.addFields({
                 name: `${challenge.emoji} ${challenge.name}`,
                 value: `${challenge.description}\n**Progress**: ${challenge.progress}/${challenge.target}\n**Reward**: ${reward}\n**Status**: ${status}`,
@@ -193,7 +194,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💎 Unclaimed Weekly Rewards',
-                value: `${totalRewards.toFixed(2)} VEX + bonus XP available!`,
+                value: `${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)}) + bonus XP available!`,
                 inline: false
             });
         }
@@ -253,7 +254,7 @@ module.exports = {
                 { name: '📅 Daily Progress', value: `${dailyCompleted}/${dailyChallenges.length} completed`, inline: true },
                 { name: '📊 Weekly Progress', value: `${weeklyCompleted}/${weeklyChallenges.length} completed`, inline: true },
                 { name: '🏆 Overall Stats', value: `**Total Completed**: ${totalChallengesCompleted}\n**Current Streak**: ${challengeStreak} days\n**Best Streak**: ${userData.stats.bestChallengeStreak || 0}`, inline: true },
-                { name: '💰 Rewards Earned', value: `**This Week**: $${(userData.stats.weeklyRewards || 0).toFixed(2)}\n**All Time**: $${(userData.stats.totalChallengeRewards || 0).toFixed(2)}`, inline: true },
+                { name: '💰 Rewards Earned', value: `**This Week**: ${(userData.stats.weeklyRewards || 0).toFixed(2)} VEX (~$${((userData.stats.weeklyRewards || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})\n**All Time**: ${(userData.stats.totalChallengeRewards || 0).toFixed(2)} VEX (~$${((userData.stats.totalChallengeRewards || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Performance', value: `**Completion Rate**: ${this.getCompletionRate(userData)}%\n**Avg Daily**: ${this.getAvgDaily(userData)}\n**Rank**: ${this.getChallengeRank(userData)}`, inline: true },
                 { name: '🎯 Next Milestone', value: this.getNextMilestone(totalChallengesCompleted), inline: true }
             )
@@ -330,6 +331,7 @@ module.exports = {
         }
         
         await user.addVEX(challenge.reward, 'challenge_reward');
+        Economics.updateVEXMarket('reward', challenge.reward);
         userData.xp += challenge.xp;
         
         challenge.claimed = true;
@@ -346,9 +348,9 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Challenge Reward Claimed!`)
             .setDescription(`**${challenge.name}** reward claimed successfully!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
-                { name: '💰 VEX Reward', value: `$${challenge.reward.toFixed(2)}`, inline: true },
+                { name: '💰 VEX Reward', value: `${challenge.reward.toFixed(2)} VEX (~$${(challenge.reward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⭐ XP Reward', value: `${challenge.xp} XP`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Keep completing challenges for more rewards!' })

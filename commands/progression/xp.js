@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -107,8 +108,10 @@ module.exports = {
         
         const levelRewards = [];
         for (let level = userData.level + 1; level <= Math.min(userData.level + 5, 100); level++) {
-            const reward = level * 0.50;
-            levelRewards.push(`**Level ${level}**: ${reward.toFixed(2)} VEX`);
+            const rewardUSD = level * 0.01; // $0.01 per level
+            const reward = Economics.getPeggedVEXPrice(rewardUSD);
+            const currentVEXPrice = Economics.getCurrentVEXPrice();
+            levelRewards.push(`**Level ${level}**: ${reward.toFixed(2)} VEX (~$${(reward * currentVEXPrice).toFixed(2)})`);
         }
         
         if (levelRewards.length > 0) {

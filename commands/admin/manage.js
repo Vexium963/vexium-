@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -164,6 +165,7 @@ module.exports = {
         switch (action) {
             case 'add':
                 await user.addVEX(amount, 'admin_add');
+                Economics.updateVEXMarket('buy', amount);
                 newBalance = userData.vexBalance + amount;
                 break;
             case 'remove':
@@ -178,14 +180,17 @@ module.exports = {
                     
                     return interaction.reply({ embeds: [embed], ephemeral: true });
                 }
+                Economics.updateVEXMarket('sell', amount);
                 newBalance = userData.vexBalance - amount;
                 break;
             case 'set':
                 const currentBalance = userData.vexBalance;
                 if (amount > currentBalance) {
                     await user.addVEX(amount - currentBalance, 'admin_set');
+                    Economics.updateVEXMarket('buy', amount - currentBalance);
                 } else if (amount < currentBalance) {
                     await user.removeVEX(currentBalance - amount, 'admin_set', false);
+                    Economics.updateVEXMarket('sell', currentBalance - amount);
                 }
                 newBalance = amount;
                 break;
@@ -199,7 +204,7 @@ module.exports = {
         
         if (isLargeAmount) {
             title = `💎 MASSIVE BALANCE CHANGE!`;
-            description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed ${amount.toFixed(2)} VEX for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
+            description = `🔥 **${impactLevel} ADMIN ACTION!** ${action.toUpperCase()}ed ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) for ${targetUser.username}!\n👑 **This will significantly impact their empire!**`;
         }
         
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
@@ -211,8 +216,8 @@ module.exports = {
             .addFields(
                 { name: '👤 Target User', value: `${targetUser.username} (<@${targetUser.id}>)`, inline: true },
                 { name: '⚙️ Admin Action', value: `${action.charAt(0).toUpperCase() + action.slice(1)} ${impactLevel}`, inline: true },
-                { name: '💰 Amount Changed', value: `${amount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 New Balance', value: `${newBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Changed', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📊 New Balance', value: `${newBalance.toFixed(2)} VEX (~$${(newBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎯 Impact Level', value: `${impactLevel} ${isLargeAmount ? '🚀' : '⭐'}`, inline: true },
                 { name: '⏰ Executed By', value: `<@${interaction.user.id}>`, inline: true }
             )
@@ -319,9 +324,9 @@ module.exports = {
             .setDescription(`✨ Successfully reset account for ${targetUser.username}`)
             .addFields(
                 { name: '👤 User', value: targetUser.username, inline: true },
-                { name: '💰 Previous Balance', value: `${backupData.oldBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Previous Balance', value: `${backupData.oldBalance.toFixed(2)} VEX (~$${(backupData.oldBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎯 Previous Level', value: backupData.oldLevel.toString(), inline: true },
-                { name: '📊 New Balance', value: `${constants.VEX_TOKEN.STARTING_BALANCE.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `${constants.VEX_TOKEN.STARTING_BALANCE.toFixed(2)} VEX (~$${(constants.VEX_TOKEN.STARTING_BALANCE * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎯 New Level', value: '1', inline: true }
             )
             .setColor(constants.COLORS.WARNING)
@@ -341,7 +346,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.TREASURY} VexiumVerse Treasury`)
             .setDescription(`💰 Current treasury status and recent transactions - The heart of VexiumVerse wealth!`)
             .addFields(
-                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Current Balance', value: `${treasuryData.balance.toFixed(2)} VEX (~$${(treasuryData.balance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
             )
             .setColor(constants.COLORS.TREASURY)
@@ -397,10 +402,10 @@ module.exports = {
                 { name: '👥 Total Users', value: totalUsers.toString(), inline: true },
                 { name: '🟢 Active Users (7d)', value: activeUsers.toString(), inline: true },
                 { name: '🏛️ Servers', value: interaction.client.guilds.cache.size.toString(), inline: true },
-                { name: '💰 Total VEX in Circulation', value: `$${totalVEX.toFixed(2)}`, inline: true },
-                { name: '🎮 Total Entertainment Games', value: `$${totalEntertainmentPlayed.toFixed(2)}`, inline: true },
-                { name: '📈 Total Invested', value: `$${totalInvested.toFixed(2)}`, inline: true },
-                { name: '🏛️ Treasury Balance', value: `$${treasuryData.balance.toFixed(2)}`, inline: true },
+                { name: '💰 Total VEX in Circulation', value: `${totalVEX.toFixed(2)} VEX (~$${(totalVEX * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎮 Total Entertainment Games', value: `${totalEntertainmentPlayed.toFixed(2)} VEX (~$${(totalEntertainmentPlayed * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📈 Total Invested', value: `${totalInvested.toFixed(2)} VEX (~$${(totalInvested * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🏛️ Treasury Balance', value: `${treasuryData.balance.toFixed(2)} VEX (~$${(treasuryData.balance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⏰ Bot Uptime', value: this.formatUptime(interaction.client.uptime), inline: true },
                 { name: '📊 Commands Available', value: '64+', inline: true }
             )
