@@ -1,12 +1,22 @@
-const Redis = require('./redis');
+const RedisCache = require('../database/redis');
 const constants = require('./constants');
 
 class DailyCapsManager {
     constructor() {
-        this.redis = Redis;
+        this.redis = new RedisCache();
+        this.isInitialized = false;
+    }
+
+    async initialize() {
+        if (!this.isInitialized) {
+            await this.redis.connect();
+            this.isInitialized = true;
+        }
     }
 
     async checkDailyCap(userId, capType, amount = 1) {
+        await this.initialize();
+        
         const today = new Date().toISOString().split('T')[0];
         const key = `daily_cap:${capType}:${userId}:${today}`;
         
@@ -36,6 +46,8 @@ class DailyCapsManager {
     }
 
     async getDailyUsage(userId, capType) {
+        await this.initialize();
+        
         const today = new Date().toISOString().split('T')[0];
         const key = `daily_cap:${capType}:${userId}:${today}`;
         
@@ -59,6 +71,8 @@ class DailyCapsManager {
     }
 
     async resetUserCaps(userId) {
+        await this.initialize();
+        
         const today = new Date().toISOString().split('T')[0];
         const pattern = `daily_cap:*:${userId}:${today}`;
         

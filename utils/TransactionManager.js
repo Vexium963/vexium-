@@ -1,11 +1,21 @@
-const Redis = require('./redis');
+const RedisCache = require('../database/redis');
 
 class TransactionManager {
     constructor() {
-        this.redis = Redis;
+        this.redis = new RedisCache();
+        this.isInitialized = false;
+    }
+
+    async initialize() {
+        if (!this.isInitialized) {
+            await this.redis.connect();
+            this.isInitialized = true;
+        }
     }
 
     async begin(userId, type, amount) {
+        await this.initialize();
+        
         const txId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const lockKey = `session:${type}:${userId}`;
         
@@ -25,6 +35,8 @@ class TransactionManager {
     }
 
     async commit(txId) {
+        await this.initialize();
+        
         const pendingKey = `pending:${txId}`;
         const txData = await this.redis.get(pendingKey);
         
@@ -41,6 +53,8 @@ class TransactionManager {
     }
 
     async rollback(txId) {
+        await this.initialize();
+        
         const pendingKey = `pending:${txId}`;
         const txData = await this.redis.get(pendingKey);
         
@@ -59,12 +73,16 @@ class TransactionManager {
     }
 
     async isLocked(userId, type) {
+        await this.initialize();
+        
         const lockKey = `session:${type}:${userId}`;
         const lock = await this.redis.get(lockKey);
         return !!lock;
     }
 
     async clearLock(userId, type) {
+        await this.initialize();
+        
         const lockKey = `session:${type}:${userId}`;
         await this.redis.del(lockKey);
     }
