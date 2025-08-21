@@ -39,6 +39,15 @@ class InteractionHandler {
         this.handlers.set('business_finance_36', this.handleBusinessFinance36.bind(this));
         this.handlers.set('business_performance_preview', this.handleBusinessPerformancePreview.bind(this));
 
+        this.handlers.set('business_buy_cash', this.handleBusinessBuyCash.bind(this));
+        this.handlers.set('business_finance_12', this.handleBusinessFinance12.bind(this));
+        this.handlers.set('business_finance_24', this.handleBusinessFinance24.bind(this));
+        this.handlers.set('business_finance_36', this.handleBusinessFinance36.bind(this));
+        
+        this.handlers.set('business_nav_prev', this.handleBusinessNavPrev.bind(this));
+        this.handlers.set('business_nav_next', this.handleBusinessNavNext.bind(this));
+        this.handlers.set('business_confirm', this.handleBusinessConfirm.bind(this));
+
         this.handlers.set('help_category_select', this.handleHelpCategorySelect.bind(this));
 
         this.handlers.set('analytics_economy', this.handleAnalyticsEconomy.bind(this));
@@ -1847,6 +1856,189 @@ class InteractionHandler {
         } catch (error) {
             console.error('Error in handleBusinessPerformancePreview:', error);
         }
+    }
+
+    async handleBusinessBuyCash(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            
+            const User = require('../database/models/User');
+            const user = new User(interaction.user.id);
+            const userData = await user.load();
+            
+            const businessTypes = businessesCommand.getBusinessTypes();
+            const business = businessTypes[businessType];
+            
+            if (userData.vexBalance < business.price) {
+                return interaction.reply({ 
+                    content: `❌ Insufficient funds. You need ${business.price.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.`, 
+                    ephemeral: true 
+                });
+            }
+            
+            await user.subtractVEX(business.price, `business_cash_${businessType}`);
+            
+            userData.businesses = userData.businesses || [];
+            userData.businesses.push({
+                type: businessType,
+                name: business.name,
+                purchasePrice: business.price,
+                startDate: new Date().toISOString(),
+                level: 1,
+                totalInvested: business.price,
+                monthlyIncomeRange: business.monthlyIncomeRange,
+                ownedOutright: true
+            });
+            
+            await user.save(userData);
+            
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setTitle(`🎉 Business Purchase Successful!`)
+                .setDescription(`**${business.name}** purchased with cash and added to your portfolio!`)
+                .setColor('#00FF00');
+            
+            await interaction.update({ embeds: [embed], components: [] });
+        } catch (error) {
+            console.error('Error in handleBusinessBuyCash:', error);
+        }
+    }
+
+    async handleBusinessFinance12(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handleFinancePurchase(interaction, businessType, 12);
+        } catch (error) {
+            console.error('Error in handleBusinessFinance12:', error);
+        }
+    }
+
+    async handleBusinessFinance24(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handleFinancePurchase(interaction, businessType, 24);
+        } catch (error) {
+            console.error('Error in handleBusinessFinance24:', error);
+        }
+    }
+
+    async handleBusinessFinance36(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handleFinancePurchase(interaction, businessType, 36);
+        } catch (error) {
+            console.error('Error in handleBusinessFinance36:', error);
+        }
+    }
+
+    async handleBusinessNavPrev(interaction) {
+        try {
+            const currentIndex = parseInt(interaction.customId.split('_').pop());
+            const newIndex = Math.max(0, currentIndex - 1);
+            await this.updateBusinessCarousel(interaction, newIndex);
+        } catch (error) {
+            console.error('Error in handleBusinessNavPrev:', error);
+        }
+    }
+
+    async handleBusinessNavNext(interaction) {
+        try {
+            const currentIndex = parseInt(interaction.customId.split('_').pop());
+            const businessesCommand = require('../commands/economy/businesses');
+            const businessTypes = businessesCommand.getBusinessTypes();
+            const businessKeys = Object.keys(businessTypes);
+            const newIndex = Math.min(businessKeys.length - 1, currentIndex + 1);
+            await this.updateBusinessCarousel(interaction, newIndex);
+        } catch (error) {
+            console.error('Error in handleBusinessNavNext:', error);
+        }
+    }
+
+    async handleBusinessConfirm(interaction) {
+        try {
+            const businessType = interaction.customId.split('_').pop();
+            const businessesCommand = require('../commands/economy/businesses');
+            await businessesCommand.handlePurchaseFlow(interaction, businessType);
+        } catch (error) {
+            console.error('Error in handleBusinessConfirm:', error);
+        }
+    }
+
+    async updateBusinessCarousel(interaction, newIndex) {
+        const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        const businessesCommand = require('../commands/economy/businesses');
+        const Economics = require('../utils/economics');
+        
+        const businessTypes = businessesCommand.getBusinessTypes();
+        const businessKeys = Object.keys(businessTypes);
+        const currentBusiness = businessTypes[businessKeys[newIndex]];
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`🏢 **BUSINESS MARKETPLACE** - ${currentBusiness.name}`)
+            .setDescription(`**${currentBusiness.description}**\n\n💰 **Price**: ${currentBusiness.price.toFixed(2)} VEX (~$${(currentBusiness.price * Economics.getCurrentVEXPrice()).toFixed(2)})\n📊 **Monthly Income**: $${currentBusiness.monthlyIncomeRange.min}-$${currentBusiness.monthlyIncomeRange.max}\n🏦 **25% Down**: ${(currentBusiness.price * 0.25).toFixed(2)} VEX`)
+            .addFields(
+                { 
+                    name: '💼 Business Details', 
+                    value: `**Type**: ${currentBusiness.name}\n**Investment Level**: ${businessesCommand.getBusinessTier(businessKeys[newIndex])}\n**Risk Level**: Medium\n**ROI**: 30-40% annually`, 
+                    inline: true 
+                },
+                { 
+                    name: '🏦 Financing Options', 
+                    value: `**12 Month**: ${businessesCommand.calculateFinancing(currentBusiness.price, 12).monthlyPayment.toFixed(2)} VEX/month\n**24 Month**: ${businessesCommand.calculateFinancing(currentBusiness.price, 24).monthlyPayment.toFixed(2)} VEX/month\n**36 Month**: ${businessesCommand.calculateFinancing(currentBusiness.price, 36).monthlyPayment.toFixed(2)} VEX/month`, 
+                    inline: true 
+                },
+                { 
+                    name: '⚠️ Performance Notes', 
+                    value: `• Variable monthly income\n• 15% chance of monthly losses\n• Success requires engagement\n• Emotional investment builds attachment`, 
+                    inline: false 
+                }
+            )
+            .setColor('#FFD700')
+            .setFooter({ text: `Business ${newIndex + 1} of ${businessKeys.length} • Use arrows to navigate` })
+            .setTimestamp();
+
+        const navigationRow = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`business_nav_prev_${newIndex}`)
+                    .setLabel('◀️ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(newIndex === 0),
+                new ButtonBuilder()
+                    .setCustomId(`business_nav_next_${newIndex}`)
+                    .setLabel('Next ▶️')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(newIndex === businessKeys.length - 1),
+                new ButtonBuilder()
+                    .setCustomId(`business_confirm_${businessKeys[newIndex]}`)
+                    .setLabel('✅ Select This Business')
+                    .setStyle(ButtonStyle.Success)
+            );
+
+        const actionRow = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('business_portfolio_overview')
+                    .setLabel('📊 My Businesses')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('business_financing_calculator')
+                    .setLabel('🧮 Financing Calculator')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId(`business_performance_preview_${businessKeys[newIndex]}`)
+                    .setLabel('📈 Performance Preview')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+        await interaction.update({ 
+            embeds: [embed], 
+            components: [navigationRow, actionRow] 
+        });
     }
 };
 

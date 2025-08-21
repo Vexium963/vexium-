@@ -191,76 +191,54 @@ module.exports = {
             .setFooter({ text: '💡 Financing Terms: 25% down • 12% APR • 12, 24, or 36 month terms • Variable performance creates attachment' })
             .setTimestamp();
 
-        const businessSelect = new ActionRowBuilder()
+        const businessTypes = this.getBusinessTypes();
+        const businessKeys = Object.keys(businessTypes);
+        const currentIndex = 0;
+        const currentBusiness = businessTypes[businessKeys[currentIndex]];
+        
+        const carouselEmbed = new EmbedBuilder()
+            .setTitle(`🏢 **BUSINESS MARKETPLACE** - ${currentBusiness.name}`)
+            .setDescription(`**${currentBusiness.description}**\n\n💰 **Price**: ${currentBusiness.price.toFixed(2)} VEX (~$${(currentBusiness.price * Economics.getCurrentVEXPrice()).toFixed(2)})\n📊 **Monthly Income**: $${currentBusiness.monthlyIncomeRange.min}-$${currentBusiness.monthlyIncomeRange.max}\n🏦 **25% Down**: ${(currentBusiness.price * 0.25).toFixed(2)} VEX`)
+            .addFields(
+                { 
+                    name: '💼 Business Details', 
+                    value: `**Type**: ${currentBusiness.name}\n**Investment Level**: ${this.getBusinessTier(businessKeys[currentIndex])}\n**Risk Level**: Medium\n**ROI**: 30-40% annually`, 
+                    inline: true 
+                },
+                { 
+                    name: '🏦 Financing Options', 
+                    value: `**12 Month**: ${this.calculateFinancing(currentBusiness.price, 12).monthlyPayment.toFixed(2)} VEX/month\n**24 Month**: ${this.calculateFinancing(currentBusiness.price, 24).monthlyPayment.toFixed(2)} VEX/month\n**36 Month**: ${this.calculateFinancing(currentBusiness.price, 36).monthlyPayment.toFixed(2)} VEX/month`, 
+                    inline: true 
+                },
+                { 
+                    name: '⚠️ Performance Notes', 
+                    value: `• Variable monthly income\n• 15% chance of monthly losses\n• Success requires engagement\n• Emotional investment builds attachment`, 
+                    inline: false 
+                }
+            )
+            .setColor('#FFD700')
+            .setFooter({ text: `Business ${currentIndex + 1} of ${businessKeys.length} • Use arrows to navigate` })
+            .setTimestamp();
+
+        const navigationRow = new ActionRowBuilder()
             .addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('business_purchase_select')
-                    .setPlaceholder('🎯 Select Your Business Venture')
-                    .addOptions([
-                        {
-                            label: '🍋 Lemonade Stand',
-                            description: '$500 • $15-$25/month • $125 down',
-                            value: 'lemonade_stand',
-                            emoji: '🍋'
-                        },
-                        {
-                            label: '🚚 Food Truck',
-                            description: '$1,500 • $45-$75/month • $375 down',
-                            value: 'food_truck',
-                            emoji: '🚚'
-                        },
-                        {
-                            label: '💼 Consulting Firm',
-                            description: '$3,000 • $80-$120/month • $750 down',
-                            value: 'consulting_firm',
-                            emoji: '💼'
-                        },
-                        {
-                            label: '🛍️ Retail Store',
-                            description: '$5,000 • $125-$175/month • $1,250 down',
-                            value: 'retail_store',
-                            emoji: '🛍️'
-                        },
-                        {
-                            label: '💻 Tech Startup',
-                            description: '$8,000 • $200-$280/month • $2,000 down',
-                            value: 'tech_startup',
-                            emoji: '💻'
-                        },
-                        {
-                            label: '🍕 Restaurant Chain',
-                            description: '$12,000 • $300-$420/month • $3,000 down',
-                            value: 'restaurant_chain',
-                            emoji: '🍕'
-                        },
-                        {
-                            label: '🏭 Manufacturing Plant',
-                            description: '$18,000 • $450-$630/month • $4,500 down',
-                            value: 'manufacturing',
-                            emoji: '🏭'
-                        },
-                        {
-                            label: '🏢 Real Estate Firm',
-                            description: '$25,000 • $625-$875/month • $6,250 down',
-                            value: 'real_estate_firm',
-                            emoji: '🏢'
-                        },
-                        {
-                            label: '🏦 Investment Bank',
-                            description: '$35,000 • $875-$1,225/month • $8,750 down',
-                            value: 'investment_bank',
-                            emoji: '🏦'
-                        },
-                        {
-                            label: '🌍 Multinational Corp',
-                            description: '$50,000 • $1,250-$1,750/month • $12,500 down',
-                            value: 'multinational_corp',
-                            emoji: '🌍'
-                        }
-                    ])
+                new ButtonBuilder()
+                    .setCustomId(`business_nav_prev_${currentIndex}`)
+                    .setLabel('◀️ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(currentIndex === 0),
+                new ButtonBuilder()
+                    .setCustomId(`business_nav_next_${currentIndex}`)
+                    .setLabel('Next ▶️')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(currentIndex === businessKeys.length - 1),
+                new ButtonBuilder()
+                    .setCustomId(`business_confirm_${businessKeys[currentIndex]}`)
+                    .setLabel('✅ Select This Business')
+                    .setStyle(ButtonStyle.Success)
             );
 
-        const actionButtons = new ActionRowBuilder()
+        const actionRow = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('business_portfolio_overview')
@@ -271,15 +249,31 @@ module.exports = {
                     .setLabel('🧮 Financing Calculator')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId('business_market_trends')
-                    .setLabel('📈 Market Trends')
-                    .setStyle(ButtonStyle.Success)
+                    .setCustomId(`business_performance_preview_${businessKeys[currentIndex]}`)
+                    .setLabel('📈 Performance Preview')
+                    .setStyle(ButtonStyle.Secondary)
             );
 
         await interaction.reply({ 
-            embeds: [embed], 
-            components: [businessSelect, actionButtons] 
+            embeds: [carouselEmbed], 
+            components: [navigationRow, actionRow] 
         });
+    },
+
+    getBusinessTier(businessType) {
+        const tiers = {
+            'lemonade_stand': 'Tier 1 - Starter',
+            'food_truck': 'Tier 2 - Small Business',
+            'consulting_firm': 'Tier 3 - Professional',
+            'retail_store': 'Tier 4 - Established',
+            'tech_startup': 'Tier 5 - Growth',
+            'restaurant_chain': 'Tier 6 - Expansion',
+            'manufacturing': 'Tier 7 - Industrial',
+            'real_estate_firm': 'Tier 8 - Investment',
+            'investment_bank': 'Tier 9 - Financial',
+            'multinational_corp': 'Tier 10 - Enterprise'
+        };
+        return tiers[businessType] || 'Unknown Tier';
     },
 
     calculateFinancing(totalPrice, termMonths) {
@@ -334,6 +328,7 @@ module.exports = {
         
         const financing12 = this.calculateFinancing(business.price, 12);
         const financing24 = this.calculateFinancing(business.price, 24);
+        const financing36 = this.calculateFinancing(business.price, 36);
         
         const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
         
@@ -355,6 +350,11 @@ module.exports = {
                     name: '🏦 24-Month Financing', 
                     value: `**Down Payment**: ${financing24.downPayment.toFixed(2)} VEX\n**Monthly Payment**: ${financing24.monthlyPayment.toFixed(2)} VEX\n**Total Cost**: ${financing24.totalCost.toFixed(2)} VEX`, 
                     inline: true 
+                },
+                { 
+                    name: '🏦 36-Month Financing', 
+                    value: `**Down Payment**: ${financing36.downPayment.toFixed(2)} VEX\n**Monthly Payment**: ${financing36.monthlyPayment.toFixed(2)} VEX\n**Total Cost**: ${financing36.totalCost.toFixed(2)} VEX`, 
+                    inline: true 
                 }
             )
             .setColor('#FFD700')
@@ -373,6 +373,10 @@ module.exports = {
                 new ButtonBuilder()
                     .setCustomId(`business_finance_24_${businessType}`)
                     .setLabel('🏦 24-Month Financing')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId(`business_finance_36_${businessType}`)
+                    .setLabel('🏦 36-Month Financing')
                     .setStyle(ButtonStyle.Secondary)
             );
         
@@ -492,5 +496,80 @@ module.exports = {
             .setFooter({ text: 'Actual performance will vary • Past performance does not guarantee future results' });
         
         await interaction.reply({ embeds: [embed], ephemeral: true });
+    },
+
+    calculateBusinessPerformance(businessType, month) {
+        const businessTypes = this.getBusinessTypes();
+        const business = businessTypes[businessType];
+        
+        const isLoss = Math.random() < 0.15;
+        const performanceMultiplier = isLoss ? -0.5 : (Math.random() * 0.4 + 0.8);
+        
+        const baseIncome = (business.monthlyIncomeRange.min + business.monthlyIncomeRange.max) / 2;
+        const income = Math.max(0, baseIncome * performanceMultiplier);
+        
+        let performance = 'average';
+        if (isLoss) performance = 'poor';
+        else if (performanceMultiplier > 1.1) performance = 'exceptional';
+        else if (performanceMultiplier < 0.9) performance = 'below average';
+        
+        return { income, performance, isLoss };
+    },
+
+    async handleFinancePurchase(interaction, businessType, termMonths) {
+        const User = require('../../database/models/User');
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const businessTypes = this.getBusinessTypes();
+        const business = businessTypes[businessType];
+        
+        if (!business) {
+            return interaction.reply({ content: '❌ Invalid business type selected.', ephemeral: true });
+        }
+        
+        const financing = this.calculateFinancing(business.price, termMonths);
+        
+        if (userData.vexBalance < financing.downPayment) {
+            return interaction.reply({ 
+                content: `❌ Insufficient funds for down payment. You need ${financing.downPayment.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.`, 
+                ephemeral: true 
+            });
+        }
+        
+        await user.subtractVEX(financing.downPayment, `business_downpayment_${businessType}`);
+        
+        userData.businesses = userData.businesses || [];
+        const newBusiness = {
+            type: businessType,
+            name: business.name,
+            purchasePrice: business.price,
+            downPayment: financing.downPayment,
+            loanAmount: financing.loanAmount,
+            monthlyPayment: financing.monthlyPayment,
+            termMonths: termMonths,
+            remainingPayments: termMonths,
+            startDate: new Date().toISOString(),
+            level: 1,
+            totalInvested: financing.downPayment,
+            monthlyIncomeRange: business.monthlyIncomeRange
+        };
+        
+        userData.businesses.push(newBusiness);
+        await user.save(userData);
+        
+        const { EmbedBuilder } = require('discord.js');
+        const embed = new EmbedBuilder()
+            .setTitle(`🎉 Business Purchase Successful!`)
+            .setDescription(`**${business.name}** has been added to your portfolio!`)
+            .addFields(
+                { name: '💰 Down Payment', value: `${financing.downPayment.toFixed(2)} VEX`, inline: true },
+                { name: '📅 Monthly Payment', value: `${financing.monthlyPayment.toFixed(2)} VEX for ${termMonths} months`, inline: true },
+                { name: '📈 Expected Monthly Income', value: `${business.monthlyIncomeRange.min}-${business.monthlyIncomeRange.max} VEX`, inline: true }
+            )
+            .setColor('#00FF00')
+            .setFooter({ text: 'Your business will start generating income next month!' });
+        
+        await interaction.update({ embeds: [embed], components: [] });
     }
 };

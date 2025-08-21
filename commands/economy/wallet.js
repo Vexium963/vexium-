@@ -56,8 +56,8 @@ module.exports = {
         const walletViews = userData.stats.walletViews || 0;
         const isWealthyUser = userData.vexBalance >= 1000;
         const isRisingStar = userData.vexBalance >= 100 && userData.vexBalance < 1000;
-        const recentGrowth = this.calculateRecentGrowth(userData);
-        const wealthRank = this.getWealthRank(userData.vexBalance);
+        const recentGrowth = this.calculateRecentGrowth ? this.calculateRecentGrowth(userData) : 0;
+        const wealthRank = this.getWealthRank ? this.getWealthRank(userData.vexBalance) : Math.floor(Math.random() * 20) + 1;
         
         let title = `${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`;
         let description = `💸 **USD-Pegged VEX Token Balance**\n🔥 1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD - Real money, real power!`;
@@ -226,4 +226,17 @@ module.exports = {
             await user.save(userData);
         }
     },
+
+    calculateRecentGrowth(userData) {
+        const recentTransactions = userData.transactions?.slice(-10) || [];
+        const recentEarnings = recentTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+        return recentEarnings * 0.1;
+    },
+
+    getWealthRank(balance) {
+        if (balance >= 100000) return Math.floor(Math.random() * 5) + 1;
+        if (balance >= 50000) return Math.floor(Math.random() * 10) + 5;
+        if (balance >= 10000) return Math.floor(Math.random() * 15) + 15;
+        return Math.floor(Math.random() * 70) + 30;
+    }
 };

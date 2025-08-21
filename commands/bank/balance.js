@@ -46,7 +46,7 @@ module.exports = {
         
         const bankChecks = userData.stats.bankChecks || 0;
         const isObsessiveTracker = bankChecks >= 50;
-        const recentGrowth = this.calculateRecentGrowth(userData);
+        const recentGrowth = this.calculateRecentGrowth ? this.calculateRecentGrowth(userData) : 0;
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(totalWealth * 0.001) : 0;
         
         const wealthGrowth = userData.stats.wealthGrowthRate || 0;
@@ -214,5 +214,11 @@ module.exports = {
         
         userData.stats.commandsUsed++;
         await user.save(userData);
+    },
+
+    calculateRecentGrowth(userData) {
+        const recentTransactions = userData.transactions?.slice(-10) || [];
+        const recentEarnings = recentTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+        return recentEarnings * 0.1;
     }
 };
