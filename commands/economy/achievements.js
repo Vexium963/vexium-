@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -214,7 +215,7 @@ module.exports = {
                 
                 embed.addFields({
                     name: `${achievement.emoji} ${achievement.name}`,
-                    value: `${achievement.description}\n📊 **Progress:** ${percentage}%\n**Reward**: ${achievement.reward} VEX + ${achievement.xp} XP`,
+                    value: `${achievement.description}\n📊 **Progress:** ${percentage}%\n**Reward**: ${achievement.reward.toFixed(2)} VEX (~$${(achievement.reward * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${achievement.xp} XP`,
                     inline: true
                 });
             }
@@ -378,12 +379,12 @@ module.exports = {
     
     getAllAchievements() {
         return [
-            { id: 'first_vex', name: 'First VEX', description: 'Earn your first VEX token', category: 'economy', emoji: '💰', reward: 100, xp: 50, rarity: 'Common' },
-            { id: 'millionaire', name: 'Millionaire', description: 'Accumulate 1,000,000 VEX net worth', category: 'economy', emoji: '💎', reward: 10000, xp: 5000, rarity: 'Legendary' },
-            { id: 'daily_streak_7', name: 'Week Warrior', description: 'Maintain 7-day daily streak', category: 'economy', emoji: '🔥', reward: 500, xp: 250, rarity: 'Uncommon' },
-            { id: 'daily_streak_30', name: 'Monthly Master', description: 'Maintain 30-day daily streak', category: 'economy', emoji: '🌟', reward: 2500, xp: 1000, rarity: 'Rare' },
+            { id: 'first_vex', name: 'First VEX', description: 'Earn your first VEX token', category: 'economy', emoji: '💰', reward: Economics.getPeggedVEXPrice(1), xp: 50, rarity: 'Common' },
+            { id: 'millionaire', name: 'Millionaire', description: `Accumulate ${Economics.getPeggedVEXPrice(10000).toLocaleString()} VEX (~$10,000) net worth`, category: 'economy', emoji: '💎', reward: Economics.getPeggedVEXPrice(100), xp: 5000, rarity: 'Legendary' },
+            { id: 'daily_streak_7', name: 'Week Warrior', description: 'Maintain 7-day daily streak', category: 'economy', emoji: '🔥', reward: Economics.getPeggedVEXPrice(5), xp: 250, rarity: 'Uncommon' },
+            { id: 'daily_streak_30', name: 'Monthly Master', description: 'Maintain 30-day daily streak', category: 'economy', emoji: '🌟', reward: Economics.getPeggedVEXPrice(25), xp: 1000, rarity: 'Rare' },
             { id: 'work_master', name: 'Work Master', description: 'Complete 100 work sessions', category: 'economy', emoji: '💼', reward: 1000, xp: 500, rarity: 'Uncommon' },
-            { id: 'investor', name: 'Smart Investor', description: 'Make profitable investments worth 50,000 VEX', category: 'economy', emoji: '📈', reward: 2000, xp: 750, rarity: 'Rare' },
+            { id: 'investor', name: 'Smart Investor', description: `Make profitable investments worth ${Economics.getPeggedVEXPrice(500).toLocaleString()} VEX (~$500)`, category: 'economy', emoji: '📈', reward: Economics.getPeggedVEXPrice(20), xp: 750, rarity: 'Rare' },
             
             { id: 'first_gift', name: 'Generous Soul', description: 'Send your first gift', category: 'social', emoji: '🎁', reward: 200, xp: 100, rarity: 'Common' },
             { id: 'trade_master', name: 'Trade Master', description: 'Complete 50 successful trades', category: 'social', emoji: '🤝', reward: 1500, xp: 600, rarity: 'Rare' },

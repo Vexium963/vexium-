@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const Progression = require('../../utils/progression');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -34,10 +35,10 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward Charging Up!`)
-                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **${nextReward.toFixed(2)} VEX** reward!`)
+                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **${nextReward.toFixed(2)} VEX (~$${(nextReward * Economics.getCurrentVEXPrice()).toFixed(2)})** reward!`)
                 .addFields(
                     { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
-                    { name: '💰 Reward Building', value: `${nextReward.toFixed(2)} VEX`, inline: true },
+                    { name: '💰 Reward Building', value: `${nextReward.toFixed(2)} VEX (~$${(nextReward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                     { name: '📊 Others Claiming', value: `${Math.floor(Math.random() * 50) + 20} players active now!`, inline: true }
                 )
                 .setColor(hoursLeft <= 2 ? constants.COLORS.VEX : constants.COLORS.WARNING)
@@ -70,6 +71,7 @@ module.exports = {
         const roundedReward = Math.round(totalReward * 100) / 100;
         
         await user.addVEX(roundedReward, 'daily_reward');
+        Economics.updateVEXMarket('daily', roundedReward);
         
         const xpGained = 25 + (userData.dailyStreak * 2);
         const xpResult = await user.addXP(xpGained, 'daily');
@@ -84,11 +86,11 @@ module.exports = {
         const finalReward = roundedReward + surpriseBonus;
         
         let title = `${constants.EMOJIS.GIFT} Daily VEX Claimed!`;
-        let description = `💰 **${finalReward.toFixed(2)} VEX** earned for day ${userData.dailyStreak}!`;
+        let description = `💰 **${finalReward.toFixed(2)} VEX (~$${(finalReward * Economics.getCurrentVEXPrice()).toFixed(2)})** earned for day ${userData.dailyStreak}!`;
         
         if (userData.dailyStreak >= 7) {
             title = `🔥 STREAK MASTER! Daily Reward Claimed!`;
-            description = `💰 **${finalReward.toFixed(2)} VEX** + **STREAK POWER BONUS**!`;
+            description = `💰 **${finalReward.toFixed(2)} VEX (~$${(finalReward * Economics.getCurrentVEXPrice()).toFixed(2)})** + **STREAK POWER BONUS**!`;
         }
         
         if (isStreakMilestone) {
@@ -123,7 +125,7 @@ module.exports = {
                 { name: '💰 Base Reward', value: `$${baseReward.toFixed(2)}`, inline: true },
                 { name: '🔥 Streak Power', value: `$${streakBonus.toFixed(2)} ${userData.dailyStreak >= 30 ? '👑' : ''}`, inline: true },
                 { name: '🎲 Lucky Bonus', value: `$${(randomBonus + surpriseBonus).toFixed(2)}`, inline: true },
-                { name: '📊 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '📊 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎯 XP Gained', value: `+${xpGained} XP ${xpResult.leveledUp ? '🆙' : ''}`, inline: true },
                 { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
                 { name: '⏰ Next Reward', value: `<t:${Math.floor((Date.now() + 86400000) / 1000)}:R> - Don't break the chain!`, inline: false }
@@ -160,7 +162,7 @@ module.exports = {
                 .setTitle(`⬆️ Level Up!`)
                 .setDescription(`⬆️ Congratulations! You've reached **Level ${xpResult.newLevel}**!\n\n✨ Your empire grows stronge...`)
                 .addFields(
-                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX (~$${(xpResult.levelReward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD)
                 .setTimestamp();
@@ -174,7 +176,7 @@ module.exports = {
                     .setTitle(`🏆 Achievement Unlocked!`)
                     .setDescription(`🏆 **${achievement.name}**\n${achievement.description}\n\n✨ You're becoming a VexiumVerse legend!...`)
                     .addFields(
-                        { name: '💰 Reward', value: `${achievement.reward.toFixed(2)} VEX`, inline: true }
+                        { name: '💰 Reward', value: `${achievement.reward.toFixed(2)} VEX (~$${(achievement.reward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                     )
                     .setColor(constants.COLORS.GOLD)
                     .setTimestamp();
@@ -186,12 +188,13 @@ module.exports = {
         if (userData.dailyStreak % 7 === 0) {
             const weeklyBonus = userData.dailyStreak * 0.50;
             await user.addVEX(weeklyBonus, 'weekly_bonus');
+            Economics.updateVEXMarket('daily', weeklyBonus);
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAR} Weekly Streak Bonus!`)
                 .setDescription(`🔥 Amazing! You've maintained a ${userData.dailyStreak}-day streak!\n\n💸 Weekly bonuses are wher...`)
                 .addFields(
-                    { name: '🎁 Bonus Reward', value: `${weeklyBonus.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Bonus Reward', value: `${weeklyBonus.toFixed(2)} VEX (~$${(weeklyBonus * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD)
                 .setTimestamp();

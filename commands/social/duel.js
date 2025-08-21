@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -138,7 +139,7 @@ module.exports = {
         if (prizeAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${prizeAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX! Earn more VEX with /work or /daily to afford this epic duel!`)
+                .setDescription(`💸 You need ${prizeAmount.toFixed(2)} VEX (~$${(prizeAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})! Earn more VEX with /work or /daily to afford this epic duel!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -199,7 +200,7 @@ module.exports = {
             .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **You've challenged ${opponent.username} to EPIC COMBAT!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
-                { name: '💰 Prize Pool', value: `${prizeAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Prize Pool', value: `${prizeAmount.toFixed(2)} VEX (~$${(prizeAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🆔 Duel ID', value: duelId, inline: true },
                 { name: '⏰ Expires', value: `<t:${Math.floor(duel.expiresAt / 1000)}:R>`, inline: true }
             )
@@ -220,7 +221,7 @@ module.exports = {
                 .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **${interaction.user.username}** has challenged you to an ...`)
                 .addFields(
                     { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
-                    { name: '💰 Prize Pool', value: `${prizeAmount.toFixed(2)} VEX`, inline: true },
+                    { name: '💰 Prize Pool', value: `${prizeAmount.toFixed(2)} VEX (~$${(prizeAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                     { name: '🆔 Duel ID', value: duelId, inline: true }
                 )
                 .setColor(constants.COLORS.WARNING)
@@ -270,7 +271,7 @@ module.exports = {
         if (duel.prizeAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need ${duel.prizeAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.`)
+                .setDescription(`You need ${duel.prizeAmount.toFixed(2)} VEX (~$${(duel.prizeAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -363,7 +364,7 @@ module.exports = {
                 const timeLeft = this.formatTimeLeft(duel.expiresAt - Date.now());
                 
                 return `**${duel.id}** - ${otherPlayer}: <@${isChallenger ? duel.opponent : duel.challenger}>\n` +
-                       `Type: ${duel.type} | Prize: ${duel.prizeAmount.toFixed(2)} VEX | Expires: ${timeLeft}`;
+                       `Type: ${duel.type} | Prize: ${duel.prizeAmount.toFixed(2)} VEX (~$${(duel.prizeAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) | Expires: ${timeLeft}`;
             }).join('\n\n');
             
             embed.addFields({
@@ -410,7 +411,7 @@ module.exports = {
                 { name: '🏆 Duels Won', value: `${duelsWon}`, inline: true },
                 { name: '💀 Duels Lost', value: `${duelsLost}`, inline: true },
                 { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
-                { name: '💰 Net Earnings', value: `${(stats.duelEarnings || 0).toFixed(2)} VEX`, inline: true }
+                { name: '💰 Net Earnings', value: `${(stats.duelEarnings || 0).toFixed(2)} VEX (~$${((stats.duelEarnings || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL())
@@ -501,7 +502,7 @@ module.exports = {
             .addFields(
                 { name: '🏆 Winner', value: winnerUser.username, inline: true },
                 { name: '💀 Loser', value: loserUser.username, inline: true },
-                { name: '💰 Winnings', value: `${winnings.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Winnings', value: `${winnings.toFixed(2)} VEX (~$${(winnings * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎮 Game Result', value: result.details, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -133,9 +134,9 @@ module.exports = {
             .setTitle(`🚀 CRYPTO EMPIRE AWAITS!`)
             .setDescription(`💥 **EXPLOSIVE CRYPTO OPPORTUNITIES!** 🚀 Trade virtual cryptocurrencies and build your digital fortune!\n\n🔥 **URGENT:** Crypto prices are surging! Don't miss out!\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n✨ **Limited Time:** Early traders get bonus rewards!`)
             .addFields(
-                { name: '📊 Market Overview', value: '**Total Market Cap**: $1.2M VEX\n**24h Volume**: $85K VEX\n**Active Traders**: 892', inline: true },
+                { name: '📊 Market Overview', value: `**Total Market Cap**: ${Economics.getPeggedVEXPrice(1200000).toLocaleString()} VEX (~$1.2M)\n**24h Volume**: ${Economics.getPeggedVEXPrice(85000).toLocaleString()} VEX (~$85K)\n**Active Traders**: 892`, inline: true },
                 { name: '📈 Market Trends', value: '**Trending**: VexCoin (+15.2%)\n**Top Gainer**: QuantumVex (+28.7%)\n**Most Traded**: EtherVex', inline: true },
-                { name: '💡 Trading Info', value: '**Trading Fee**: 2%\n**Staking Available**: Yes\n**Min Trade**: $10 VEX', inline: true }
+                { name: '💡 Trading Info', value: `**Trading Fee**: 2%\n**Staking Available**: Yes\n**Min Trade**: ${Economics.getPeggedVEXPrice(10)} VEX (~$10)`, inline: true }
             )
             .setColor(constants.COLORS.CRYPTO)
             .setFooter({ text: '⚡ Virtual cryptocurrency market • Fortunes are made HERE!' })
@@ -147,7 +148,7 @@ module.exports = {
             
             embed.addFields({
                 name: `${crypto.emoji} ${crypto.symbol}`,
-                value: `**${crypto.name}**\n**Price**: ${crypto.price.toFixed(4)} VEX\n**24h**: ${changeEmoji} ${changeSign}${crypto.change.toFixed(2)}%`,
+                value: `**${crypto.name}**\n**Price**: ${(crypto.price * Economics.getPeggedVEXPrice(1)).toFixed(2)} VEX (~$${crypto.price.toFixed(2)})\n**24h**: ${changeEmoji} ${changeSign}${crypto.change.toFixed(2)}%`,
                 inline: true
             });
         }
@@ -213,7 +214,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`🔥 **INSUFFICIENT FUNDS!** You need more VEX to join the crypto revolution!\n\n💰 **Required:** ${totalCost.toFixed(2)} VEX (including 2% fee)\n💸 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/daily\` or \`/work\` to earn more VEX instantly!`)
+                .setDescription(`🔥 **INSUFFICIENT FUNDS!** You need more VEX to join the crypto revolution!\n\n💰 **Required:** ${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)}) (including 2% fee)\n💸 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n🚀 **Quick Fix:** Use \`/daily\` or \`/work\` to earn more VEX instantly!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -229,7 +230,12 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
+        
+        Economics.updateVEXMarket('buy', totalCost);
+        
         await user.burnVEX(tradingFee, 'crypto_trading_fee');
+        Economics.updateVEXMarket('burn', tradingFee);
         
         const cryptoAmount = vexAmount / crypto.price;
         
@@ -263,10 +269,10 @@ module.exports = {
             .addFields(
                 { name: '💎 Cryptocurrency', value: `${crypto.emoji} ${crypto.name} (${currency})`, inline: true },
                 { name: '🔢 Amount Purchased', value: `${cryptoAmount.toFixed(6)} ${currency}`, inline: true },
-                { name: '💰 Price per Unit', value: `${crypto.price.toFixed(4)} VEX`, inline: true },
-                { name: '💸 VEX Spent', value: `$${vexAmount.toFixed(2)}`, inline: true },
-                { name: '💳 Trading Fee', value: `$${tradingFee.toFixed(2)}`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price per Unit', value: `${(crypto.price * Economics.getPeggedVEXPrice(1)).toFixed(2)} VEX (~$${crypto.price.toFixed(2)})`, inline: true },
+                { name: '💸 VEX Spent', value: `${vexAmount.toFixed(2)} VEX (~$${(vexAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💳 Trading Fee', value: `${tradingFee.toFixed(2)} VEX (~$${(tradingFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Portfolio Position', value: `**Total ${currency}**: ${userData.crypto[currency].amount.toFixed(6)}\n**Avg Price**: $${userData.crypto[currency].avgPrice.toFixed(4)}`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)

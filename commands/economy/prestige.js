@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRow
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const Progression = require('../../utils/progression');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -52,7 +53,7 @@ module.exports = {
         
         if (urgencyBonus > 0) {
             await interaction.followUp({
-                content: `✨ **SURPRISE PRESTIGE BONUS!** +${urgencyBonus} VEX added to your prestige reward for being an active player!`,
+                content: `✨ **SURPRISE PRESTIGE BONUS!** +${urgencyBonus} VEX (~$${(urgencyBonus * Economics.getCurrentVEXPrice()).toFixed(2)}) added to your prestige reward for being an active player!`,
                 ephemeral: true
             });
         }
@@ -128,7 +129,7 @@ module.exports = {
         
         if (prestigeData.canPrestige) {
             embed.addFields(
-                { name: '💰 VEX Bonus', value: `${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
+                { name: '💰 VEX Bonus', value: `${prestigeData.vexBonus.toFixed(2)} VEX (~$${(prestigeData.vexBonus * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⭐ Prestige Level', value: `${userData.prestige || 0} → ${(userData.prestige || 0) + 1}`, inline: true },
                 { name: '🎯 Current Level', value: `${userData.level}`, inline: true },
                 { name: '🔄 Reset To', value: 'Level 1', inline: true },
@@ -214,6 +215,7 @@ module.exports = {
         userData.jobLevel = {};
         
         await user.addVEX(prestigeData.vexBonus, 'prestige_bonus');
+        Economics.updateVEXMarket('reward', prestigeData.vexBonus);
         
         userData.stats.totalPrestige = (userData.stats.totalPrestige || 0) + 1;
         userData.stats.commandsUsed++;
@@ -229,11 +231,11 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.CROWN} Prestige Complete!`)
             .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ **You've unlocked exclusive prestige benefits and multipliers!**`)
             .addFields(
-                { name: '💰 VEX Bonus Received', value: `${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
+                { name: '💰 VEX Bonus Received', value: `${prestigeData.vexBonus.toFixed(2)} VEX (~$${(prestigeData.vexBonus * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⭐ New Prestige Level', value: `${userData.prestige}`, inline: true },
                 { name: '🔄 Level Reset', value: `${oldLevel} → 1`, inline: true },
                 { name: '💎 Earning Multiplier', value: `+${(prestigeData.multiplierBonus * 100).toFixed(1)}%`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Exclusive Perks', value: prestigeData.perks.join('\n'), inline: false }
             )
             .setColor(constants.COLORS.GOLD)

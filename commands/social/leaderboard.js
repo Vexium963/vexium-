@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -110,7 +111,7 @@ module.exports = {
         }
         
         if (urgencyBonus > 0) {
-            description += `\n✨ **ACTIVE BONUS: +${urgencyBonus} VEX** for checking rankings during peak hours!`;
+            description += `\n✨ **ACTIVE BONUS: +${urgencyBonus} VEX (~$${(urgencyBonus * Economics.getCurrentVEXPrice()).toFixed(2)})** for checking rankings during peak hours!`;
         }
         
         if (hasClimbed > 0) {
@@ -276,21 +277,22 @@ module.exports = {
     },
     
     getUserValue(userData, category) {
+        const vexPrice = Economics.getCurrentVEXPrice();
         switch (category) {
             case 'networth':
-                return `${userData.networth.toFixed(2)} VEX`;
+                return `${userData.networth.toFixed(2)} VEX (~$${(userData.networth * vexPrice).toFixed(2)})`;
             case 'level':
                 return `Level ${userData.level} (${userData.xp} XP)`;
             case 'vexBalance':
-                return `${userData.vexBalance.toFixed(2)} VEX`;
+                return `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * vexPrice).toFixed(2)})`;
             case 'bankBalance':
-                return `${userData.bankBalance.toFixed(2)} VEX`;
+                return `${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * vexPrice).toFixed(2)})`;
             case 'totalEarned':
-                return `${(userData.stats?.totalEarned || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalEarned || 0).toFixed(2)} VEX (~$${((userData.stats?.totalEarned || 0) * vexPrice).toFixed(2)})`;
             case 'totalEntertainmentPlayed':
-                return `${(userData.stats?.totalEntertainmentPlayed || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalEntertainmentPlayed || 0).toFixed(2)} VEX (~$${((userData.stats?.totalEntertainmentPlayed || 0) * vexPrice).toFixed(2)})`;
             case 'totalInvested':
-                return `${(userData.stats?.totalInvested || 0).toFixed(2)} VEX`;
+                return `${(userData.stats?.totalInvested || 0).toFixed(2)} VEX (~$${((userData.stats?.totalInvested || 0) * vexPrice).toFixed(2)})`;
             case 'gamesPlayed':
                 return `${userData.stats?.gamesPlayed || 0} games`;
             case 'tradesCompleted':

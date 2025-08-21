@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -137,6 +138,7 @@ module.exports = {
             
             await user.removeVEX(migrationFee, 'late_wallet_link', false);
             await user.burnVEX(treasuryAmount, 'wallet_link_penalty');
+            Economics.updateVEXMarket('sell', migrationFee);
         }
         
         userData.linkedWallets[walletType] = {
@@ -195,7 +197,7 @@ module.exports = {
         
         if (isLateLink) {
             embed.addFields(
-                { name: '💸 Migration Fee', value: `${migrationFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Migration Fee', value: `${migrationFee.toFixed(2)} VEX (~$${(migrationFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '💡 Note', value: 'Linking wallets early avoids fees!', inline: false }
             );
         }

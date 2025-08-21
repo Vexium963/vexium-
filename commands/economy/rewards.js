@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -88,6 +89,7 @@ module.exports = {
         const totalValue = availableRewards.reduce((sum, reward) => sum + reward.value, 0);
         
         await user.addVEX(totalValue, 'rewards_claim');
+        Economics.updateVEXMarket('reward', totalValue);
         
         userData.stats.rewardsClaimed = (userData.stats.rewardsClaimed || 0) + availableRewards.length;
         userData.stats.totalRewardsValue = (userData.stats.totalRewardsValue || 0) + totalValue;
@@ -112,9 +114,9 @@ module.exports = {
             .setTitle(`🎉 ${milestoneMessage ? '🏆 MILESTONE ACHIEVED!' : 'Rewards Claimed!'}`)
             .setDescription(`💸 You've claimed ${availableRewards.length} reward(s)!${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}${variableReward ? `\n✨ ${variableReward}` : ''}\n\n👥 ${socialProof}\n\n🔥 **Streak bonus active!** Keep claiming for bigger rewards!`)
             .addFields(
-                { name: '💰 Total Value', value: `${totalValue.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Value', value: `${totalValue.toFixed(2)} VEX (~$${(totalValue * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎁 Rewards Claimed', value: availableRewards.map(r => `• ${r.name}: $${r.value.toFixed(2)}`).join('\n'), inline: false },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(milestoneMessage ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -149,7 +151,7 @@ module.exports = {
                     inline: false 
                 },
                 { name: '📊 Total Claimed', value: `${userData.stats.rewardsClaimed || 0} rewards`, inline: true },
-                { name: '💎 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
+                { name: '💎 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX (~$${((userData.stats.totalRewardsValue || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
@@ -185,7 +187,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.HISTORY} Reward History`)
-            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** ${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`)
+            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** ${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX (~$${((userData.stats.totalRewardsValue || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`)
             .addFields(
                 { 
                     name: '📜 Recent Claims', 
@@ -195,7 +197,7 @@ module.exports = {
                     inline: false 
                 },
                 { name: '🎁 Total Rewards', value: `${userData.stats.rewardsClaimed || 0}`, inline: true },
-                { name: '💰 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Value', value: `${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX (~$${((userData.stats.totalRewardsValue || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.INFO)
             .setTimestamp();
@@ -204,7 +206,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const historyProgress = Math.min((userData.stats.totalRewardsValue || 0) / 1000, 1);
         const historyProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Reward Value Progress: $${(userData.stats.totalRewardsValue || 0).toFixed(2)}/1000 VEX`,
+            `Reward Value Progress: ${(userData.stats.totalRewardsValue || 0).toFixed(2)}/1000 VEX`,
             historyProgress,
             constants.COLORS.INFO
         );

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -118,7 +119,7 @@ module.exports = {
         if (amount < pool.minStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Stake Required`)
-                .setDescription(`🔥 **${pool.name}** requires a minimum of ${pool.minStake.toFixed(2)} VEX to join the wealth building revolution! 💎 Start your passive income empire today!`)
+                .setDescription(`🔥 **${pool.name}** requires a minimum of ${pool.minStake.toFixed(2)} VEX (~$${(pool.minStake * Economics.getCurrentVEXPrice()).toFixed(2)}) to join the wealth building revolution! 💎 Start your passive income empire today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -127,7 +128,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need ${amount.toFixed(2)} VEX but have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily to fuel your staking empire! 🚀`)
+                .setDescription(`⏳ You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). Earn more with /work or /daily to fuel your staking empire! 🚀`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -142,6 +143,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('stake', amount);
         
         const stakeId = this.generateStakeId();
         const startTime = Date.now();
@@ -249,10 +252,12 @@ module.exports = {
         const totalReturn = stake.amount + pendingRewards - earlyWithdrawalPenalty;
         
         await user.addVEX(totalReturn, 'unstaking');
+        Economics.updateVEXMarket('unstake', totalReturn);
         
         if (pendingRewards > 0) {
             const rewardTax = pendingRewards * constants.TAX_SYSTEM.STAKING.REWARD_TAX_RATE;
             await user.burnVEX(rewardTax, 'staking_reward_tax');
+            Economics.updateVEXMarket('burn', rewardTax);
         }
         
         delete userData.stakes[stakeId];
@@ -334,7 +339,9 @@ module.exports = {
         const netRewards = totalRewards - taxAmount;
         
         await user.addVEX(netRewards, 'staking_rewards');
+        Economics.updateVEXMarket('reward', netRewards);
         await user.burnVEX(taxAmount, 'staking_reward_tax');
+        Economics.updateVEXMarket('burn', taxAmount);
         
         userData.stats.stakingRewardsClaimed = (userData.stats.stakingRewardsClaimed || 0) + totalRewards;
         userData.stats.commandsUsed++;

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,7 +19,7 @@ module.exports = {
         if (userData.onboardingCompleted) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SUCCESS} Welcome Back, VEX Legend!`)
-                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.level} Entrepreneur\n• ${userData.vexBalance.toFixed(2)} VEX in your vault\n• Ready to expand your wealth!`)
+                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.level} Entrepreneur\n• ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) in your vault\n• Ready to expand your wealth!`)
                 .addFields(
                     { name: '💰 Daily Empire Growth', value: '`/daily` - Claim streak bonuses', inline: true },
                     { name: '⚒️ Wealth Generation', value: '`/work` - Earn premium VEX', inline: true },
@@ -38,6 +39,7 @@ module.exports = {
             const comebackBonus = Math.random() < 0.4 ? Math.floor(Math.random() * 25) + 10 : 0;
             if (comebackBonus > 0) {
                 await user.addVEX(comebackBonus, 'comeback_bonus');
+                Economics.updateVEXMarket('reward', comebackBonus);
             }
             
             const progressBuffer = await this.createProgressBar(userData.level, userData.xp);
@@ -46,15 +48,15 @@ module.exports = {
             const welcomeBackEmbed = new EmbedBuilder()
                 .setTitle(`🎉 ${netWorthTier.icon} WELCOME BACK, ${netWorthTier.title}!`)
                 .setDescription(`**${interaction.user.username}**, your empire awaits your return! 🎉\n\n` +
-                    `${comebackBonus > 0 ? `💸 **COMEBACK BONUS:** +${comebackBonus} VEX!\n` : ''}` +
-                    `✨ **Empire Status:** ${userData.networth.toFixed(2)} VEX\n` +
+                    `${comebackBonus > 0 ? `💸 **COMEBACK BONUS:** +${comebackBonus} VEX (~$${(comebackBonus * Economics.getCurrentVEXPrice()).toFixed(2)})!\n` : ''}` +
+                    `✨ **Empire Status:** ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                     `🔥 **Daily Streak:** ${userData.dailyStreak} days ${userData.dailyStreak >= 7 ? '🏆' : ''}\n\n` +
                     `⬆️ **Level ${userData.level}**\n\n` +
                     `⚡ **Quick Actions:** ${Math.floor(Math.random() * 200) + 100} players online now!`)
                 .addFields(
-                    { name: '💰 Current Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                    { name: '🏦 Bank Savings', value: `${userData.bankBalance.toFixed(2)} VEX`, inline: true },
-                    { name: '📈 Net Worth', value: `${userData.networth.toFixed(2)} VEX`, inline: true }
+                    { name: '💰 Current Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                    { name: '🏦 Bank Savings', value: `${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                    { name: '📈 Net Worth', value: `${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                 )
                 .setColor(netWorthTier.color)
                 .setThumbnail(interaction.user.displayAvatarURL())
@@ -101,6 +103,7 @@ module.exports = {
         const totalStarting = constants.VEX_TOKEN.STARTING_BALANCE + welcomeBonus;
         
         await user.addVEX(totalStarting, 'starting_bonus');
+        Economics.updateVEXMarket('reward', totalStarting);
         await user.save(userData);
         
         const progressBuffer = await this.createProgressBar(1, 0, 5);
@@ -112,21 +115,33 @@ module.exports = {
 ${constants.ANIMATED_EMOJIS.FIRE} **BREAKING:** You're among the first 1,000 empire builders to receive **DOUBLE STARTING VEX!**
 
 ${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Empire Status:**
-• **Starting Capital:** ${totalStarting.toFixed(2)} VEX (+ bonus pending!)
+• **Starting Capital:** ${totalStarting.toFixed(2)} VEX (~$${(totalStarting * Economics.getCurrentVEXPrice()).toFixed(2)}) (+ bonus pending!)
 • **Entrepreneur Level:** ${userData.level}
 • **Empire ID:** #${userData.level.toString().padStart(4, '0')}
 
 ${constants.ANIMATED_EMOJIS.SPARKLES} **LIVE STATS:** ${Math.floor(Math.random() * 500) + 200} active builders earning **real money** right now!
 
+💰 **VEX TOKENOMICS EXPLAINED:**
+• VEX tokens are pegged to USD (currently $${Economics.getCurrentVEXPrice().toFixed(4)} per VEX)
+• Price fluctuates based on community activity - your actions affect the market!
+• When users buy items/invest/stake → VEX price increases 📈
+• When users withdraw/sell/cash out → VEX price decreases 📉
+• You're building wealth in a living, breathing economy!
+
 ${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom wallet to unlock premium earning potential!`)
             .addFields(
                 { 
                     name: `${constants.ANIMATED_EMOJIS.ROCKET} Your Empire Blueprint`, 
-                    value: `**Phase 1:** ${constants.ANIMATED_EMOJIS.VEX} Link Phantom Wallet (PRIORITY)\n**Phase 2:** ${constants.ANIMATED_EMOJIS.GIFT} Claim Daily Empire Rewards\n**Phase 3:** ${constants.ANIMATED_EMOJIS.WORK} Start Your First Job\n**Phase 4:** ${constants.ANIMATED_EMOJIS.CHART} Explore Advanced Features`, 
+                    value: `**Phase 1:** ${constants.ANIMATED_EMOJIS.VEX} Link Phantom Wallet (PRIORITY)\n**Phase 2:** ${constants.ANIMATED_EMOJIS.GIFT} Claim Daily Empire Rewards\n**Phase 3:** ${constants.ANIMATED_EMOJIS.WORK} Start Your First Job\n**Phase 4:** ${constants.ANIMATED_EMOJIS.CHART} Explore Advanced Features\n**Phase 5:** 📊 Monitor market with \`/market\` and \`/forecast\``, 
                     inline: false 
                 },
                 { 
-                    name: `${constants.ANIMATED_EMOJIS.FIRE} Why VexiumVerse Dominates`, 
+                    name: `${constants.ANIMATED_EMOJIS.FIRE} VEX Token Economy`, 
+                    value: `• **Dynamic USD Peg:** Price changes with activity\n• **Market Impact:** Your actions move the market\n• **Supply & Demand:** Limited supply, growing demand\n• **Burn Mechanics:** Fees reduce total supply\n• **Real Economics:** Inflation, deflation, market cycles`, 
+                    inline: false 
+                },
+                { 
+                    name: `${constants.ANIMATED_EMOJIS.DIAMOND} Why VexiumVerse Dominates`, 
                     value: `• **Real USD-Pegged VEX Tokens** ${constants.ANIMATED_EMOJIS.MONEY_RAIN}\n• **Multiple Income Streams** ${constants.ANIMATED_EMOJIS.PROGRESS}\n• **Social Trading Empire** ${constants.ANIMATED_EMOJIS.HEART_BEAT}\n• **Premium Wallet Integration** ${constants.ANIMATED_EMOJIS.DIAMOND}`, 
                     inline: false 
                 }
@@ -168,7 +183,7 @@ ${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom w
                 .setTitle(`✨ PRO TIP: The First 24 Hours`)
                 .setDescription(`**${interaction.user.username}**, players who complete the tutorial in their first session earn **3x more VEX** in their first week!\n\n` +
                     `🔥 **Current online:** ${Math.floor(Math.random() * 200) + 150} players\n` +
-                    `📈 **Today's top earner:** ${(Math.random() * 500 + 200).toFixed(2)} VEX\n` +
+                    `📈 **Today's top earner:** ${(Math.random() * 500 + 200).toFixed(2)} VEX (~$${((Math.random() * 500 + 200) * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                     `🚀 **Your potential:** Unlimited\n\n` +
                     `**Ready to connect your wallet and secure your fortune?**`)
                 .setColor(constants.COLORS.GOLD)

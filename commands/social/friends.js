@@ -77,6 +77,8 @@ module.exports = {
         const socialBoost = Math.random() < 0.15 ? Math.floor(friendsCount * 0.5) + 5 : 0;
         if (socialBoost > 0) {
             await user.addVEX(socialBoost, 'social_activity_bonus');
+            const Economics = require('../../utils/economics');
+            Economics.updateVEXMarket('reward', socialBoost);
             userData.stats.socialBonusesEarned = (userData.stats.socialBonusesEarned || 0) + 1;
         }
         

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -149,9 +150,12 @@ module.exports = {
         for (const property of availableProperties.slice(0, 8)) {
             const roi = ((property.dailyIncome * 365) / property.price * 100).toFixed(1);
             
+            const priceUSD = (property.price * Economics.getCurrentVEXPrice()).toFixed(2);
+            const incomeUSD = (property.dailyIncome * Economics.getCurrentVEXPrice()).toFixed(2);
+            
             embed.addFields({
                 name: `${property.emoji} ${property.name}`,
-                value: `**Price**: ${property.price.toFixed(2)} VEX\n**Daily Income**: ${property.dailyIncome.toFixed(2)} VEX\n**ROI**: ${roi}% annually\n**ID**: ${property.id}`,
+                value: `**Price**: ${property.price.toFixed(2)} VEX (~$${priceUSD})\n**Daily Income**: ${property.dailyIncome.toFixed(2)} VEX (~$${incomeUSD})\n**ROI**: ${roi}% annually\n**ID**: ${property.id}`,
                 inline: true
             });
         }
@@ -226,7 +230,7 @@ module.exports = {
         if (userData.vexBalance < property.price) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: ${property.price.toFixed(2)} VEX\n${constants.ANIMATED_EMOJIS.SPARKLES} **Your balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: ${property.price.toFixed(2)} VEX (~$${(property.price * Economics.getCurrentVEXPrice()).toFixed(2)})\n${constants.ANIMATED_EMOJIS.SPARKLES} **Your balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -241,6 +245,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('buy', property.price, interaction.user.id);
         
         const ownedProperty = {
             ...property,
@@ -267,10 +273,10 @@ module.exports = {
             .setDescription(`Congratulations! You now own **${property.name}**!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '🏠 Property', value: `${property.emoji} ${property.name}`, inline: true },
-                { name: '💰 Purchase Price', value: `${property.price.toFixed(2)} VEX`, inline: true },
-                { name: '📈 Daily Income', value: `${property.dailyIncome.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Purchase Price', value: `${property.price.toFixed(2)} VEX (~$${(property.price * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📈 Daily Income', value: `${property.dailyIncome.toFixed(2)} VEX (~$${(property.dailyIncome * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Annual ROI', value: `${annualROI}%`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Properties Owned', value: `${userData.stats.propertiesOwned}`, inline: true },
                 { name: '💡 Rental Income', value: 'Collect rental income every 24 hours\nUpgrade properties to increase income', inline: false },
                 { name: '📅 Next Collection', value: '<t:' + Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000) + ':R>', inline: false }
@@ -430,6 +436,7 @@ module.exports = {
         }
         
         await user.addVEX(availableIncome, 'real_estate_income');
+        Economics.updateVEXMarket('reward', availableIncome);
         
         const now = new Date().toISOString();
         let propertiesCollected = 0;
@@ -497,14 +504,14 @@ module.exports = {
     
     getAvailableProperties() {
         return [
-            { id: 'STUDIO_01', name: 'Downtown Studio', emoji: '🏢', price: 2500, dailyIncome: 25, type: 'residential' },
-            { id: 'HOUSE_01', name: 'Suburban House', emoji: '🏠', price: 5000, dailyIncome: 60, type: 'residential' },
-            { id: 'CONDO_01', name: 'Luxury Condo', emoji: '🏙️', price: 8000, dailyIncome: 100, type: 'residential' },
-            { id: 'SHOP_01', name: 'Corner Shop', emoji: '🏪', price: 10000, dailyIncome: 150, type: 'commercial' },
-            { id: 'OFFICE_01', name: 'Office Building', emoji: '🏢', price: 15000, dailyIncome: 250, type: 'commercial' },
-            { id: 'MALL_01', name: 'Shopping Mall', emoji: '🏬', price: 25000, dailyIncome: 450, type: 'commercial' },
-            { id: 'HOTEL_01', name: 'Boutique Hotel', emoji: '🏨', price: 35000, dailyIncome: 650, type: 'hospitality' },
-            { id: 'RESORT_01', name: 'Beach Resort', emoji: '🏖️', price: 50000, dailyIncome: 1000, type: 'hospitality' }
+            { id: 'STUDIO_01', name: 'Downtown Studio', emoji: '🏢', price: Economics.getPeggedVEXPrice(25), dailyIncome: Economics.getPeggedVEXPrice(0.25), type: 'residential' },
+            { id: 'HOUSE_01', name: 'Suburban House', emoji: '🏠', price: Economics.getPeggedVEXPrice(50), dailyIncome: Economics.getPeggedVEXPrice(0.60), type: 'residential' },
+            { id: 'CONDO_01', name: 'Luxury Condo', emoji: '🏙️', price: Economics.getPeggedVEXPrice(80), dailyIncome: Economics.getPeggedVEXPrice(1.00), type: 'residential' },
+            { id: 'SHOP_01', name: 'Corner Shop', emoji: '🏪', price: Economics.getPeggedVEXPrice(100), dailyIncome: Economics.getPeggedVEXPrice(1.50), type: 'commercial' },
+            { id: 'OFFICE_01', name: 'Office Building', emoji: '🏢', price: Economics.getPeggedVEXPrice(150), dailyIncome: Economics.getPeggedVEXPrice(2.50), type: 'commercial' },
+            { id: 'MALL_01', name: 'Shopping Mall', emoji: '🏬', price: Economics.getPeggedVEXPrice(250), dailyIncome: Economics.getPeggedVEXPrice(4.50), type: 'commercial' },
+            { id: 'HOTEL_01', name: 'Boutique Hotel', emoji: '🏨', price: Economics.getPeggedVEXPrice(350), dailyIncome: Economics.getPeggedVEXPrice(6.50), type: 'hospitality' },
+            { id: 'RESORT_01', name: 'Beach Resort', emoji: '🏖️', price: Economics.getPeggedVEXPrice(500), dailyIncome: Economics.getPeggedVEXPrice(10.00), type: 'hospitality' }
         ];
     },
     

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -122,8 +123,8 @@ module.exports = {
                 embed.addFields({
                     name: `${comp.icon} ${comp.name} (${comp.id})`,
                     value: `**Type**: ${comp.type}\n` +
-                           `**Entry Fee**: ${comp.entryFee.toFixed(2)} VEX\n` +
-                           `**Prize Pool**: ${comp.prizePool.toFixed(2)} VEX\n` +
+                           `**Entry Fee**: ${comp.entryFee.toFixed(2)} VEX (~$${(comp.entryFee * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
+                           `**Prize Pool**: ${comp.prizePool.toFixed(2)} VEX (~$${(comp.prizePool * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                            `**Participants**: ${comp.participants}/${comp.maxParticipants}\n` +
                            `**Registration Ends**: ${timeLeftStr}`,
                     inline: true
@@ -210,7 +211,7 @@ module.exports = {
         if (competition.entryFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💰 Entry fee is ${competition.entryFee.toFixed(2)} VEX but you only have ${userData.vexBalance.toFixed(2)} VEX. ⚒️ Earn more VEX with \`/work\` or \`/daily\` to join this epic tournament!`)
+                .setDescription(`💰 Entry fee is ${competition.entryFee.toFixed(2)} VEX (~$${(competition.entryFee * Economics.getCurrentVEXPrice()).toFixed(2)}) but you only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). ⚒️ Earn more VEX with \`/work\` or \`/daily\` to join this epic tournament!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -225,6 +226,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('sell', competition.entryFee, interaction.user.id);
         
         userData.competitions[competitionId] = {
             registeredAt: Date.now(),
@@ -256,10 +259,10 @@ module.exports = {
             .setDescription(`🎉 Successfully registered for **${competition.name}**! 🔥\n\n${milestoneMessage}\n${socialProof} 🚀`)
             .addFields(
                 { name: '🏆 Competition', value: competition.name, inline: true },
-                { name: '💰 Entry Fee', value: `${competition.entryFee.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Prize Pool', value: `${competition.prizePool.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Entry Fee', value: `${competition.entryFee.toFixed(2)} VEX (~$${(competition.entryFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎁 Prize Pool', value: `${competition.prizePool.toFixed(2)} VEX (~$${(competition.prizePool * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📅 Start Date', value: `<t:${Math.floor(competition.startTime / 1000)}:F>`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -345,7 +348,7 @@ module.exports = {
         } else {
             const leaderboardText = leaderboard.slice(0, 10).map((player, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-                return `${medal} **${player.username}** - ${player.wins} wins, ${player.totalEarnings.toFixed(2)} VEX earned`;
+                return `${medal} **${player.username}** - ${player.wins} wins, ${player.totalEarnings.toFixed(2)} VEX (~$${(player.totalEarnings * Economics.getCurrentVEXPrice()).toFixed(2)}) earned`;
             }).join('\n');
             
             embed.addFields({

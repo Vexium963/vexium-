@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -108,7 +109,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`🔥 ${bond.name} requires a minimum investment of ${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMessage}\n\n💡 **Start small and grow your portfolio!**`)
+                .setDescription(`🔥 ${bond.name} requires a minimum investment of ${Economics.getPeggedVEXPrice(bond.minAmountUSD || 10).toFixed(2)} VEX (~$${(bond.minAmountUSD || 10).toFixed(2)}).\n\n${fomoMessage}\n\n💡 **Start small and grow your portfolio!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -118,13 +119,14 @@ module.exports = {
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ Investment amount: ${amount.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Earn more VEX with `/work` or `/daily` to fund your investment!**`)
+                .setDescription(`⏳ Investment amount: ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Earn more VEX with \`/work\` or \`/daily\` to fund your investment!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const result = await user.removeVEX(amount, 'bond_purchase');
+        Economics.updateVEXMarket('buy', amount);
         if (!result.success) {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
@@ -164,6 +166,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.15 ? Math.floor(amount * 0.02) : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'bond_purchase_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
         }
         
         let title = `${constants.EMOJIS.SUCCESS} Bond Purchased Successfully!`;
@@ -203,13 +206,13 @@ module.exports = {
             .addFields(
                 { name: '🆔 Bond ID', value: bondId, inline: true },
                 { name: '📊 Bond Type', value: bond.name, inline: true },
-                { name: '💰 Principal', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Principal', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Return Rate', value: `${(bond.returnRate * 100).toFixed(1)}%`, inline: true },
-                { name: '💎 Maturity Value', value: `${maturityValue.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Maturity Value', value: `${maturityValue.toFixed(2)} VEX (~$${(maturityValue * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📅 Maturity Date', value: `<t:${Math.floor(maturityDate.getTime() / 1000)}:F>`, inline: true },
                 { name: '⏰ Time to Maturity', value: `${bond.days} days`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Expected Profit', value: `${(maturityValue - amount).toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📊 Expected Profit', value: `${(maturityValue - amount).toFixed(2)} VEX (~$${((maturityValue - amount) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: `Bond #${bondId} • Government guaranteed returns` })
@@ -369,6 +372,7 @@ module.exports = {
         const returns = bond.maturityValue - bond.principal;
         
         await user.addVEX(bond.maturityValue, 'bond_redemption');
+        Economics.updateVEXMarket('reward', bond.maturityValue, interaction.user.id);
         
         bond.status = 'redeemed';
         bond.redeemedAt = new Date().toISOString();

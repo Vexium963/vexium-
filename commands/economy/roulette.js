@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -95,7 +96,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n🔥 ${comeback}\n📈 ${socialProof}\n\n🚀 **${Math.floor(Math.random() * 20) + 10} players** just earned VEX in the last hour!`)
+                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX (~$${(playAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n🔥 ${comeback}\n📈 ${socialProof}\n\n🚀 **${Math.floor(Math.random() * 20) + 10} players** just earned VEX in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -110,6 +111,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('sell', playAmount, interaction.user.id);
         
         const winningNumber = Math.floor(Math.random() * 37);
         const isWin = this.checkWin(playType, number, winningNumber);
@@ -138,11 +141,13 @@ module.exports = {
                 winnings += jackpotBonus;
             }
             await user.addVEX(winnings, 'roulette_win');
+            Economics.updateVEXMarket('buy', winnings);
             userData.stats.rouletteStreak = currentStreak + 1;
         } else {
             userData.stats.rouletteStreak = 0;
             if (comebackBonus > 0) {
                 await user.addVEX(comebackBonus, 'roulette_comeback');
+                Economics.updateVEXMarket('buy', comebackBonus);
             }
         }
         
@@ -167,10 +172,10 @@ module.exports = {
             .addFields(
                 { name: '🎯 Winning Number', value: `${winningNumber} (${numberColor})`, inline: true },
                 { name: '🎲 Your Play', value: this.formatPlay(playType, number), inline: true },
-                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX (~$${(playAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Result', value: isWin ? '✅ WIN!' : '❌ LOSE', inline: true },
-                { name: '💎 Winnings', value: `${(winnings - playAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💎 Winnings', value: `${(winnings - playAmount).toFixed(2)} VEX (~$${((winnings - playAmount) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(isWin ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setFooter({ text: 'The house edge ensures fair play for all!' })
@@ -297,7 +302,7 @@ module.exports = {
                 { name: '🎲 Total Spins', value: `${spins}`, inline: true },
                 { name: '🏆 Wins', value: `${wins}`, inline: true },
                 { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
-                { name: '💰 Total Winnings', value: `${(stats.rouletteWinnings || 0).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Winnings', value: `${(stats.rouletteWinnings || 0).toFixed(2)} VEX (~$${((stats.rouletteWinnings || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🔥 Current Streak', value: `${stats.rouletteStreak || 0}`, inline: true },
                 { name: '🎯 Favorite Play', value: stats.rouletteFavoritePlay || 'None', inline: true }
             )

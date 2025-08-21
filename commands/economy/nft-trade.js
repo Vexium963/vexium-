@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -86,6 +87,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.15 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'nft_trading_bonus');
+            Economics.updateVEXMarket('buy', surpriseBonus);
             userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
         }
         
@@ -96,6 +98,7 @@ module.exports = {
         if (milestoneRewards.length > 0) {
             for (const reward of milestoneRewards) {
                 await user.addVEX(reward.amount, 'nft_milestone_reward');
+                Economics.updateVEXMarket('buy', reward.amount);
                 userData.achievements = userData.achievements || [];
                 if (!userData.achievements.includes(reward.achievementId)) {
                     userData.achievements.push(reward.achievementId);
@@ -149,7 +152,7 @@ module.exports = {
         if (price > constants.LIMITS.MAX_NFT_PRICE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Price Too High`)
-                .setDescription(`Maximum NFT price is ${constants.LIMITS.MAX_NFT_PRICE.toFixed(2)} VEX.`)
+                .setDescription(`Maximum NFT price is ${Economics.getPeggedVEXPrice(constants.LIMITS.MAX_NFT_PRICE_USD || 1000).toFixed(2)} VEX (~$${(constants.LIMITS.MAX_NFT_PRICE_USD || 1000).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -193,10 +196,10 @@ module.exports = {
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: `${rarityEmojis[nft.rarity]} ${nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1)}`, inline: true },
-                { name: '💰 Price', value: `${price.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price', value: `${price.toFixed(2)} VEX (~$${(price * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🆔 NFT ID', value: `#${nft.id}`, inline: true },
                 { name: '📋 Listing ID', value: `#${listingId}`, inline: true },
-                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX (~$${(nft.marketValue * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📝 Description', value: nft.description, inline: false },
                 { name: '🎨 Traits', value: this.formatTraits(nft.traits), inline: false }
             )
@@ -266,7 +269,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need ${totalCost.toFixed(2)} VEX (including 2% trading fee).\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`You need ${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)}) including 2% trading fee.\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -295,7 +298,9 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
         await seller.addVEX(listing.price, 'nft_sale');
+        Economics.updateVEXMarket('buy', listing.price);
         await user.burnVEX(tradingFee, 'nft_trading_fee');
         
         sellerData.nfts = sellerData.nfts.filter(n => n.id !== listing.nftId);
@@ -330,9 +335,9 @@ module.exports = {
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1), inline: true },
                 { name: '🆔 NFT ID', value: `#${nft.id}`, inline: true },
-                { name: '💰 Purchase Price', value: `${listing.price.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Trading Fee', value: `${tradingFee.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Purchase Price', value: `${listing.price.toFixed(2)} VEX (~$${(listing.price * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💸 Trading Fee', value: `${tradingFee.toFixed(2)} VEX (~$${(tradingFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '👤 Previous Owner', value: listing.sellerName, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -406,7 +411,7 @@ module.exports = {
             if (nft) {
                 const rarityEmoji = this.getRarityEmoji(nft.rarity);
                 embed.addFields({
-                    name: `${rarityEmoji} ${nft.name} - ${listing.price.toFixed(2)} VEX`,
+                    name: `${rarityEmoji} ${nft.name} - ${listing.price.toFixed(2)} VEX (~$${(listing.price * Economics.getCurrentVEXPrice()).toFixed(2)})`,
                     value: `**ID**: #${listing.id}\n**Rarity**: ${nft.rarity}\n**Seller**: ${listing.sellerName}`,
                     inline: true
                 });

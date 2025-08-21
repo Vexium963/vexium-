@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -121,8 +122,8 @@ module.exports = {
         embed.addFields(
             { name: '🔗 Your Referral Code', value: `\`${referralStats.code}\``, inline: true },
             { name: '👥 Total Referrals', value: `${referralStats.referrals.length}`, inline: true },
-            { name: '💰 Total Earned', value: `${referralStats.totalEarned.toFixed(2)} VEX`, inline: true },
-            { name: '💎 Pending Rewards', value: `${referralStats.pendingRewards.toFixed(2)} VEX`, inline: true }
+            { name: '💰 Total Earned', value: `${referralStats.totalEarned.toFixed(2)} VEX (~$${(referralStats.totalEarned * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+            { name: '💎 Pending Rewards', value: `${referralStats.pendingRewards.toFixed(2)} VEX (~$${(referralStats.pendingRewards * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
         );
         
         if (referralStats.referredBy) {
@@ -135,7 +136,7 @@ module.exports = {
         
         const rewardTiers = this.getRewardTiers();
         const tierInfo = rewardTiers.map(tier => 
-            `**${tier.referrals} referrals**: ${tier.bonus.toFixed(2)} VEX bonus`
+            `**${tier.referrals} referrals**: ${tier.bonus.toFixed(2)} VEX (~$${(tier.bonus * Economics.getCurrentVEXPrice()).toFixed(2)}) bonus`
         ).join('\n');
         
         embed.addFields({
@@ -146,7 +147,7 @@ module.exports = {
         
         if (referralStats.referrals.length > 0) {
             const recentReferrals = referralStats.referrals.slice(-3).map(ref => 
-                `${ref.username} - ${ref.earned.toFixed(2)} VEX earned`
+                `${ref.username} - ${ref.earned.toFixed(2)} VEX (~$${(ref.earned * Economics.getCurrentVEXPrice()).toFixed(2)}) earned`
             ).join('\n');
             
             embed.addFields({
@@ -221,8 +222,8 @@ module.exports = {
             .setDescription(`🚀 Share this code with friends to earn massive rewards!\n\n🔥 **VIRAL OPPORTUNITY:** Each friend...`)
             .addFields(
                 { name: '🔗 Referral Code', value: `\`${userData.referral.code}\``, inline: false },
-                { name: '💰 Reward per Referral', value: `${constants.REFERRAL.REFERRER_REWARD.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Friend Bonus', value: `${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Reward per Referral', value: `${Economics.getPeggedVEXPrice(constants.REFERRAL.REFERRER_REWARD_USD || 5).toFixed(2)} VEX (~$${(constants.REFERRAL.REFERRER_REWARD_USD || 5).toFixed(2)})`, inline: true },
+                { name: '🎁 Friend Bonus', value: `${Economics.getPeggedVEXPrice(constants.REFERRAL.REFEREE_BONUS_USD || 2).toFixed(2)} VEX (~$${(constants.REFERRAL.REFEREE_BONUS_USD || 2).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -245,7 +246,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Rewards`)
-                .setDescription(`⏳ You need at least ${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pend...`)
+                .setDescription(`⏳ You need at least ${Economics.getPeggedVEXPrice(constants.REFERRAL.MIN_CLAIM_AMOUNT_USD || 1).toFixed(2)} VEX (~$${(constants.REFERRAL.MIN_CLAIM_AMOUNT_USD || 1).toFixed(2)}) to claim. Current pending: ${referralStats.pendingRewards.toFixed(2)} VEX (~$${(referralStats.pendingRewards * Economics.getCurrentVEXPrice()).toFixed(2)})`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -256,7 +257,9 @@ module.exports = {
         const netAmount = claimAmount - taxAmount;
         
         await user.addVEX(netAmount, 'referral_rewards');
+        Economics.updateVEXMarket('reward', netAmount);
         await user.burnVEX(taxAmount, 'referral_tax');
+        Economics.updateVEXMarket('burn', taxAmount);
         
         referralStats.totalEarned += claimAmount;
         referralStats.pendingRewards = 0;
@@ -365,6 +368,7 @@ module.exports = {
         const referrerData = await referrer.load();
         
         await user.addVEX(constants.REFERRAL.REFEREE_BONUS, 'referral_bonus');
+        Economics.updateVEXMarket('reward', constants.REFERRAL.REFEREE_BONUS);
         
         if (!userData.referral) {
             userData.referral = {

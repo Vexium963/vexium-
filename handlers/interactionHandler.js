@@ -67,6 +67,11 @@ class InteractionHandler {
         this.handlers.set('nft_marketplace', this.handleNftMarketplace.bind(this));
         this.handlers.set('nft_mint_new', this.handleNftMintNew.bind(this));
         this.handlers.set('nft_my_collection', this.handleNftMyCollection.bind(this));
+        
+        this.handlers.set('forecast_price_detail', this.handleForecastPrice.bind(this));
+        this.handlers.set('forecast_analytics_detail', this.handleForecastAnalytics.bind(this));
+        this.handlers.set('forecast_sentiment_detail', this.handleForecastSentiment.bind(this));
+        this.handlers.set('forecast_overview', this.handleForecastOverview.bind(this));
         this.handlers.set('nft_buy_prompt', this.handleNftBuyPrompt.bind(this));
         this.handlers.set('nft_refresh_marketplace', this.handleNftRefreshMarketplace.bind(this));
 
@@ -1463,5 +1468,29 @@ class InteractionHandler {
         }
     }
 }
+
+    async handleForecastPrice(interaction) {
+        const forecastCommand = require('../commands/admin/forecast');
+        await interaction.deferUpdate();
+        await forecastCommand.handlePrice(interaction);
+    }
+
+    async handleForecastAnalytics(interaction) {
+        const forecastCommand = require('../commands/admin/forecast');
+        await interaction.deferUpdate();
+        await forecastCommand.handleAnalytics(interaction);
+    }
+
+    async handleForecastSentiment(interaction) {
+        const forecastCommand = require('../commands/admin/forecast');
+        await interaction.deferUpdate();
+        await forecastCommand.handleSentiment(interaction);
+    }
+
+    async handleForecastOverview(interaction) {
+        const forecastCommand = require('../commands/admin/forecast');
+        await interaction.deferUpdate();
+        await forecastCommand.handleOverview(interaction);
+    }
 
 module.exports = InteractionHandler;

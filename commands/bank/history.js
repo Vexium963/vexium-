@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -162,11 +163,12 @@ module.exports = {
         if (type === 'transactions') {
             const transactionList = recentRecords.map(record => {
                 const emoji = this.getTransactionEmoji(record.type);
-                const amount = record.type === 'spend' ? `-$${record.amount.toFixed(2)}` : `+$${record.amount.toFixed(2)}`;
-                const tax = record.taxAmount > 0 ? ` (Tax: $${record.taxAmount.toFixed(2)})` : '';
+                const amount = record.type === 'spend' ? `-${record.amount.toFixed(2)}` : `+${record.amount.toFixed(2)}`;
+                const usdAmount = record.type === 'spend' ? `-$${(record.amount * Economics.getCurrentVEXPrice()).toFixed(2)}` : `+$${(record.amount * Economics.getCurrentVEXPrice()).toFixed(2)}`;
+                const tax = record.taxAmount > 0 ? ` (Tax: ${record.taxAmount.toFixed(2)} VEX)` : '';
                 const date = new Date(record.timestamp).toLocaleDateString();
                 
-                return `${emoji} **${amount}** VEX - ${record.source}${tax}\n*${date}*`;
+                return `${emoji} **${amount} VEX (${usdAmount})** - ${record.source}${tax}\n*${date}*`;
             }).join('\n\n');
             
             embed.addFields({
@@ -177,7 +179,7 @@ module.exports = {
         } else if (type === 'taxes') {
             const taxList = recentRecords.map(record => {
                 const date = new Date(record.timestamp).toLocaleDateString();
-                return `💸 **$${record.amount.toFixed(2)}** VEX - ${record.source}\n*${date}*`;
+                return `💸 **${record.amount.toFixed(2)} VEX (~$${(record.amount * Economics.getCurrentVEXPrice()).toFixed(2)})** - ${record.source}\n*${date}*`;
             }).join('\n\n');
             
             embed.addFields({
@@ -188,7 +190,7 @@ module.exports = {
         } else if (type === 'burns') {
             const burnList = recentRecords.map(record => {
                 const date = new Date(record.timestamp).toLocaleDateString();
-                return `🔥 **$${record.amount.toFixed(2)}** VEX - ${record.reason}\n*${date}*`;
+                return `🔥 **${record.amount.toFixed(2)} VEX (~$${(record.amount * Economics.getCurrentVEXPrice()).toFixed(2)})** - ${record.reason}\n*${date}*`;
             }).join('\n\n');
             
             embed.addFields({
@@ -209,9 +211,9 @@ module.exports = {
             const totalTaxes = records.reduce((sum, r) => sum + (r.taxAmount || 0), 0);
             
             embed.addFields(
-                { name: '💰 Total Earned', value: `${totalEarned.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Total Spent', value: `${totalSpent.toFixed(2)} VEX`, inline: true },
-                { name: '🏛️ Total Taxes', value: `${totalTaxes.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Earned', value: `${totalEarned.toFixed(2)} VEX (~$${(totalEarned * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💸 Total Spent', value: `${totalSpent.toFixed(2)} VEX (~$${(totalSpent * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🏛️ Total Taxes', value: `${totalTaxes.toFixed(2)} VEX (~$${(totalTaxes * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             );
         }
         

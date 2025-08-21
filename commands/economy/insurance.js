@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,9 +16,9 @@ module.exports = {
                         .setDescription(`✨ Choose your protection level - Elite players choose Elite coverage!`)
                         .setRequired(true)
                         .addChoices(
-                            { name: 'Basic - 25% coverage, 50 VEX/month', value: 'basic' },
-                            { name: 'Premium - 50% coverage, 100 VEX/month', value: 'premium' },
-                            { name: 'Elite - 75% coverage, 200 VEX/month', value: 'elite' }))
+                            { name: 'Basic - 25% coverage, ~50 VEX/month', value: 'basic' },
+                            { name: 'Premium - 50% coverage, ~100 VEX/month', value: 'premium' },
+                            { name: 'Elite - 75% coverage, ~200 VEX/month', value: 'elite' }))
                 .addIntegerOption(option =>
                     option.setName('months')
                         .setDescription(`🔥 Duration of protection - Longer coverage = Better peace of mind!`)
@@ -89,10 +90,10 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
-                .setDescription(`💸 **Your ${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
+                .setDescription(`💸 **Your ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)}) empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
                 .addFields(
-                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: ${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
-                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
+                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
+                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **${(Math.random() * 50000 + 10000).toFixed(0)} VEX (~$${((Math.random() * 50000 + 10000) * Economics.getCurrentVEXPrice()).toFixed(0)}) protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
                 )
                 .setColor(constants.COLORS.ERROR)
                 .setFooter({ text: '⏰ Don\'t wait until it\'s too late! Protect your empire NOW!' })
@@ -123,9 +124,9 @@ module.exports = {
         const months = interaction.options.getInteger('months');
         
         const policies = {
-            basic: { coverage: 0.25, monthlyCost: 50, name: 'Basic Protection' },
-            premium: { coverage: 0.50, monthlyCost: 100, name: 'Premium Shield' },
-            elite: { coverage: 0.75, monthlyCost: 200, name: 'Elite Guardian' }
+            basic: { coverage: 0.25, monthlyCost: Economics.getPeggedVEXPrice(0.5), name: 'Basic Protection' },
+            premium: { coverage: 0.50, monthlyCost: Economics.getPeggedVEXPrice(1), name: 'Premium Shield' },
+            elite: { coverage: 0.75, monthlyCost: Economics.getPeggedVEXPrice(2), name: 'Elite Guardian' }
         };
         
         const policy = policies[type];
@@ -154,6 +155,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(totalCost, 'insurance_purchase');
+        Economics.updateVEXMarket('sell', totalCost);
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
@@ -279,6 +281,7 @@ module.exports = {
         const claimId = this.generateClaimId();
         
         await user.addVEX(coverageAmount, 'insurance_claim');
+        Economics.updateVEXMarket('reward', coverageAmount);
         
         userData.insurance.claimsUsed++;
         

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -51,7 +52,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${fomoMessage}\n\n🚀 **Quick tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **FOMO Alert:** ${Math.floor(Math.random() * 50) + 20} players just made deposits in the last hour!`)
+                .setDescription(`⏳ You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n${fomoMessage}\n\n🚀 **Quick tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **FOMO Alert:** ${Math.floor(Math.random() * 50) + 20} players just made deposits in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -67,6 +68,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('deposit', amount, interaction.user.id);
         
         userData.bankBalance += amount;
         
@@ -127,14 +130,15 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'deposit_surprise_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
         }
         
         let title = `${constants.EMOJIS.BANK} WEALTH SECURED!`;
-        let description = `💰 **${amount.toFixed(2)} VEX** locked and loaded for compound growth!`;
+        let description = `💰 **${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})** locked and loaded for compound growth!`;
         
         if (isHighRoller) {
             title = `💎 HIGH-ROLLER DEPOSIT CONFIRMED!`;
-            description = `🔥 **MASSIVE DEPOSIT!** ${amount.toFixed(2)} VEX is now working for you!\n💪 **You're building serious wealth!**`;
+            description = `🔥 **MASSIVE DEPOSIT!** ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) is now working for you!\n💪 **You're building serious wealth!**`;
         }
         
         if (isSmartInvestor) {
@@ -172,12 +176,12 @@ module.exports = {
             .setTitle(title)
             .setDescription(`🎉 ${description}\n\n📈 **Compound Interest Magic:** Your money grows ${compoundingPower}% annual...`)
             .addFields(
-                { name: '💰 Deposited Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Deposited Amount', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Interest Rate', value: `${(interestRate * 100).toFixed(3)}% daily`, inline: true },
                 { name: '🔒 Term', value: termName, inline: true },
-                { name: '💵 Daily Interest', value: `${dailyInterest.toFixed(4)} VEX`, inline: true },
-                { name: '📈 Yearly Projection', value: `${projectedYearly.toFixed(2)} VEX`, inline: true },
-                { name: '🏦 Total Bank Balance', value: `${userData.bankBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💵 Daily Interest', value: `${dailyInterest.toFixed(4)} VEX (~$${(dailyInterest * Economics.getCurrentVEXPrice()).toFixed(4)})`, inline: true },
+                { name: '📈 Yearly Projection', value: `${projectedYearly.toFixed(2)} VEX (~$${(projectedYearly * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🏦 Total Bank Balance', value: `${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
@@ -205,7 +209,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const depositProgress = Math.min(userData.bankBalance / 10000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Bank Balance: ${userData.bankBalance.toFixed(2)} VEX`,
+            `Bank Balance: ${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             depositProgress,
             constants.COLORS.SUCCESS
         );

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -68,8 +69,9 @@ module.exports = {
         }
         
         if (surpriseBonus > 0) {
-            description += `\n✨ **SURPRISE INSPECTION BONUS: +${surpriseBonus} VEX!** Lucky you!`;
+            description += `\n✨ **SURPRISE INSPECTION BONUS: +${surpriseBonus} VEX (~$${(surpriseBonus * Economics.getCurrentVEXPrice()).toFixed(2)})!** Lucky you!`;
             await user.addVEX(surpriseBonus, 'bank_inspection_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
         }
         
         const activeInvestors = Math.floor(Math.random() * 200) + 50;
@@ -94,9 +96,9 @@ module.exports = {
             .setTitle(title)
             .setDescription(`✨ ${description} 📈`)
             .addFields(
-                { name: '🏦 Bank Vault', value: `${userData.bankBalance.toFixed(2)} VEX ${userData.bankBalance >= 50000 ? '🐋' : userData.bankBalance >= 10000 ? '🦈' : '🐟'}`, inline: true },
-                { name: '💼 Active Wallet', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '💎 Total Empire', value: `${totalWealth.toFixed(2)} VEX`, inline: true }
+                { name: '🏦 Bank Vault', value: `${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) ${userData.bankBalance >= 50000 ? '🐋' : userData.bankBalance >= 10000 ? '🦈' : '🐟'}`, inline: true },
+                { name: '💼 Active Wallet', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💎 Total Empire', value: `${totalWealth.toFixed(2)} VEX (~$${(totalWealth * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(isMillionaire ? constants.COLORS.VEX : isWealthy ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setTimestamp();
@@ -131,9 +133,9 @@ module.exports = {
             }
             
             embed.addFields(
-                { name: '🔓 Available Funds', value: `${totalUnlocked.toFixed(2)} VEX`, inline: true },
-                { name: '🔒 Locked Funds', value: `${totalLocked.toFixed(2)} VEX`, inline: true },
-                { name: '💵 Daily Interest', value: `${totalDailyInterest.toFixed(4)} VEX`, inline: true }
+                { name: '🔓 Available Funds', value: `${totalUnlocked.toFixed(2)} VEX (~$${(totalUnlocked * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🔒 Locked Funds', value: `${totalLocked.toFixed(2)} VEX (~$${(totalLocked * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💵 Daily Interest', value: `${totalDailyInterest.toFixed(4)} VEX (~$${(totalDailyInterest * Economics.getCurrentVEXPrice()).toFixed(4)})`, inline: true }
             );
             
             if (activeDeposits.length > 0) {
@@ -147,7 +149,7 @@ module.exports = {
             const yearlyProjection = totalDailyInterest * 365;
             embed.addFields({
                 name: '📈 Yearly Interest Projection',
-                value: `${yearlyProjection.toFixed(2)} VEX`,
+                value: `${yearlyProjection.toFixed(2)} VEX (~$${(yearlyProjection * Economics.getCurrentVEXPrice()).toFixed(2)})`,
                 inline: true
             });
         } else {

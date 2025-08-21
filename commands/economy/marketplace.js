@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -96,6 +97,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'marketplace_surprise_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} SURPRISE MARKETPLACE BONUS!`)
@@ -113,12 +115,14 @@ module.exports = {
                 .setDescription(`🏆 **${totalTransactions} Total Transactions!**\n✨ You're becoming a marketplace legend!\n\n🔥 Le...`)
                 .addFields({
                     name: '🎁 Milestone Reward',
-                    value: `${totalTransactions * 2} VEX bonus!`,
+                    value: `${milestoneReward.toFixed(2)} VEX (~$${(milestoneReward * Economics.getCurrentVEXPrice()).toFixed(2)}) bonus!`,
                     inline: true
                 })
                 .setColor(constants.COLORS.GOLD);
             
-            await user.addVEX(totalTransactions * 2, 'marketplace_milestone');
+            const milestoneReward = Economics.getPeggedVEXPrice(totalTransactions * 0.02);
+            await user.addVEX(milestoneReward, 'marketplace_milestone');
+            Economics.updateVEXMarket('reward', milestoneReward);
             await interaction.followUp({ embeds: [achievementEmbed] });
         }
         
@@ -192,7 +196,7 @@ module.exports = {
                 const timeLeft = this.getTimeLeft(listing.expiresAt);
                 embed.addFields({
                     name: `${listing.emoji} ${listing.name}`,
-                    value: `**Price**: ${listing.price.toFixed(2)} VEX\n**Seller**: ${listing.sellerName}\n**ID**: ${listing.id}\n**Expires**: ${timeLeft}`,
+                    value: `**Price**: ${listing.price.toFixed(2)} VEX (~$${(listing.price * Economics.getCurrentVEXPrice()).toFixed(2)})\n**Seller**: ${listing.sellerName}\n**ID**: ${listing.id}\n**Expires**: ${timeLeft}`,
                     inline: true
                 });
             }
@@ -274,7 +278,7 @@ module.exports = {
         if (price > constants.LIMITS.MAX_MARKETPLACE_PRICE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Price Too High`)
-                .setDescription(`Maximum listing price is ${constants.LIMITS.MAX_MARKETPLACE_PRICE.toFixed(2)} VEX.`)
+                .setDescription(`Maximum listing price is ${constants.LIMITS.MAX_MARKETPLACE_PRICE.toFixed(2)} VEX (~$${(constants.LIMITS.MAX_MARKETPLACE_PRICE * Economics.getCurrentVEXPrice()).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -285,13 +289,16 @@ module.exports = {
         if (userData.vexBalance < listingFee) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Listing Fee`)
-                .setDescription(`Listing fee (5%): ${listingFee.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`Listing fee (5%): ${listingFee.toFixed(2)} VEX (~$${(listingFee * Economics.getCurrentVEXPrice()).toFixed(2)})\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const result = await user.removeVEX(listingFee, 'marketplace_listing_fee');
+        if (result.success) {
+            Economics.updateVEXMarket('sell', listingFee);
+        }
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Listing Failed`)
@@ -335,10 +342,10 @@ module.exports = {
             .setDescription(`**${itemName}** is now available in the marketplace!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProofMessage}`)
             .addFields(
                 { name: '📦 Item', value: itemName, inline: true },
-                { name: '💰 Price', value: `${price.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Price', value: `${price.toFixed(2)} VEX (~$${(price * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🔢 Quantity', value: `${quantity}`, inline: true },
                 { name: '🆔 Listing ID', value: listingId, inline: true },
-                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX (~$${(listingFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⏰ Expires', value: '<t:' + Math.floor(new Date(listing.expiresAt).getTime() / 1000) + ':R>', inline: true },
                 { name: '📢 Share Listing', value: `Tell others to use:\n\`/marketplace buy ${listingId}\``, inline: false }
             )
@@ -424,6 +431,9 @@ module.exports = {
         }
         
         const buyResult = await user.removeVEX(totalCost, 'marketplace_purchase');
+        if (buyResult.success) {
+            Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
+        }
         if (!buyResult.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
@@ -499,10 +509,10 @@ module.exports = {
     
     getMarketplaceListings(category) {
         const allListings = [
-            { id: 'MKT001', name: 'Energy Drink', price: 25, sellerName: 'PowerSeller', emoji: '⚡', category: 'consumables', expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: 'MKT002', name: 'Mining Pickaxe', price: 500, sellerName: 'ToolMaster', emoji: '⛏️', category: 'tools', expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: 'MKT003', name: 'Luck Potion', price: 100, sellerName: 'AlchemyPro', emoji: '🍀', category: 'consumables', expiresAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: 'MKT004', name: 'Trading Bot Service', price: 1000, sellerName: 'BotExpert', emoji: '🤖', category: 'services', expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() }
+            { id: 'MKT001', name: 'Energy Drink', price: Economics.getPeggedVEXPrice(0.25), sellerName: 'PowerSeller', emoji: '⚡', category: 'consumables', expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
+            { id: 'MKT002', name: 'Mining Pickaxe', price: Economics.getPeggedVEXPrice(5), sellerName: 'ToolMaster', emoji: '⛏️', category: 'tools', expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
+            { id: 'MKT003', name: 'Luck Potion', price: Economics.getPeggedVEXPrice(1), sellerName: 'AlchemyPro', emoji: '🍀', category: 'consumables', expiresAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString() },
+            { id: 'MKT004', name: 'Trading Bot Service', price: Economics.getPeggedVEXPrice(10), sellerName: 'BotExpert', emoji: '🤖', category: 'services', expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() }
         ];
         
         if (category === 'all') return allListings;

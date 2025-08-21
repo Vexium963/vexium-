@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -94,14 +95,14 @@ module.exports = {
         ];
         
         let title = `${constants.EMOJIS.CHART} Smart Money Calculator`;
-        let description = `💰 **Interest projections for ${amount.toFixed(2)} VEX** over **${days} days**`;
+        let description = `💰 **Interest projections for ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})** over **${days} days**`;
         
         if (isWhale) {
             title = `🐋 WHALE INVESTOR CALCULATOR!`;
-            description = `💎 **MASSIVE WEALTH PROJECTION!** ${amount.toFixed(2)} VEX over **${days} days**\n👑 **Elite investor status detected!**`;
+            description = `💎 **MASSIVE WEALTH PROJECTION!** ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) over **${days} days**\n👑 **Elite investor status detected!**`;
         } else if (isAnalyst) {
             title = `🧠 FINANCIAL ANALYST MODE!`;
-            description = `📊 **EXPERT ANALYSIS!** ${amount.toFixed(2)} VEX over **${days} days**\n⭐ **You're a calculation master!**`;
+            description = `📊 **EXPERT ANALYSIS!** ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) over **${days} days**\n⭐ **You're a calculation master!**`;
         }
         
         const fomoMessage = urgencyFactor ? constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)] : null;
@@ -128,9 +129,9 @@ module.exports = {
             
             embed.addFields({
                 name: `${calc.name} (${annualizedReturn}% APY)`,
-                value: `**Daily**: ${dailyInterest.toFixed(4)} VEX\n` +
-                       `**${days} Days**: ${totalInterest.toFixed(2)} VEX\n` +
-                       `**Final Amount**: ${finalAmount.toFixed(2)} VEX\n` +
+                value: `**Daily**: ${dailyInterest.toFixed(4)} VEX (~$${(dailyInterest * Economics.getCurrentVEXPrice()).toFixed(4)})\n` +
+                       `**${days} Days**: ${totalInterest.toFixed(2)} VEX (~$${(totalInterest * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
+                       `**Final Amount**: ${finalAmount.toFixed(2)} VEX (~$${(finalAmount * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                        `*${calc.term}*`,
                 inline: true
             });
@@ -154,8 +155,9 @@ module.exports = {
         const compoundExample = amount * Math.pow(1 + (rates.YEARLY + premiumBonus), 365);
         embed.addFields({
             name: '🚀 1-Year Compound Growth',
-            value: `${amount.toFixed(2)} → ${compoundExample.toFixed(2)} VEX\n` +
-                   `Total gain: ${(compoundExample - amount).toFixed(2)} VEX`,
+            value: `${amount.toFixed(2)} VEX → ${compoundExample.toFixed(2)} VEX\n` +
+                   `$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)} → $${(compoundExample * Economics.getCurrentVEXPrice()).toFixed(2)}\n` +
+                   `Total gain: ${(compoundExample - amount).toFixed(2)} VEX (~$${((compoundExample - amount) * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             inline: false
         });
         

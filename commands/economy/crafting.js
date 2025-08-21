@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -169,9 +170,10 @@ module.exports = {
                 const canCraft = this.canCraftRecipe(recipe, userData);
                 const status = canCraft ? '✅ Can Craft' : '❌ Missing Materials';
                 
+                const vexCost = Economics.getPeggedVEXPrice(recipe.vexCost * 0.01); // Convert to USD equivalent
                 embed.addFields({
                     name: `${recipe.emoji} ${recipe.name}`,
-                    value: `**Materials**: ${materials}\n**VEX Cost**: $${recipe.vexCost.toFixed(2)}\n**ID**: ${recipe.id}\n**Status**: ${status}`,
+                    value: `**Materials**: ${materials}\n**VEX Cost**: ${vexCost.toFixed(2)} VEX (~$${(vexCost * Economics.getCurrentVEXPrice()).toFixed(2)})\n**ID**: ${recipe.id}\n**Status**: ${status}`,
                     inline: true
                 });
             }
@@ -246,12 +248,12 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const totalVexCost = recipe.vexCost * quantity;
+        const totalVexCost = Economics.getPeggedVEXPrice(recipe.vexCost * 0.01) * quantity;
         
         if (userData.vexBalance < totalVexCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`💸 **Insufficient VEX for this legendary craft!**\n\n💰 **Required:** ${totalVexCost.toFixed(2)} VEX\n💳 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n⚡ **${Math.floor(Math.random() * 20) + 5} players** just earned VEX in the last hour!`)
+                .setDescription(`💸 **Insufficient VEX for this legendary craft!**\n\n💰 **Required:** ${totalVexCost.toFixed(2)} VEX (~$${(totalVexCost * Economics.getCurrentVEXPrice()).toFixed(2)})\n💳 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n⚡ **${Math.floor(Math.random() * 20) + 5} players** just earned VEX in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -282,6 +284,10 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('sell', totalVexCost, interaction.user.id);
+        
+        Economics.updateVEXMarket('sell', totalVexCost);
         
         for (const material of recipe.materials) {
             const required = material.quantity * quantity;
@@ -315,9 +321,9 @@ module.exports = {
             .addFields(
                 { name: '🔨 Item Crafted', value: `${recipe.emoji} ${recipe.name}`, inline: true },
                 { name: '🔢 Quantity', value: `${quantity}`, inline: true },
-                { name: '💰 VEX Cost', value: `$${totalVexCost.toFixed(2)}`, inline: true },
+                { name: '💰 VEX Cost', value: `${totalVexCost.toFixed(2)} VEX (~$${(totalVexCost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⭐ XP Gained', value: `${recipe.xp * quantity} Crafting XP`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Total Crafted', value: `${userData.stats.itemsCrafted}`, inline: true },
                 { name: '📦 Materials Used', value: recipe.materials.map(m => `${m.quantity * quantity}x ${m.name}`).join('\n'), inline: false }
             )

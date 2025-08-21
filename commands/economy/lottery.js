@@ -86,11 +86,11 @@ module.exports = {
         const activeParticipants = Math.floor(Math.random() * 200) + 150;
         
         let title = `${constants.EMOJIS.LOTTERY} MASSIVE JACKPOT ALERT!`;
-        let description = `💎 **${lotteryData.jackpot.toFixed(2)} VEX JACKPOT** - Life-changing money awaits!\n🔥 **${activeParticipants} players competing RIGHT NOW!**`;
+        let description = `💎 **${lotteryData.jackpot.toFixed(2)} VEX (~$${(lotteryData.jackpot * Economics.getCurrentVEXPrice()).toFixed(2)}) JACKPOT** - Life-changing money awaits!\n🔥 **${activeParticipants} players competing RIGHT NOW!**`;
         
         if (isUrgent) {
             title = `🚨 URGENT: ${hoursLeft}H LEFT TO WIN!`;
-            description = `⏰ **FINAL HOURS!** Jackpot closes in ${hoursLeft} hours!\n💰 **${lotteryData.jackpot.toFixed(2)} VEX** could be YOURS!\n🏃‍♂️ **Don't miss your chance at financial freedom!**`;
+            description = `⏰ **FINAL HOURS!** Jackpot closes in ${hoursLeft} hours!\n💰 **${lotteryData.jackpot.toFixed(2)} VEX (~$${(lotteryData.jackpot * Economics.getCurrentVEXPrice()).toFixed(2)})** could be YOURS!\n🏃‍♂️ **Don't miss your chance at financial freedom!**`;
         }
         
         const lotteryUsage = userData.stats.lotteryTicketsBought || 0;
@@ -119,7 +119,7 @@ module.exports = {
             .setDescription(`🔥 ${description} 💸\n\n🚨 **FOMO ALERT:** Every minute you wait, someone else could claim YOUR j...`)
             .setColor(isUrgent ? constants.COLORS.ERROR : constants.COLORS.GOLD)
             .addFields(
-                { name: '🎯 Current Jackpot', value: `${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
+                { name: '🎯 Current Jackpot', value: `${lotteryData.jackpot.toFixed(2)} VEX (~$${(lotteryData.jackpot * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎫 Ticket Price', value: `${Economics.getPeggedVEXPrice(5)} VEX (~$5.00)`, inline: true },
                 { name: '📊 Tickets Sold', value: `${lotteryData.ticketsSold}`, inline: true },
                 { name: '⏰ Draw Time', value: `<t:${lotteryData.drawTime}:F>`, inline: false },
@@ -141,7 +141,7 @@ module.exports = {
         const canvasRenderer = new CanvasRenderer();
         const jackpotProgress = Math.min(lotteryData.jackpot / 10000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Jackpot Growth: ${lotteryData.jackpot.toFixed(2)} VEX`,
+            `Jackpot Growth: ${lotteryData.jackpot.toFixed(2)} VEX (~$${(lotteryData.jackpot * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             jackpotProgress,
             constants.COLORS.GOLD
         );
@@ -165,7 +165,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n⚠️ **WARNING:** While you're earning, others are buying YOUR winning tickets!`)
+                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n⚠️ **WARNING:** While you're earning, others are buying YOUR winning tickets!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -193,8 +193,11 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('sell', totalCost, interaction.user.id);
+        
         const burnAmount = totalCost * constants.TAX_SYSTEM.LOTTERY.BURN_RATE;
         await user.burnVEX(burnAmount, 'lottery_tax');
+        Economics.updateVEXMarket('burn', burnAmount);
         
         if (!userData.lotteryTickets) userData.lotteryTickets = {};
         if (!userData.lotteryTickets[lotteryWeek]) userData.lotteryTickets[lotteryWeek] = [];
@@ -234,9 +237,9 @@ module.exports = {
             .setDescription(`🎉 ${description}\n\n🔥 **You're now in the running for LIFE-CHANGING money!** 💸\n\n📈 **Social ...`)
             .addFields(
                 { name: '🎫 Your Tickets', value: newTickets.join(', '), inline: false },
-                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
-                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX (~$${(burnAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Total Tickets This Week', value: `${userData.lotteryTickets[lotteryWeek].length}`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)

@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ButtonBuilder, But
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const CanvasRenderer = require('../../utils/canvasRenderer');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -172,7 +173,7 @@ module.exports = {
         const statusEmoji = this.getStatusEmoji(userData.profile.status || 'Active');
         
         embed.addFields(
-            { name: '💰 Net Worth', value: `${userData.networth.toFixed(2)} VEX ${wealthRank}`, inline: true },
+            { name: '💰 Net Worth', value: `${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)}) ${wealthRank}`, inline: true },
             { name: '🎯 Level Progress', value: `Level ${userData.level}\nSee progress bar below`, inline: true },
             { name: '📊 Status', value: `${statusEmoji} ${userData.profile.status || 'Active'}${recentActivity ? ' 🟢 ONLINE' : ''}`, inline: true }
         );
@@ -226,7 +227,7 @@ module.exports = {
         
         if (isOwnProfile) {
             embed.addFields(
-                { name: '📈 Total Earned', value: `${userData.stats.totalEarned.toFixed(2)} VEX`, inline: true },
+                { name: '📈 Total Earned', value: `${userData.stats.totalEarned.toFixed(2)} VEX (~$${(userData.stats.totalEarned * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎮 Games Played', value: userData.stats.gamesPlayed.toString(), inline: true },
                 { name: '🤝 Trades Completed', value: userData.stats.tradesCompleted.toString(), inline: true }
             );

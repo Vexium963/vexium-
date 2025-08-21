@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -91,6 +92,7 @@ module.exports = {
         const engagementBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 50) + 25 : 0;
         if (engagementBonus > 0) {
             await user.addVEX(engagementBonus, 'tournament_engagement_bonus');
+            Economics.updateVEXMarket('reward', engagementBonus);
             userData.stats.surpriseBonusesReceived = (userData.stats.surpriseBonusesReceived || 0) + 1;
         }
         
@@ -261,7 +263,7 @@ module.exports = {
         if (userData.vexBalance < tournament.entryFee) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Entry fee: ${tournament.entryFee} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Entry fee: ${tournament.entryFee} VEX (~$${(tournament.entryFee * Economics.getCurrentVEXPrice()).toFixed(2)})\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -276,6 +278,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('buy', tournament.entryFee);
         
         tournament.participants.push(interaction.user.id);
         tournament.playerData[interaction.user.id] = {
@@ -368,13 +372,14 @@ module.exports = {
         if (userData.vexBalance < creationCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Tournament creation fee: ${creationCost.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`Tournament creation fee: ${creationCost.toFixed(2)} VEX (~$${(creationCost * Economics.getCurrentVEXPrice()).toFixed(2)})\nYour balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const result = await user.removeVEX(creationCost, 'tournament_creation');
+        Economics.updateVEXMarket('buy', creationCost);
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Creation Failed`)
@@ -383,6 +388,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('buy', creationCost);
         
         const tournamentId = this.generateTournamentId();
         const tournament = {
@@ -417,7 +424,7 @@ module.exports = {
                 { name: '💰 Entry Fee', value: `${entryFee} VEX`, inline: true },
                 { name: '👥 Max Players', value: '20', inline: true },
                 { name: '⏰ Duration', value: '24 hours', inline: true },
-                { name: '💸 Creation Fee', value: `${creationCost.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Creation Fee', value: `${creationCost.toFixed(2)} VEX (~$${(creationCost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📢 Share Tournament', value: `Tell others to use:\n\`/tournaments join ${tournamentId}\``, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)

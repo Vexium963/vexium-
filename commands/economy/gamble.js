@@ -150,7 +150,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`💥 Maximum play amount for slots is ${maxAmount.toFixed(2)} VEX. Start smaller and build your empire!`)
+                .setDescription(`💥 Maximum play amount for slots is ${maxAmount.toFixed(2)} VEX (~$${(maxAmount * Economics.getCurrentVEXPrice()).toFixed(2)}). Start smaller and build your empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -175,7 +175,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily!`)
+                .setDescription(`💸 You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). Earn more with /work or /daily!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -207,6 +207,8 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('sell', amount);
+        
         const symbols = Economics.generateSlotsResult();
         const payout = Economics.calculateEntertainmentPayout('slots', amount, symbols);
         
@@ -215,15 +217,16 @@ module.exports = {
         
         if (payout > 0) {
             await user.addVEX(payout, 'entertainment_win');
+            Economics.updateVEXMarket('reward', payout);
             const profit = payout - amount;
-            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX`;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
             
             const winTax = payout * constants.TAX_SYSTEM.ENTERTAINMENT.WIN_TAX_RATE;
             await user.burnVEX(winTax, 'entertainment_win_tax');
-        } else {
-            resultText = `💸 **YOU LOSE!** 💸\nLoss: ${amount.toFixed(2)} VEX`;
+        }else {
+            resultText = `💸 **YOU LOSE!** 💸\nLoss: ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             userData.stats.totalLost += amount;
             
             const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
@@ -260,9 +263,9 @@ module.exports = {
             .setTitle(`🎰 VEX Skill-Based Slots`)
             .setDescription(`✨ ${description} 🔥`)
             .addFields(
-                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
-                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX (~$${(payout * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(color)
             .setImage('attachment://progress.png')
@@ -286,7 +289,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`💥 Maximum play amount for coinflip is ${maxAmount.toFixed(2)} VEX. Start smaller and build your empire!`)
+                .setDescription(`💥 Maximum play amount for coinflip is ${maxAmount.toFixed(2)} VEX (~$${(maxAmount * Economics.getCurrentVEXPrice()).toFixed(2)}). Start smaller and build your empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -295,7 +298,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily!`)
+                .setDescription(`💸 You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). Earn more with /work or /daily!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -311,6 +314,8 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('sell', amount);
+        
         const coinResult = Economics.flipCoin();
         const won = choice === coinResult;
         const payout = won ? amount * constants.ENTERTAINMENT_GAMES.COINFLIP.winMultiplier : 0;
@@ -321,12 +326,13 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
+            Economics.updateVEXMarket('reward', payout);
             const profit = payout - amount;
-            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX`;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
-        } else {
-            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: ${amount.toFixed(2)} VEX`;
+        }else {
+            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             userData.stats.totalLost += amount;
             
             const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
@@ -354,9 +360,9 @@ module.exports = {
             .addFields(
                 { name: '🎯 Your Choice', value: choice.charAt(0).toUpperCase() + choice.slice(1), inline: true },
                 { name: '🪙 Result', value: coinResult.charAt(0).toUpperCase() + coinResult.slice(1), inline: true },
-                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
-                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX (~$${(payout * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(color)
             .setImage('attachment://progress.png')
@@ -379,7 +385,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`💥 Maximum play amount for dice is ${maxAmount.toFixed(2)} VEX. Start smaller and build your empire!`)
+                .setDescription(`💥 Maximum play amount for dice is ${maxAmount.toFixed(2)} VEX (~$${(maxAmount * Economics.getCurrentVEXPrice()).toFixed(2)}). Start smaller and build your empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -388,7 +394,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX. Earn more with /work or /daily!`)
+                .setDescription(`💸 You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). Earn more with /work or /daily!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -404,6 +410,8 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('sell', amount);
+        
         const diceRoll = Economics.rollDice();
         const won = prediction === diceRoll;
         const payout = won ? amount * constants.ENTERTAINMENT_GAMES.DICE.winMultiplier : 0;
@@ -413,12 +421,13 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
+            Economics.updateVEXMarket('reward', payout);
             const profit = payout - amount;
-            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX`;
+            resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
             userData.stats.totalWon += profit;
-        } else {
-            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: ${amount.toFixed(2)} VEX`;
+        }else {
+            resultText = `💸 **BETTER LUCK NEXT TIME!** 💸\nLoss: ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             userData.stats.totalLost += amount;
             
             const lossBurn = amount * constants.TAX_SYSTEM.ENTERTAINMENT.LOSS_BURN_RATE;
@@ -438,9 +447,9 @@ module.exports = {
             .addFields(
                 { name: '🎯 Your Prediction', value: prediction.toString(), inline: true },
                 { name: '🎲 Actual Roll', value: diceRoll.toString(), inline: true },
-                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
-                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎰 Payout', value: `${payout.toFixed(2)} VEX (~$${(payout * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(color)
             .setImage('attachment://progress.png')

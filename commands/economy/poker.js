@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -68,6 +69,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'poker_engagement_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
             userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
         }
         
@@ -137,7 +139,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💰 You need ${tournament.buyIn.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX....`)
+                .setDescription(`💰 You need ${tournament.buyIn.toFixed(2)} VEX (~$${(tournament.buyIn * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})....`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -152,6 +154,7 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        Economics.updateVEXMarket('buy', tournament.buyIn, interaction.user.id);
         
         const burnAmount = tournament.buyIn * constants.TAX_SYSTEM.POKER.RAKE_RATE;
         await user.burnVEX(burnAmount, 'poker_rake');
@@ -161,6 +164,7 @@ module.exports = {
         
         if (prize > 0) {
             await user.addVEX(prize, 'poker_prize');
+            Economics.updateVEXMarket('reward', prize);
         }
         
         userData.stats.pokerTournaments = (userData.stats.pokerTournaments || 0) + 1;
@@ -184,11 +188,11 @@ module.exports = {
             .setDescription(`**${tournament.name}** tournament completed!`)
             .addFields(
                 { name: '🏆 Final Placement', value: `${placement}/${tournament.maxPlayers}`, inline: true },
-                { name: '💰 Buy-in', value: `${tournament.buyIn.toFixed(2)} VEX`, inline: true },
-                { name: '🎁 Prize Won', value: `${prize.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Rake', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Net Result', value: `${prize - tournament.buyIn >= 0 ? '+' : ''}${(prize - tournament.buyIn).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Buy-in', value: `${tournament.buyIn.toFixed(2)} VEX (~$${(tournament.buyIn * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🎁 Prize Won', value: `${prize.toFixed(2)} VEX (~$${(prize * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💸 Rake', value: `${burnAmount.toFixed(2)} VEX (~$${(burnAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📊 Net Result', value: `${prize - tournament.buyIn >= 0 ? '+' : ''}${(prize - tournament.buyIn).toFixed(2)} VEX (~$${((prize - tournament.buyIn) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(placement <= 3 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setImage('attachment://progress.png')
@@ -213,10 +217,10 @@ module.exports = {
             
             embed.addFields({
                 name: `${tournament.name}`,
-                value: `**Buy-in**: ${tournament.buyIn.toFixed(2)} VEX\n` +
+                value: `**Buy-in**: ${tournament.buyIn.toFixed(2)} VEX (~$${(tournament.buyIn * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                        `**Players**: ${tournament.maxPlayers}\n` +
-                       `**Prize Pool**: ${prizePool.toFixed(2)} VEX\n` +
-                       `**1st Place**: ${firstPlace.toFixed(2)} VEX\n` +
+                       `**Prize Pool**: ${prizePool.toFixed(2)} VEX (~$${(prizePool * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
+                       `**1st Place**: ${firstPlace.toFixed(2)} VEX (~$${(firstPlace * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                        `**Skill Level**: ${tournament.skillLevel}`,
                 inline: true
             });
@@ -265,7 +269,7 @@ module.exports = {
                 { name: '🎯 Tournaments Played', value: `${tournaments}`, inline: true },
                 { name: '🏆 Top 3 Finishes', value: `${wins}`, inline: true },
                 { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
-                { name: '💰 Total Winnings', value: `${(stats.pokerWinnings || 0).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Winnings', value: `${(stats.pokerWinnings || 0).toFixed(2)} VEX (~$${((stats.pokerWinnings || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎲 Best Finish', value: stats.pokerBestFinish ? `${stats.pokerBestFinish}` : 'N/A', inline: true },
                 { name: '🔥 Current Streak', value: `${stats.pokerStreak || 0}`, inline: true }
             )

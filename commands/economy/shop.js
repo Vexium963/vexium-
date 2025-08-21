@@ -122,7 +122,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
+                .setDescription(`⏳ You need ${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -149,6 +149,10 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
+        
+        Economics.updateVEXMarket('buy', totalCost);
+        
         const burnAmount = totalCost * (item.burnRate || constants.TAX_SYSTEM.PURCHASE.ITEM_BURN_RATE);
         await user.burnVEX(burnAmount, 'item_purchase');
         
@@ -173,9 +177,9 @@ module.exports = {
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Purchase Successful!`)
             .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your empire grows stronger!**\n\n🔥 ${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 50)}`)
             .addFields(
-                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
-                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX (~$${(totalCost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX (~$${(burnAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -279,7 +283,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Shopping Power: ${userData.vexBalance.toFixed(0)} VEX Available`,
+            `Shopping Power: ${userData.vexBalance.toFixed(0)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) Available`,
             Math.min(userData.vexBalance / 1000, 1),
             constants.COLORS.VEX
         );
@@ -287,7 +291,7 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} VexiumVerse Marketplace`)
             .setDescription(`**${interaction.user.username}**, welcome to the ultimate shopping experience!\n\n` +
-                `${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n` +
+                `${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                 `${constants.ANIMATED_EMOJIS.CELEBRATION} **Items Available:** ${Object.keys(constants.SHOP_ITEMS).length}\n` +
                 `${constants.ANIMATED_EMOJIS.PULSE} **${Math.floor(Math.random() * 50) + 20} players** shopping now!\n\n` +
                 `**Categories:**`)
@@ -404,7 +408,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHOP} VexiumVerse Marketplace - ${category.charAt(0).toUpperCase() + category.slice(1)}`)
-            .setDescription(`💰 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** Don't miss out!`)
+            .setDescription(`💰 **Your Balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n🔥 **Limited Time Offers Active!** Don't miss out!`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
 
@@ -416,7 +420,7 @@ module.exports = {
                     const Economics = require('../../utils/economics');
                     const originalVexPrice = Economics.getPeggedVEXPrice(item.originalUsdPrice || 10);
                     const saleVexPrice = Economics.getPeggedVEXPrice((item.originalUsdPrice || 10) * 0.8);
-                    return `🔥 **${item.name}** - ~~${originalVexPrice} VEX~~ **${saleVexPrice} VEX** (${item.discount}% OFF!)`;
+                    return `🔥 **${item.name}** - ~~${originalVexPrice.toFixed(2)} VEX~~ **${saleVexPrice.toFixed(2)} VEX** (~$${((item.originalUsdPrice || 10) * 0.8).toFixed(2)}) (${item.discount}% OFF!)`;
                 }).join('\n'),
                 inline: false
             });
@@ -428,7 +432,7 @@ module.exports = {
                 value: featuredItems.map(item => {
                     const Economics = require('../../utils/economics');
                     const vexPrice = Economics.getPeggedVEXPrice(item.usdPrice || 10);
-                    return `${this.getCategoryEmoji(category)} **${item.name}** - ${vexPrice} VEX\n*${item.personalizedReason}*`;
+                    return `${this.getCategoryEmoji(category)} **${item.name}** - ${vexPrice.toFixed(2)} VEX (~$${(item.usdPrice || 10).toFixed(2)})\n*${item.personalizedReason}*`;
                 }).join('\n\n'),
                 inline: false
             });

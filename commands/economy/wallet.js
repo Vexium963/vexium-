@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -53,27 +54,27 @@ module.exports = {
         const wealthRank = this.getWealthRank(userData.networth);
         
         let title = `${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`;
-        let description = `💸 **USD-Pegged VEX Token Balance**\n🔥 1 VEX = $1.00 USD - Real money, real power!`;
+        let description = `💸 **USD-Pegged VEX Token Balance**\n🔥 1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD - Real money, real power!`;
         
         if (isOwnWallet) {
             if (isWealthyUser) {
                 title = `💎 YOUR WEALTH EMPIRE!`;
-                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **${userData.networth.toFixed(2)} VEX**!\n💸 **1 VEX = $1.00 USD** - Real money, real power!`;
+                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})**!\n💸 **1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD** - Real money, real power!`;
             } else if (isRisingStar) {
                 title = `🚀 RISING WEALTH STAR!`;
-                description = `✨ **You're building something AMAZING!** ${userData.networth.toFixed(2)} VEX and climbing!\n🔥 **Next milestone: 1,000 VEX** for Wealth Elite status!`;
+                description = `✨ **You're building something AMAZING!** ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)}) and climbing!\n🔥 **Next milestone: 1,000 VEX (~$${(1000 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Wealth Elite status!`;
             } else {
                 title = `🌟 YOUR GROWING EMPIRE!`;
-                description = `✨ **Every legend starts somewhere!** You're at ${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: 100 VEX** for Rising Star status!`;
+                description = `✨ **Every legend starts somewhere!** You're at ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})!\n🚀 **Next goal: 100 VEX (~$${(100 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Rising Star status!`;
             }
             
             if (recentGrowth > 0) {
-                description += `\n📈 **+${recentGrowth.toFixed(2)} VEX growth** in recent activity!`;
+                description += `\n📈 **+${recentGrowth.toFixed(2)} VEX (~$${(recentGrowth * Economics.getCurrentVEXPrice()).toFixed(2)}) growth** in recent activity!`;
             }
         } else {
             if (isWealthyUser) {
                 title = `👑 ${targetUser.username}'s WEALTH EMPIRE`;
-                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: ${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
+                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
             }
         }
         

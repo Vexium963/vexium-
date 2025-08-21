@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -188,6 +189,7 @@ module.exports = {
         
         userData.loans.push(newLoan);
         await user.addVEX(amount, 'loan_disbursement');
+        Economics.updateVEXMarket('buy', amount);
         
         userData.stats.loansApplied = (userData.stats.loansApplied || 0) + 1;
         userData.stats.totalBorrowed = (userData.stats.totalBorrowed || 0) + amount;
@@ -204,13 +206,13 @@ module.exports = {
             .setDescription(`Your loan application has been approved and funds have been disbursed!${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
             .addFields(
                 { name: '🆔 Loan ID', value: loanId, inline: true },
-                { name: '💰 Loan Amount', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Loan Amount', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Interest Rate', value: `${(interestRate * 100).toFixed(2)}% APR`, inline: true },
                 { name: '📅 Term', value: `${termMonths} months`, inline: true },
-                { name: '💳 Monthly Payment', value: `${monthlyPayment.toFixed(2)} VEX`, inline: true },
-                { name: '💸 Total Repayment', value: `${totalRepayment.toFixed(2)} VEX`, inline: true },
+                { name: '💳 Monthly Payment', value: `${monthlyPayment.toFixed(2)} VEX (~$${(monthlyPayment * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💸 Total Repayment', value: `${totalRepayment.toFixed(2)} VEX (~$${(totalRepayment * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Credit Score', value: `${creditScore}/850`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📅 First Payment Due', value: '<t:' + Math.floor(new Date(newLoan.nextPaymentDue).getTime() / 1000) + ':R>', inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -234,7 +236,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Loan Progress: ${amount.toFixed(2)} VEX`,
+            `Loan Progress: ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             1.0,
             constants.COLORS.SUCCESS
         );
@@ -259,7 +261,7 @@ module.exports = {
             .setDescription('Your financial creditworthiness and borrowing capacity')
             .addFields(
                 { name: '📊 Credit Score', value: `**${creditScore}/850**\n${creditRating}`, inline: true },
-                { name: '💰 Max Loan Amount', value: `${maxLoanAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Max Loan Amount', value: `${maxLoanAmount.toFixed(2)} VEX (~$${(maxLoanAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Interest Rate', value: `${(this.getInterestRate(creditScore) * 100).toFixed(2)}% APR`, inline: true },
                 { name: '🏦 Credit Factors', value: this.getCreditFactors(userData), inline: false },
                 { name: '📋 Credit History', value: this.getCreditHistory(userData), inline: false },
@@ -310,7 +312,7 @@ module.exports = {
             .setDescription(`Personalized financial advice for ${interaction.user.displayName}`)
             .addFields(
                 { name: '📊 Financial Health Score', value: `**${analysis.healthScore}/100**\n${analysis.healthRating}`, inline: true },
-                { name: '💰 Net Worth', value: `${(userData.networth || 0).toFixed(2)} VEX`, inline: true },
+                { name: '💰 Net Worth', value: `${(userData.networth || 0).toFixed(2)} VEX (~$${((userData.networth || 0) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Monthly Growth', value: `${analysis.monthlyGrowth >= 0 ? '+' : ''}${analysis.monthlyGrowth.toFixed(1)}%`, inline: true },
                 { name: '🎯 Recommendations', value: analysis.recommendations, inline: false },
                 { name: '⚠️ Risk Assessment', value: analysis.riskAssessment, inline: false },
@@ -389,7 +391,7 @@ module.exports = {
     getMaxLoanAmount(creditScore, userData) {
         const baseAmount = 1000;
         const scoreMultiplier = creditScore / 300;
-        const balanceMultiplier = Math.min((userData.vexBalance || 0) / 1000, 5);
+        const balanceMultiplier = Math.min((userData.vexBalance || 0) / Economics.getPeggedVEXPrice(100), 5);
         
         return Math.round(baseAmount * scoreMultiplier * balanceMultiplier);
     },
@@ -418,7 +420,7 @@ module.exports = {
         if ((userData.stats.daysActive || 0) > 30) factors.push('✅ Established account');
         else factors.push('⚠️ New account');
         
-        if ((userData.vexBalance || 0) > 5000) factors.push('✅ Strong financial position');
+        if ((userData.vexBalance || 0) > Economics.getPeggedVEXPrice(500)) factors.push('✅ Strong financial position');
         else factors.push('⚠️ Building financial stability');
         
         return factors.join('\n');

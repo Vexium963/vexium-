@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -119,8 +120,8 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.STOCKS} 🔥 EXPLOSIVE STOCK MARKET!`)
             .setDescription(`💸 **MILLIONAIRE MAKERS TRADING NOW!** Build your investment empire!\n\n🔥 **URGENT:** ${fomoMessage}\n✨ **SOCIAL PROOF:** ${socialProofMessage}${variableReward ? `\n🎉 **BONUS:** ${variableReward}` : ''}\n\n🚀 **JOIN THE LEGENDS NOW!**`)
             .addFields(
-                { name: '📊 Market Status', value: '**Status**: 🔥 **BLAZING HOT**\n**Stocks Available**: 12 **GOLDMINES**\n**Market Cap**: $2.5M VEX **GROWING**', inline: true },
-                { name: '📈 Market Performance', value: '**Daily Change**: +2.3% **BULLISH**\n**Volume**: $125K VEX **MASSIVE**\n**Active Traders**: 1,247 **LEGENDS**', inline: true },
+                { name: '📊 Market Status', value: '**Status**: 🔥 **BLAZING HOT**\n**Stocks Available**: 12 **GOLDMINES**\n**Market Cap**: ' + Economics.getPeggedVEXPrice(2500000).toLocaleString() + ' VEX (~$2.5M) **GROWING**', inline: true },
+                { name: '📈 Market Performance', value: '**Daily Change**: +2.3% **BULLISH**\n**Volume**: ' + Economics.getPeggedVEXPrice(125000).toLocaleString() + ' VEX (~$125K) **MASSIVE**\n**Active Traders**: 1,247 **LEGENDS**', inline: true },
                 { name: '💡 INSIDER SECRETS', value: '• **DIVERSIFY** = Guaranteed wealth\n• **RESEARCH** = Beat 90% of traders\n• **LONG-TERM** = Millionaire mindset\n• **TRENDS** = Fortune follows patterns', inline: true }
             )
             .setColor(constants.COLORS.STOCKS)
@@ -201,7 +202,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} 💔 SO CLOSE TO WEALTH!`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SO CLOSE TO WEALTH!**\n\n**You need:** ${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** ${userData.vexBalance.toFixed(2)} VEX\n\n${constants.ANIMATED_EMOJIS.EXPLOSION} **FOMO ALERT:** ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!\n\n${constants.ANIMATED_EMOJIS.ROCKET} **DON'T MISS OUT ON MILLIONS!**`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SO CLOSE TO WEALTH!**\n\n**You need:** ${totalWithFees.toFixed(2)} VEX (~$${(totalWithFees * Economics.getCurrentVEXPrice()).toFixed(2)}) (including 1% fee)\n**You have:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n${constants.ANIMATED_EMOJIS.EXPLOSION} **FOMO ALERT:** ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!\n\n${constants.ANIMATED_EMOJIS.ROCKET} **DON'T MISS OUT ON MILLIONS!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -217,7 +218,9 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        Economics.updateVEXMarket('buy', totalWithFees, interaction.user.id);
         await user.burnVEX(transactionFee, 'stock_transaction_fee');
+        Economics.updateVEXMarket('burn', transactionFee);
         
         if (!userData.stocks) userData.stocks = {};
         if (!userData.stocks[symbol]) {
@@ -249,10 +252,10 @@ module.exports = {
             .addFields(
                 { name: '📊 Stock', value: `${stock.emoji} ${symbol} - ${stock.name}`, inline: true },
                 { name: '🔢 Shares', value: `${shares}`, inline: true },
-                { name: '💰 Price per Share', value: `$${stock.price.toFixed(2)}`, inline: true },
-                { name: '💸 Total Cost', value: `$${totalCost.toFixed(2)}`, inline: true },
-                { name: '💳 Transaction Fee', value: `$${transactionFee.toFixed(2)}`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
+                { name: '💰 Price per Share', value: `${Economics.getPeggedVEXPrice(stock.price).toFixed(2)} VEX (~$${stock.price.toFixed(2)})`, inline: true },
+                { name: '💸 Total Cost', value: `${Economics.getPeggedVEXPrice(totalCost).toFixed(2)} VEX (~$${totalCost.toFixed(2)})`, inline: true },
+                { name: '💳 Transaction Fee', value: `${Economics.getPeggedVEXPrice(transactionFee).toFixed(2)} VEX (~$${transactionFee.toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Portfolio Position', value: `**Total Shares**: ${userData.stocks[symbol].shares}\n**Avg Price**: $${userData.stocks[symbol].avgPrice.toFixed(2)}`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)

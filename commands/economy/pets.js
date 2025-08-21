@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -103,6 +104,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'pet_surprise_bonus');
+            Economics.updateVEXMarket('reward', surpriseBonus);
             userData.stats.lastPetActivity = Date.now();
         }
         
@@ -142,19 +144,20 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const adoptionCost = 500;
+        const adoptionCost = Economics.getPeggedVEXPrice(25);
         
         if (userData.vexBalance < adoptionCost) {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 Pet adoption costs ${adoptionCost.toFixed(2)} VEX.\n\n💰 **Your balance:** ${userData.vexBalance.toFixed(2)} VEX\n🔥 **Missing:** ${(adoptionCost - userData.vexBalance).toFixed(2)} VEX\n\n🚀 **Quick earn:** Use \`/work\` or \`/daily\` to get VEX fast!\n\n${socialProof}`)
+                .setDescription(`💸 Pet adoption costs ${adoptionCost.toFixed(2)} VEX (~$${(adoptionCost * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n💰 **Your balance:** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n🔥 **Missing:** ${(adoptionCost - userData.vexBalance).toFixed(2)} VEX (~$${((adoptionCost - userData.vexBalance) * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n🚀 **Quick earn:** Use \`/work\` or \`/daily\` to get VEX fast!\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const result = await user.removeVEX(adoptionCost, 'pet_adoption');
+        Economics.updateVEXMarket('purchase', adoptionCost);
         if (!result.success) {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
@@ -269,7 +272,7 @@ module.exports = {
                 .setDescription('You don\'t have any pets yet!\n\nUse `/pets adopt` to get your first companion.')
                 .addFields(
                     { name: '🐾 Available Pets', value: '🐕 Dog - Loyalty bonus\n🐱 Cat - Independence bonus\n🐦 Bird - Speed bonus\n🐠 Fish - Calm bonus\n🐰 Rabbit - Luck bonus', inline: false },
-                    { name: '💰 Adoption Cost', value: '$500 VEX per pet', inline: false }
+                    { name: '💰 Adoption Cost', value: `${Economics.getPeggedVEXPrice(25).toFixed(2)} VEX (~$25.00) per pet`, inline: false }
                 )
                 .setColor(constants.COLORS.INFO);
             

@@ -128,7 +128,7 @@ module.exports = {
         if (energyCost > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Energy`)
-                .setDescription(`⏳ You need ${energyCost.toFixed(2)} VEX for energy costs but only have ${userData.vexBalance.toFixed(2)} VEX. Earn more VEX with \`/daily\` or \`/work\` - then come back to start your mining empire!`)
+                .setDescription(`⏳ You need ${energyCost.toFixed(2)} VEX (~$${(energyCost * Economics.getCurrentVEXPrice()).toFixed(2)}) for energy costs but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}). Earn more VEX with \`/daily\` or \`/work\` - then come back to start your mining empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -143,6 +143,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('sell', energyCost, interaction.user.id);
         
         const burnAmount = energyCost * constants.TAX_SYSTEM.MINING.ENERGY_BURN_RATE;
         await user.burnVEX(burnAmount, 'mining_energy_burn');
@@ -179,11 +181,11 @@ module.exports = {
             .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} **Your ${rig.name} is now DOMINATING the blockchain!**\n\n${variableReward ? `${variableReward}\n` : ''}${constants.ANIMATED_EMOJIS.MONEY_RAIN} **PASSIVE INCOME ACTIVATED** - Earn while you sleep!\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '⚡ Hash Rate', value: `${rig.hashRate.toFixed(2)} TH/s`, inline: true },
-                { name: '🔋 Energy Cost', value: `${energyCost.toFixed(2)} VEX`, inline: true },
+                { name: '🔋 Energy Cost', value: `${energyCost.toFixed(2)} VEX (~$${(energyCost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📈 Efficiency', value: `${(rig.efficiency * 100).toFixed(1)}%`, inline: true },
-                { name: '💰 Expected Hourly', value: `${this.calculateHourlyRate(rig).toFixed(4)} VEX`, inline: true },
+                { name: '💰 Expected Hourly', value: `${this.calculateHourlyRate(rig).toFixed(4)} VEX (~$${(this.calculateHourlyRate(rig) * Economics.getCurrentVEXPrice()).toFixed(4)})`, inline: true },
                 { name: '⏰ Started', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true },
-                { name: '🔥 Energy Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true }
+                { name: '🔥 Energy Burned', value: `${burnAmount.toFixed(2)} VEX (~$${(burnAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -222,12 +224,12 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.MINING} Mining Status`)
             .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Your **${rig.name}** has been DOMINATING the blockchain f...`)
             .addFields(
-                { name: '💎 VEX Mined', value: `${minedAmount.toFixed(6)} VEX`, inline: true },
+                { name: '💎 VEX Mined', value: `${minedAmount.toFixed(6)} VEX (~$${(minedAmount * Economics.getCurrentVEXPrice()).toFixed(4)})`, inline: true },
                 { name: '⚡ Hash Rate', value: `${mining.hashRate.toFixed(2)} TH/s`, inline: true },
                 { name: '📈 Efficiency', value: `${(mining.efficiency * 100).toFixed(1)}%`, inline: true },
                 { name: '🌐 Network Difficulty', value: difficulty.toLocaleString(), inline: true },
                 { name: '🔗 Network Hash Rate', value: `${networkHashRate.toFixed(2)} PH/s`, inline: true },
-                { name: '💰 Hourly Rate', value: `${this.calculateHourlyRate(rig).toFixed(4)} VEX/h`, inline: true }
+                { name: '💰 Hourly Rate', value: `${this.calculateHourlyRate(rig).toFixed(4)} VEX/h (~$${(this.calculateHourlyRate(rig) * Economics.getCurrentVEXPrice()).toFixed(4)}/h)`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
@@ -251,7 +253,7 @@ module.exports = {
             const canvasRenderer = new CanvasRenderer();
             const claimProgress = Math.min(minedAmount / constants.MINING.MIN_CLAIM_AMOUNT, 1);
             const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-                `Ready to Claim: ${minedAmount.toFixed(6)} VEX`,
+                `Ready to Claim: ${minedAmount.toFixed(6)} VEX (~$${(minedAmount * Economics.getCurrentVEXPrice()).toFixed(4)})`,
                 claimProgress,
                 constants.COLORS.SUCCESS
             );
@@ -274,7 +276,7 @@ module.exports = {
             const canvasRenderer = new CanvasRenderer();
             const miningProgress = Math.min(minedAmount / constants.MINING.MIN_CLAIM_AMOUNT, 1);
             const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-                `Mining Progress: ${minedAmount.toFixed(6)} VEX`,
+                `Mining Progress: ${minedAmount.toFixed(6)} VEX (~$${(minedAmount * Economics.getCurrentVEXPrice()).toFixed(4)})`,
                 miningProgress,
                 constants.COLORS.PRIMARY
             );
@@ -322,6 +324,9 @@ module.exports = {
         
         await user.addVEX(netAmount, 'mining_reward');
         await user.burnVEX(taxAmount, 'mining_tax');
+        
+        Economics.updateVEXMarket('reward', netAmount);
+        Economics.updateVEXMarket('burn', taxAmount);
         
         userData.mining.isActive = false;
         userData.mining.lastClaim = Date.now();

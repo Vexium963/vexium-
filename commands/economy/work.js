@@ -81,6 +81,7 @@ module.exports = {
         const vexEarned = Math.round(workPay * constants.VEX_TOKEN.WORK_MULTIPLIER * 100) / 100;
         
         await user.addVEX(vexEarned, `work_${userData.job}`);
+        Economics.updateVEXMarket('work', vexEarned);
         
         const xpGained = jobData.xpReward + Math.floor(Math.random() * 10);
         const jobXpGained = Math.floor(xpGained * 0.5);
@@ -124,11 +125,11 @@ module.exports = {
         const activeWorkers = Math.floor(Math.random() * 25) + 10;
         
         let title = `${constants.EMOJIS.WORK} Work Complete!`;
-        let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **${vexEarned.toFixed(2)} VEX** earned!`;
+        let description = `💪 You crushed it as a **${jobData.name}**!\n💰 **${vexEarned.toFixed(2)} VEX (~$${(vexEarned * Economics.getCurrentVEXPrice()).toFixed(2)})** earned!`;
         
         if (isWorkExpert) {
             title = `👑 WORK MASTER IN ACTION!`;
-            description = `🏆 **${totalWorkSessions} work sessions completed!** You're a productivity legend!\n💰 **${vexEarned.toFixed(2)} VEX** earned with expert efficiency!`;
+            description = `🏆 **${totalWorkSessions} work sessions completed!** You're a productivity legend!\n💰 **${vexEarned.toFixed(2)} VEX (~$${(vexEarned * Economics.getCurrentVEXPrice()).toFixed(2)})** earned with expert efficiency!`;
         } else if (isWorkNovice) {
             title = `🌟 BUILDING YOUR WORK EMPIRE!`;
             description += `\n🚀 **Building your reputation!** (${totalWorkSessions}/100 sessions)`;
@@ -138,11 +139,13 @@ module.exports = {
             title = `🎉 EXCEPTIONAL PERFORMANCE!`;
             description += `\n✨ **PERFORMANCE BONUS: +${bonusAmount} VEX!**`;
             await user.addVEX(bonusAmount, 'performance_bonus');
+            Economics.updateVEXMarket('work', bonusAmount);
         }
         
         if (urgencyBonus > 0) {
             description += `\n⚡ **PRODUCTIVITY SURGE: +${urgencyBonus} VEX!** You're on fire!`;
             await user.addVEX(urgencyBonus, 'productivity_surge');
+            Economics.updateVEXMarket('work', urgencyBonus);
         }
         
         if (workStreak >= 10) {
@@ -183,8 +186,8 @@ module.exports = {
             .setDescription(description + `\n\n✨ ${randomMotivation}\n📈 **${Math.floor(Math.random() * 50) + 20} players** are working right now!`)
             .addFields(
                 { name: '💼 Career', value: `${jobData.name} (Level ${userData.jobLevel})`, inline: true },
-                { name: '💰 Total Earned', value: `${(vexEarned + bonusAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Total Earned', value: `${(vexEarned + bonusAmount).toFixed(2)} VEX (~$${((vexEarned + bonusAmount) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Job Progress', value: `${Math.floor(jobProgress * 100)}% to next level`, inline: false },
                 { name: '🔥 Work Streak', value: `${workStreak} days ${workStreak >= 10 ? '👑' : ''}`, inline: true },
                 { name: '⏰ Next Work', value: `<t:${Math.floor((now + workCooldown) / 1000)}:R>`, inline: true }
@@ -212,7 +215,7 @@ module.exports = {
                 .setTitle(`⬆️ Level Up!`)
                 .setDescription(`⬆️ You've reached **Level ${xpResult.newLevel}**!\n\n🎉 **New opportunities unlocked!** Check out...`)
                 .addFields(
-                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Level Reward', value: `${xpResult.levelReward.toFixed(2)} VEX (~$${(xpResult.levelReward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                 )
                 .setColor(constants.COLORS.GOLD);
             
@@ -222,12 +225,13 @@ module.exports = {
         if (jobLevelUp) {
             const jobBonus = userData.jobLevel * 1.00;
             await user.addVEX(jobBonus, 'job_level_bonus');
+            Economics.updateVEXMarket('work', jobBonus);
             
             const jobLevelEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Job Level Up!`)
                 .setDescription(`🏆 Your **${jobData.name}** skills improved to Level ${userData.jobLevel}!\n\n💸 **Higher earning...`)
                 .addFields(
-                    { name: '🎁 Bonus', value: `${jobBonus.toFixed(2)} VEX`, inline: true }
+                    { name: '🎁 Bonus', value: `${jobBonus.toFixed(2)} VEX (~$${(jobBonus * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
                 )
                 .setColor(constants.COLORS.INFO);
             
@@ -251,7 +255,7 @@ module.exports = {
         
         const jobOptions = availableJobs.slice(0, 25).map(job => ({
             label: job.name,
-            description: `${job.minPay.toFixed(2)}-${job.maxPay.toFixed(2)} VEX | Level ${job.requiredLevel}+`,
+            description: `${Economics.getPeggedVEXPrice(job.minPayUSD || 2).toFixed(2)}-${Economics.getPeggedVEXPrice(job.maxPayUSD || 8).toFixed(2)} VEX | Level ${job.requiredLevel}+`,
             value: job.id
         }));
         

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -71,13 +72,14 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)}.\n\n✨ **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n🔄 ${comebackMessage}\n📈 ${socialProofMessage}`)
+                .setDescription(`💸 You need ${playAmount.toFixed(2)} VEX (~$${(playAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n✨ **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n🔄 ${comebackMessage}\n📈 ${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
         const result = await user.removeVEX(playAmount, 'blackjack_play', false);
+        Economics.updateVEXMarket('sell', playAmount);
         if (!result.success) {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 25);
@@ -131,7 +133,7 @@ module.exports = {
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${this.calculateHandValue(game.playerHand)}`, inline: true },
                 { name: '🏠 Dealer Hand', value: this.formatDealerHand(game.dealerHand), inline: true },
-                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Play Amount', value: `${playAmount.toFixed(2)} VEX (~$${(playAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Choose your action!' });
@@ -356,6 +358,7 @@ module.exports = {
         
         if (winnings > 0) {
             await user.addVEX(winnings, 'blackjack_win');
+            Economics.updateVEXMarket('reward', winnings);
         }
         
         const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
@@ -377,8 +380,8 @@ module.exports = {
             .addFields(
                 { name: '🃏 Your Hand', value: `${this.formatHand(game.playerHand)} (${playerValue})`, inline: true },
                 { name: '🏠 Dealer Hand', value: `${this.formatHand(game.dealerHand)} (${dealerValue})`, inline: true },
-                { name: '💰 Winnings', value: `${(winnings - game.playAmount).toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Winnings', value: `${(winnings - game.playAmount).toFixed(2)} VEX (~$${((winnings - game.playAmount) * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(color)
             .setTimestamp();

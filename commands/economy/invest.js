@@ -102,10 +102,11 @@ module.exports = {
         if (isInvestmentNovice && Math.random() < 0.3) {
             const bonusAmount = Math.floor(Math.random() * 50) + 25;
             await user.addVEX(bonusAmount, 'investment_newbie_bonus');
+            Economics.updateVEXMarket('reward', bonusAmount);
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`🎉 INVESTMENT NEWBIE BONUS!`)
-                .setDescription(`🎉 **Welcome to wealth building!** Here's ${bonusAmount} VEX to boost your first investments!\n\n🚀 **Smart move!** New investors who start early see 300% better returns!\n\n💡 **Pro tip:** Diversify across crypto, stocks, and real estate for maximum gains!`)
+                .setDescription(`🎉 **Welcome to wealth building!** Here's ${bonusAmount} VEX (~$${(bonusAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) to boost your first investments!\n\n🚀 **Smart move!** New investors who start early see 300% better returns!\n\n💡 **Pro tip:** Diversify across crypto, stocks, and real estate for maximum gains!`)
                 .setColor(constants.COLORS.SUCCESS)
                 .setTimestamp();
             
@@ -138,7 +139,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💥 **Investment opportunity slipping away!** You need ${amount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n${fomoMessage}\n\n🚀 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **Hurry:** Market conditions change every hour!`)
+                .setDescription(`💥 **Investment opportunity slipping away!** You need ${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n${fomoMessage}\n\n🚀 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **Hurry:** Market conditions change every hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,7 +160,7 @@ module.exports = {
         if (amount < assetData.minInvestment) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is ${assetData.minInvestment.toFixed(2)} VEX.`)
+                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is ${Economics.getPeggedVEXPrice(assetData.minInvestmentUSD || 10).toFixed(2)} VEX (~$${(assetData.minInvestmentUSD || 10).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -174,6 +175,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('invest', amount);
         
         if (!userData.investments[type]) {
             userData.investments[type] = {};
@@ -214,12 +217,12 @@ module.exports = {
             .setTitle(`📈 Investment Purchased!`)
             .setDescription(`🎉 **Investment secured!** Successfully invested in **${assetData.name}**${variableReward ? `\n\n✨ ${variableReward}` : ''}${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}\n\n🔥 ${socialProof}\n\n🚀 **Your wealth empire grows stronger!**`)
             .addFields(
-                { name: '💰 Amount Invested', value: `${amount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Amount Invested', value: `${amount.toFixed(2)} VEX (~$${(amount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📊 Asset', value: `${assetData.name} (${assetData.symbol})`, inline: true },
                 { name: '📈 Expected Return', value: `${(assetData.baseReturn * 100).toFixed(1)}% annually`, inline: true },
                 { name: '⚠️ Volatility', value: `${(assetData.volatility * 100).toFixed(1)}%`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Total Invested', value: `${userData.stats.totalInvested.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📊 Total Invested', value: `${userData.stats.totalInvested.toFixed(2)} VEX (~$${(userData.stats.totalInvested * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
@@ -279,7 +282,9 @@ module.exports = {
         const netAmount = sellAmount - taxAmount;
         
         await user.addVEX(netAmount, 'investment_sale');
+        Economics.updateVEXMarket('sell', netAmount);
         await user.burnVEX(taxAmount, 'investment_tax');
+        Economics.updateVEXMarket('burn', taxAmount);
         
         investment.totalInvested *= (1 - sellPortion);
         investment.currentValue *= (1 - sellPortion);

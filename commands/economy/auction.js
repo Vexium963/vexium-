@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -147,7 +148,7 @@ module.exports = {
             
             embed.addFields({
                 name: `${auction.item.name} (ID: ${auction.id})`,
-                value: `**Current Bid**: ${auction.currentBid.toFixed(2)} VEX\n` +
+                value: `**Current Bid**: ${auction.currentBid.toFixed(2)} VEX (~$${(auction.currentBid * Economics.getCurrentVEXPrice()).toFixed(2)})\n` +
                        `**Bidder**: ${auction.highestBidder || 'None'}\n` +
                        `**Time Left**: ${timeLeftStr}\n` +
                        `**Seller**: ${auction.seller}`,
@@ -208,7 +209,7 @@ module.exports = {
         if (listingFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need ${listingFee.toFixed(2)} VEX for the listing fee but only have ${userData.vexBalance.toFixed(2)} VEX.\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`You need ${listingFee.toFixed(2)} VEX (~$${(listingFee * Economics.getCurrentVEXPrice()).toFixed(2)}) for the listing fee but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -223,6 +224,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('sell', listingFee, interaction.user.id);
         
         await user.burnVEX(listingFee, 'auction_fee');
         await user.removeItem(itemId, 1);
@@ -263,9 +266,9 @@ module.exports = {
             .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your auction for **${item.name}** is now live!`)
             .addFields(
                 { name: '🆔 Auction ID', value: auctionId, inline: true },
-                { name: '💰 Starting Bid', value: `${startingBid.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Starting Bid', value: `${startingBid.toFixed(2)} VEX (~$${(startingBid * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⏰ Duration', value: `${duration} hours`, inline: true },
-                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX`, inline: true },
+                { name: '💸 Listing Fee', value: `${listingFee.toFixed(2)} VEX (~$${(listingFee * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '📅 End Time', value: `<t:${Math.floor(endTime / 1000)}:F>`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
@@ -318,7 +321,7 @@ module.exports = {
         if (bidAmount < minBid) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bid Too Low`)
-                .setDescription(`Minimum bid is ${minBid.toFixed(2)} VEX.`)
+                .setDescription(`Minimum bid is ${minBid.toFixed(2)} VEX (~$${(minBid * Economics.getCurrentVEXPrice()).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -327,7 +330,7 @@ module.exports = {
         if (bidAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need ${bidAmount.toFixed(2)} VEX but only have ${userData.vexBalance.toFixed(2)} VEX.`)
+                .setDescription(`You need ${bidAmount.toFixed(2)} VEX (~$${(bidAmount * Economics.getCurrentVEXPrice()).toFixed(2)}) but only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -336,6 +339,7 @@ module.exports = {
         if (auction.highestBidderId) {
             const previousBidder = new User(auction.highestBidderId);
             await previousBidder.addVEX(auction.currentBid, 'auction_refund');
+            Economics.updateVEXMarket('buy', auction.currentBid);
         }
         
         const result = await user.removeVEX(bidAmount, 'auction_bid', false);
@@ -347,6 +351,8 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('buy', bidAmount, interaction.user.id);
         
         auction.currentBid = bidAmount;
         auction.highestBidder = interaction.user.username;
@@ -372,10 +378,10 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.SUCCESS} Bid Placed!`)
             .setDescription(`You're now the highest bidder on **${auction.item.name}**!`)
             .addFields(
-                { name: '💰 Your Bid', value: `${bidAmount.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Your Bid', value: `${bidAmount.toFixed(2)} VEX (~$${(bidAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Status', value: 'Highest Bidder', inline: true },
                 { name: '⏰ Time Left', value: timeLeftStr, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'You\'ll be refunded if someone outbids you.' })

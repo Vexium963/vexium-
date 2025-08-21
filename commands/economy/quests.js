@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -68,6 +69,7 @@ module.exports = {
         
         if (urgencyBonus > 0) {
             await user.addVEX(urgencyBonus, 'quest_urgency_bonus');
+            Economics.updateVEXMarket('reward', urgencyBonus);
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ SURPRISE QUEST BONUS!`)
@@ -117,7 +119,7 @@ module.exports = {
         
         if (hasUrgentQuests) {
             title = `🔥 URGENT! Rewards Ready!`;
-            description = `⚡ **CLAIM YOUR REWARDS NOW!** Don't let them expire!\n\n💰 **${totalRewards.toFixed(2)} VEX** waiting for you!`;
+            description = `⚡ **CLAIM YOUR REWARDS NOW!** Don't let them expire!\n\n💰 **${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)})** waiting for you!`;
         }
         
         if (questStreak >= 7) {
@@ -156,7 +158,7 @@ module.exports = {
         } else {
             for (const quest of activeQuests) {
                 const status = quest.completed ? (quest.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${quest.progress}/${quest.target}`;
-                const reward = `${quest.reward.toFixed(2)} VEX + ${quest.xp} XP`;
+                const reward = `${quest.reward.toFixed(2)} VEX (~$${(quest.reward * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${quest.xp} XP`;
                 
                 embed.addFields({
                     name: `${quest.emoji} ${quest.name}`,
@@ -169,7 +171,7 @@ module.exports = {
         if (totalRewards > 0) {
             embed.addFields({
                 name: '💰 Unclaimed Rewards',
-                value: `${totalRewards.toFixed(2)} VEX + bonus XP available!`,
+                value: `${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)}) + bonus XP available!`,
                 inline: false
             });
         }
@@ -248,6 +250,7 @@ module.exports = {
         }
         
         await user.addVEX(quest.reward, 'quest_reward');
+        Economics.updateVEXMarket('reward', quest.reward);
         userData.xp += quest.xp;
         
         quest.claimed = true;
@@ -271,6 +274,7 @@ module.exports = {
         
         if (variableBonus > 0) {
             await user.addVEX(variableBonus, 'quest_completion_bonus');
+            Economics.updateVEXMarket('reward', variableBonus);
         }
         
         let celebrationDescription = `**${quest.name}** has been completed successfully!\n\n${milestoneMessage}`;
@@ -289,10 +293,10 @@ module.exports = {
             .setDescription(celebrationDescription)
             .addFields(
                 { name: '🎯 Quest', value: quest.name, inline: true },
-                { name: '💰 VEX Reward', value: `$${quest.reward.toFixed(2)}`, inline: true },
+                { name: '💰 VEX Reward', value: `${quest.reward.toFixed(2)} VEX (~$${(quest.reward * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '⭐ XP Reward', value: `${quest.xp} XP`, inline: true },
                 { name: '📊 Progress', value: `${quest.progress}/${quest.target} (100%)`, inline: true },
-                { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🏆 Total Completed', value: `${userData.stats.questsCompleted}`, inline: true },
                 { name: '📝 Description', value: quest.description, inline: false }
             )
@@ -341,7 +345,7 @@ module.exports = {
             .setTitle(`${constants.EMOJIS.HISTORY} ${interaction.user.displayName}'s Quest History`)
             .setDescription('Your quest completion achievements and rewards')
             .addFields(
-                { name: '📊 Quest Statistics', value: `**Completed**: ${questsCompleted}\n**Total Rewards**: ${totalRewards.toFixed(2)} VEX\n**Average Reward**: ${questsCompleted > 0 ? (totalRewards / questsCompleted).toFixed(2) : '0.00'} VEX`, inline: true },
+                { name: '📊 Quest Statistics', value: `**Completed**: ${questsCompleted}\n**Total Rewards**: ${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)})\n**Average Reward**: ${questsCompleted > 0 ? (totalRewards / questsCompleted).toFixed(2) : '0.00'} VEX (~$${questsCompleted > 0 ? ((totalRewards / questsCompleted) * Economics.getCurrentVEXPrice()).toFixed(2) : '0.00'})`, inline: true },
                 { name: '🏆 Quest Mastery', value: `**Completion Rate**: ${this.getCompletionRate(userData)}%\n**Quest Rank**: ${this.getQuestRank(questsCompleted)}\n**Streak**: ${userData.stats.questStreak || 0}`, inline: true },
                 { name: '🎯 Categories', value: this.getQuestCategories(completedQuests), inline: true }
             )
@@ -364,7 +368,7 @@ module.exports = {
             for (const quest of recentQuests) {
                 embed.addFields({
                     name: `${quest.emoji} ${quest.name}`,
-                    value: `**Reward**: ${quest.reward.toFixed(2)} VEX + ${quest.xp} XP\n**Completed**: <t:${Math.floor(new Date(quest.completedAt).getTime() / 1000)}:R>`,
+                    value: `**Reward**: ${quest.reward.toFixed(2)} VEX (~$${(quest.reward * Economics.getCurrentVEXPrice()).toFixed(2)}) + ${quest.xp} XP\n**Completed**: <t:${Math.floor(new Date(quest.completedAt).getTime() / 1000)}:R>`,
                     inline: true
                 });
             }

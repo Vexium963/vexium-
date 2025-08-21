@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -405,10 +406,10 @@ module.exports = {
             const event = this.getEvent(eventId);
             if (!event || !eventData.completed || eventData.rewardsClaimed) continue;
             
-            const reward = event.rewardAmount || 50;
+            const reward = event.rewardAmount || Economics.getPeggedVEXPrice(5);
             totalRewards += reward;
             claimedEvents++;
-            rewardDetails.push(`${event.icon} **${event.name}**: ${reward.toFixed(2)} VEX`);
+            rewardDetails.push(`${event.icon} **${event.name}**: ${reward.toFixed(2)} VEX (~$${(reward * Economics.getCurrentVEXPrice()).toFixed(2)})`);
             
             eventData.rewardsClaimed = true;
         }
@@ -423,6 +424,7 @@ module.exports = {
         }
         
         await user.addVEX(totalRewards, 'event_rewards');
+        Economics.updateVEXMarket('reward', totalRewards);
         
         userData.stats.eventRewardsClaimed = (userData.stats.eventRewardsClaimed || 0) + totalRewards;
         userData.stats.commandsUsed++;
@@ -437,8 +439,8 @@ module.exports = {
             .setDescription(`Successfully claimed rewards from ${claimedEvents} completed event${claimedEvents > 1 ? 's' : ''}!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '🎁 Rewards Claimed', value: rewardDetails.join('\n'), inline: false },
-                { name: '💰 Total Earned', value: `${totalRewards.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Total Earned', value: `${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Keep participating in events for more rewards!' })
@@ -447,7 +449,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Rewards Claimed: ${totalRewards.toFixed(2)} VEX`,
+            `Rewards Claimed: ${totalRewards.toFixed(2)} VEX (~$${(totalRewards * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             1.0,
             constants.COLORS.SUCCESS
         );
@@ -511,7 +513,7 @@ module.exports = {
     formatRequirements(requirements) {
         const reqs = [];
         if (requirements.minLevel) reqs.push(`Level ${requirements.minLevel}+`);
-        if (requirements.minBalance) reqs.push(`${requirements.minBalance.toFixed(2)} VEX balance`);
+        if (requirements.minBalance) reqs.push(`${requirements.minBalance.toFixed(2)} VEX (~$${(requirements.minBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) balance`);
         return reqs.join('\n') || 'None';
     },
     

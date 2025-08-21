@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -123,7 +124,7 @@ module.exports = {
             const variableReward = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2));
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`🔥 You only have ${userData.vexBalance.toFixed(2)} VEX.\n\n🚀 **Earn more VEX:** Use /work, /dai...`)
+                .setDescription(`🔥 You only have ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n🚀 **Earn more VEX:** Use /work, /dai...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -143,7 +144,7 @@ module.exports = {
         if (tradeValue > constants.LIMITS.MAX_TRADE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Trade Value Too High`)
-                .setDescription(`🔥 Maximum trade value is ${constants.LIMITS.MAX_TRADE.toFixed(2)} VEX.\n\n✨ **Pro Tip:** Break ...`)
+                .setDescription(`🔥 Maximum trade value is ${constants.LIMITS.MAX_TRADE.toFixed(2)} VEX (~$${(constants.LIMITS.MAX_TRADE * Economics.getCurrentVEXPrice()).toFixed(2)}).\n\n✨ **Pro Tip:** Break ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -169,7 +170,7 @@ module.exports = {
         
         let offerText = '';
         if (vexAmount > 0) {
-            offerText += `💰 ${vexAmount.toFixed(2)} VEX`;
+            offerText += `💰 ${vexAmount.toFixed(2)} VEX (~$${(vexAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`;
         }
         if (itemId) {
             if (offerText) offerText += '\n';
@@ -188,7 +189,7 @@ module.exports = {
         
         if (isHighValueTrade) {
             title = `💎 HIGH-VALUE TRADE INITIATED!`;
-            description = `🔥 **MAJOR DEAL!** Trade offer sent to ${targetUser.username}!\n💰 **Value: ${totalTradeValue.toFixed(2)} VEX** - This is a big one!`;
+            description = `🔥 **MAJOR DEAL!** Trade offer sent to ${targetUser.username}!\n💰 **Value: ${totalTradeValue.toFixed(2)} VEX (~$${(totalTradeValue * Economics.getCurrentVEXPrice()).toFixed(2)})** - This is a big one!`;
         }
         
         if (isTradeExpert) {
@@ -199,7 +200,7 @@ module.exports = {
         }
         
         if (urgencyBonus > 0) {
-            description += `\n✨ **TRADE BONUS ACTIVE: +${urgencyBonus} VEX** if accepted within 2 minutes!`;
+            description += `\n✨ **TRADE BONUS ACTIVE: +${urgencyBonus} VEX (~$${(urgencyBonus * Economics.getCurrentVEXPrice()).toFixed(2)})** if accepted within 2 minutes!`;
         }
         
         const socialProof = Math.random() < 0.3;
@@ -216,7 +217,7 @@ module.exports = {
                 { name: '⏰ Expires Soon', value: '<t:' + Math.floor((Date.now() + 300000) / 1000) + ':R>', inline: true },
                 { name: '🆔 Trade ID', value: `\`${tradeId}\``, inline: true },
                 { name: '📊 Trade Stats', value: `🤝 **${totalTrades}** completed\n🏅 **${isTradeExpert ? 'Expert' : isTradeNovice ? 'Novice' : 'Experienced'}** trader`, inline: true },
-                { name: '💎 Trade Value', value: `${totalTradeValue.toFixed(2)} VEX`, inline: true },
+                { name: '💎 Trade Value', value: `${totalTradeValue.toFixed(2)} VEX (~$${(totalTradeValue * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
                 { name: '🎯 Success Tip', value: 'Fair trades build reputation!', inline: true }
             )
             .setColor(isHighValueTrade ? constants.COLORS.VEX : isTradeExpert ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
@@ -239,7 +240,7 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Trade Value: ${totalTradeValue.toFixed(2)} VEX`,
+            `Trade Value: ${totalTradeValue.toFixed(2)} VEX (~$${(totalTradeValue * Economics.getCurrentVEXPrice()).toFixed(2)})`,
             Math.min(totalTradeValue / 1000, 1),
             constants.COLORS.VEX
         );

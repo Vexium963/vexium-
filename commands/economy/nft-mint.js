@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -117,10 +118,10 @@ module.exports = {
         const rarity = interaction.options.getString('rarity');
         
         const costs = {
-            common: 50,
-            rare: 150,
-            epic: 500,
-            legendary: 1500
+            common: Economics.getPeggedVEXPrice(5),
+            rare: Economics.getPeggedVEXPrice(15),
+            epic: Economics.getPeggedVEXPrice(50),
+            legendary: Economics.getPeggedVEXPrice(150)
         };
         
         const cost = costs[rarity];
@@ -131,7 +132,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need ${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: ${userData.vexBalance.toFixed(2)} VEX\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
+                .setDescription(`⏳ You need ${cost.toFixed(2)} VEX (~$${(cost * Economics.getCurrentVEXPrice()).toFixed(2)}) to mint a ${rarity} NFT.\n💰 Your balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n\n💡 **Tip:** Earn more VEX with /daily or /work!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -148,6 +149,10 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
+        
+        Economics.updateVEXMarket('buy', cost, interaction.user.id);
+        
+        Economics.updateVEXMarket('buy', cost);
         
         const nftId = this.generateNFTId();
         const nft = {
@@ -169,6 +174,7 @@ module.exports = {
         
         const burnAmount = cost * constants.TAX_SYSTEM.NFT.MINT_BURN_RATE;
         await user.burnVEX(burnAmount, 'nft_mint_burn');
+        Economics.updateVEXMarket('burn', burnAmount);
         
         await user.save(userData);
         
@@ -192,9 +198,9 @@ module.exports = {
                 { name: '🆔 Token ID', value: `#${nftId}`, inline: true },
                 { name: '📝 Description', value: description, inline: false },
                 { name: '🎨 Traits', value: this.formatTraits(nft.traits), inline: false },
-                { name: '💰 Mint Cost', value: `${cost.toFixed(2)} VEX`, inline: true },
-                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💰 Mint Cost', value: `${cost.toFixed(2)} VEX (~$${(cost * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📈 Est. Value', value: `${nft.marketValue.toFixed(2)} VEX (~$${(nft.marketValue * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
             )
             .setColor(this.getRarityColor(rarity))
             .setFooter({ text: `NFT #${nftId} • VexiumVerse Collection` })
@@ -242,7 +248,7 @@ module.exports = {
                 .setDescription(`You don't own any NFTs yet!\n\nUse \`/nft-mint create\` to mint your first NFT.\n\n${fomoMessage}\n${socialProof}`)
                 .addFields(
                     { name: '🎨 Getting Started', value: 'Mint NFTs with unique traits and rarity levels', inline: false },
-                    { name: '💰 Rarity Costs', value: 'Common: 50 VEX\nRare: 150 VEX\nEpic: 500 VEX\nLegendary: 1500 VEX', inline: false }
+                    { name: '💰 Rarity Costs', value: `Common: ${Economics.getPeggedVEXPrice(5).toFixed(0)} VEX (~$5)\nRare: ${Economics.getPeggedVEXPrice(15).toFixed(0)} VEX (~$15)\nEpic: ${Economics.getPeggedVEXPrice(50).toFixed(0)} VEX (~$50)\nLegendary: ${Economics.getPeggedVEXPrice(150).toFixed(0)} VEX (~$150)`, inline: false }
                 )
                 .setColor(constants.COLORS.INFO);
             
@@ -257,7 +263,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} ${interaction.user.displayName}'s NFT Collection`)
-            .setDescription(`**${userData.nfts.length}** NFTs owned • **$${totalValue.toFixed(2)}** VEX total value`)
+            .setDescription(`**${userData.nfts.length}** NFTs owned • **${totalValue.toFixed(2)} VEX** (~$${(totalValue * Economics.getCurrentVEXPrice()).toFixed(2)}) total value`)
             .addFields(
                 { name: '📊 Collection Stats', value: this.formatRarityStats(rarityCount), inline: true },
                 { name: '💎 Most Valuable', value: this.getMostValuable(userData.nfts), inline: true },
@@ -399,7 +405,7 @@ module.exports = {
     getMostValuable(nfts) {
         if (nfts.length === 0) return 'None';
         const most = nfts.reduce((max, nft) => nft.marketValue > max.marketValue ? nft : max);
-        return `**${most.name}**\n${most.marketValue.toFixed(2)} VEX`;
+        return `**${most.name}**\n${most.marketValue.toFixed(2)} VEX (~$${(most.marketValue * Economics.getCurrentVEXPrice()).toFixed(2)})`;
     },
     
     getRecentMints(nfts) {
