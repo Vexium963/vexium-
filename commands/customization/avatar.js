@@ -123,7 +123,11 @@ module.exports = {
             let status = '';
             if (equipped) status = '✅ Equipped';
             else if (owned) status = '✅ Owned';
-            else status = `💰 ${frame.price.toFixed(2)} VEX`;
+            else {
+                const Economics = require('../../utils/economics');
+                const vexPrice = Economics.getPeggedVEXPrice(frame.usdPrice || 25);
+                status = `💰 ${vexPrice} VEX (~$${(frame.usdPrice || 25).toFixed(2)})`;
+            }
             
             embed.addFields({
                 name: `${frame.emoji} ${frame.name}`,

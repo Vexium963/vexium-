@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
+const Economics = require('../../utils/economics');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -119,7 +120,7 @@ module.exports = {
             .setColor(isUrgent ? constants.COLORS.ERROR : constants.COLORS.GOLD)
             .addFields(
                 { name: '🎯 Current Jackpot', value: `${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
-                { name: '🎫 Ticket Price', value: `${constants.LOTTERY.TICKET_PRICE.toFixed(2)} VEX`, inline: true },
+                { name: '🎫 Ticket Price', value: `${Economics.getPeggedVEXPrice(5)} VEX (~$5.00)`, inline: true },
                 { name: '📊 Tickets Sold', value: `${lotteryData.ticketsSold}`, inline: true },
                 { name: '⏰ Draw Time', value: `<t:${lotteryData.drawTime}:F>`, inline: false },
                 { name: '🏆 Prize Distribution', value: this.getPrizeDistribution(lotteryData.jackpot), inline: false },
@@ -157,7 +158,8 @@ module.exports = {
         const userData = await user.load();
         
         const ticketCount = interaction.options.getInteger('tickets');
-        const totalCost = ticketCount * constants.LOTTERY.TICKET_PRICE;
+        const ticketPrice = Economics.getPeggedVEXPrice(5);
+        const totalCost = ticketCount * ticketPrice;
         
         if (totalCost > userData.vexBalance) {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
@@ -305,7 +307,8 @@ module.exports = {
         
         const baseJackpot = constants.LOTTERY.BASE_JACKPOT;
         const ticketsSold = Math.floor(Math.random() * 1000) + 500;
-        const jackpot = baseJackpot + (ticketsSold * constants.LOTTERY.TICKET_PRICE * 0.7);
+        const ticketPrice = Economics.getPeggedVEXPrice(5);
+        const jackpot = baseJackpot + (ticketsSold * ticketPrice * 0.7);
         
         return {
             jackpot,

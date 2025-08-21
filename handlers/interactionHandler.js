@@ -175,6 +175,10 @@ class InteractionHandler {
         this.handlers.set('profile_view', this.handleProfileView.bind(this));
         this.handlers.set('investment_portfolio', this.handleInvestmentPortfolio.bind(this));
 
+        this.handlers.set('market_refresh', this.handleMarketRefresh.bind(this));
+        this.handlers.set('market_chart', this.handleMarketChart.bind(this));
+        this.handlers.set('market_events', this.handleMarketEvents.bind(this));
+
         this.handlers.set('shop_browse', this.handleShopBrowse.bind(this));
 
         this.handlers.set('trade_help_offer', this.handleTradeHelpOffer.bind(this));
@@ -1322,6 +1326,36 @@ class InteractionHandler {
             await interaction.reply({ content: '📈 Investment portfolio coming soon!', ephemeral: true });
         } catch (error) {
             console.error('Error in handleInvestmentPortfolio:', error);
+        }
+    }
+
+    async handleMarketRefresh(interaction) {
+        try {
+            const marketCommand = require('../commands/admin/market');
+            await interaction.deferUpdate();
+            await marketCommand.handleStats(interaction);
+        } catch (error) {
+            console.error('Error in handleMarketRefresh:', error);
+        }
+    }
+
+    async handleMarketChart(interaction) {
+        try {
+            const marketCommand = require('../commands/admin/market');
+            await interaction.deferUpdate();
+            await marketCommand.handleChart(interaction);
+        } catch (error) {
+            console.error('Error in handleMarketChart:', error);
+        }
+    }
+
+    async handleMarketEvents(interaction) {
+        try {
+            const marketCommand = require('../commands/admin/market');
+            await interaction.deferUpdate();
+            await marketCommand.handleEvents(interaction);
+        } catch (error) {
+            console.error('Error in handleMarketEvents:', error);
         }
     }
 

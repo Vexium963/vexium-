@@ -114,7 +114,9 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const totalCost = item.price * quantity;
+        const Economics = require('../../utils/economics');
+        const itemVexPrice = Economics.getPeggedVEXPrice(item.usdPrice || 10);
+        const totalCost = itemVexPrice * quantity;
         
         if (totalCost > userData.vexBalance) {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
@@ -410,7 +412,12 @@ module.exports = {
             const timeLeft = this.getTimeUntilMidnight();
             embed.addFields({
                 name: '⏰ FLASH SALE - ENDS IN ' + timeLeft,
-                value: limitedOffers.map(item => `🔥 **${item.name}** - ~~${item.originalPrice} VEX~~ **${item.price.toFixed(2)} VEX** (${item.discount}% OFF!)`).join('\n'),
+                value: limitedOffers.map(item => {
+                    const Economics = require('../../utils/economics');
+                    const originalVexPrice = Economics.getPeggedVEXPrice(item.originalUsdPrice || 10);
+                    const saleVexPrice = Economics.getPeggedVEXPrice((item.originalUsdPrice || 10) * 0.8);
+                    return `🔥 **${item.name}** - ~~${originalVexPrice} VEX~~ **${saleVexPrice} VEX** (${item.discount}% OFF!)`;
+                }).join('\n'),
                 inline: false
             });
         }
@@ -418,7 +425,11 @@ module.exports = {
         if (featuredItems.length > 0) {
             embed.addFields({
                 name: '⭐ RECOMMENDED FOR YOU',
-                value: featuredItems.map(item => `${this.getCategoryEmoji(category)} **${item.name}** - ${item.price.toFixed(2)} VEX\n*${item.personalizedReason}*`).join('\n\n'),
+                value: featuredItems.map(item => {
+                    const Economics = require('../../utils/economics');
+                    const vexPrice = Economics.getPeggedVEXPrice(item.usdPrice || 10);
+                    return `${this.getCategoryEmoji(category)} **${item.name}** - ${vexPrice} VEX\n*${item.personalizedReason}*`;
+                }).join('\n\n'),
                 inline: false
             });
         }
@@ -426,11 +437,13 @@ module.exports = {
         let itemsText = '';
         pageItems.forEach(([itemId, item], index) => {
             const globalIndex = startIndex + index + 1;
-            const affordableEmoji = userData.vexBalance >= item.price ? '✅' : '❌';
+            const Economics = require('../../utils/economics');
+            const vexPrice = Economics.getPeggedVEXPrice(item.usdPrice || 10);
+            const affordableEmoji = userData.vexBalance >= vexPrice ? '✅' : '❌';
             const popularityEmoji = this.getPopularityIndicator(item);
             
             itemsText += `**${globalIndex}.** ${this.getCategoryEmoji(category)} **${item.name}** ${popularityEmoji}\n`;
-            itemsText += `💰 ${item.price.toFixed(2)} VEX ${affordableEmoji}\n`;
+            itemsText += `💰 ${vexPrice} VEX (~$${(item.usdPrice || 10).toFixed(2)}) ${affordableEmoji}\n`;
             itemsText += `📝 *${item.description}*\n`;
             
             if (item.effect === 'work_boost') {
@@ -475,11 +488,13 @@ module.exports = {
             const pageItems = itemEntries.slice(0, 5);
             
             pageItems.forEach(([itemId, item]) => {
-                const affordableEmoji = userData.vexBalance >= item.price ? '✅' : '❌';
+                const Economics = require('../../utils/economics');
+                const vexPrice = Economics.getPeggedVEXPrice(item.usdPrice || 10);
+                const affordableEmoji = userData.vexBalance >= vexPrice ? '✅' : '❌';
                 const urgencyText = this.isLimitedOffer(item) ? ' ⏰ LIMITED!' : '';
                 
                 selectMenu.addOptions({
-                    label: `${item.name} - ${item.price.toFixed(2)} VEX ${affordableEmoji}${urgencyText}`,
+                    label: `${item.name} - ${vexPrice} VEX ${affordableEmoji}${urgencyText}`,
                     description: `${item.description.substring(0, 80)}...`,
                     value: itemId,
                     emoji: this.getCategoryEmoji(category)
@@ -540,8 +555,7 @@ module.exports = {
         const shuffled = items.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, dealCount).map(item => ({
             ...item,
-            originalPrice: item.price,
-            price: item.price * 0.8,
+            originalUsdPrice: item.usdPrice || 10,
             discount: 20
         }));
     },
@@ -550,7 +564,7 @@ module.exports = {
         const recommendations = [];
         
         if (userData.level < 10) {
-            const beginnerItems = items.filter(item => item.price < 50);
+            const beginnerItems = items.filter(item => (item.usdPrice || 10) < 5);
             if (beginnerItems.length > 0) {
                 recommendations.push({
                     ...beginnerItems[0],

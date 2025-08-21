@@ -158,12 +158,12 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const creationCost = constants.GUILD.CREATION_COST;
+        const creationCost = Economics.getPeggedVEXPrice(50);
         if (creationCost > userData.vexBalance) {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`💸 Creating a guild costs ${creationCost.toFixed(2)} VEX but you only have ${userData.vexBalance.toFixed(2)} VEX!\n\n💡 **Tip:** Earn more VEX with /daily or /work to afford guild creation!`)
+                .setDescription(`💸 Creating a guild costs ${creationCost} VEX (~$50.00) but you only have ${userData.vexBalance} VEX!\n\n💡 **Tip:** Earn more VEX with /daily or /work to afford guild creation!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -231,9 +231,9 @@ module.exports = {
                 { name: '🆔 Guild ID', value: guildId, inline: true },
                 { name: '👑 Leader', value: interaction.user.username, inline: true },
                 { name: '👥 Members', value: '1', inline: true },
-                { name: '💰 Creation Cost', value: `${creationCost.toFixed(2)} VEX`, inline: true },
+                { name: '💰 Creation Cost', value: `${creationCost} VEX (~$50.00)`, inline: true },
                 { name: '🔥 Burned', value: `${burnAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: true }
+                { name: '💼 New Balance', value: `${userData.vexBalance} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')

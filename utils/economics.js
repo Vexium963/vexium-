@@ -1,4 +1,5 @@
 const constants = require('./constants');
+const simulatedVEX = require('./simulatedVEX');
 
 class Economics {
     static calculateWorkPay(job, level, items = {}) {
@@ -12,7 +13,11 @@ class Economics {
         if (items.laptop) multiplier += 0.15;
         if (items.car && job === 'delivery') multiplier += 0.25;
         
-        return Math.floor(basePay * multiplier);
+        const finalPay = Math.floor(basePay * multiplier);
+        
+        simulatedVEX.updateVEXPrice('work', finalPay);
+        
+        return finalPay;
     }
 
     static getJobData(jobId) {
@@ -42,7 +47,11 @@ class Economics {
         const streakBonus = Math.min(streak * 50, 1000);
         const randomBonus = Math.floor(Math.random() * 200);
         
-        return baseReward + streakBonus + randomBonus;
+        const totalReward = baseReward + streakBonus + randomBonus;
+        
+        simulatedVEX.updateVEXPrice('daily', totalReward);
+        
+        return totalReward;
     }
 
     static calculateBankInterest(amount, duration) {
@@ -176,6 +185,26 @@ class Economics {
         return amount.toLocaleString();
     }
 
+    static getPeggedVEXPrice(usdAmount) {
+        return simulatedVEX.getPeggedPrice(usdAmount);
+    }
+
+    static getCurrentVEXPrice() {
+        return simulatedVEX.getCurrentPrice();
+    }
+
+    static updateVEXMarket(activityType, amount, userId = null) {
+        return simulatedVEX.updateVEXPrice(activityType, amount, userId);
+    }
+
+    static getVEXMarketStats() {
+        return simulatedVEX.getMarketStats();
+    }
+
+    static formatVEXPrice(price) {
+        return simulatedVEX.formatPrice(price);
+    }
+
     static validatePlayAmount(amount, userBalance, gameType = 'general') {
         if (amount <= 0) {
             return { valid: false, reason: 'Play amount must be positive' };
@@ -194,13 +223,21 @@ class Economics {
 
     static calculateTradeTax(amount) {
         const taxRate = 0.05;
-        return Math.floor(amount * taxRate);
+        const tax = Math.floor(amount * taxRate);
+        
+        simulatedVEX.updateVEXPrice('trade', amount);
+        
+        return tax;
     }
 
     static calculateGiftTax(amount) {
         if (amount > 10000) {
             const taxRate = 0.02;
-            return Math.floor(amount * taxRate);
+            const tax = Math.floor(amount * taxRate);
+            
+            simulatedVEX.updateVEXPrice('sell', amount * 0.1);
+            
+            return tax;
         }
         return 0;
     }
