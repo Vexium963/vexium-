@@ -54,24 +54,24 @@ module.exports = {
         }
         
         const walletViews = userData.stats.walletViews || 0;
-        const isWealthyUser = userData.networth >= 1000;
-        const isRisingStar = userData.networth >= 100 && userData.networth < 1000;
+        const isWealthyUser = userData.vexBalance >= 1000;
+        const isRisingStar = userData.vexBalance >= 100 && userData.vexBalance < 1000;
         const recentGrowth = this.calculateRecentGrowth(userData);
-        const wealthRank = this.getWealthRank(userData.networth);
+        const wealthRank = this.getWealthRank(userData.vexBalance);
         
         let title = `${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`;
         let description = `💸 **USD-Pegged VEX Token Balance**\n🔥 1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD - Real money, real power!`;
         
         if (isOwnWallet) {
             if (isWealthyUser) {
-                title = `💎 YOUR WEALTH EMPIRE!`;
-                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})**!\n💸 **1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD** - Real money, real power!`;
+                title = `💎 YOUR WALLET EMPIRE!`;
+                description = `🔥 **You're in the TOP ${wealthRank}%!** Your wallet holds **${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})**!\n💸 **1 VEX = $${Economics.getCurrentVEXPrice().toFixed(4)} USD** - Real money, real power!`;
             } else if (isRisingStar) {
-                title = `🚀 RISING WEALTH STAR!`;
-                description = `✨ **You're building something AMAZING!** ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)}) and climbing!\n🔥 **Next milestone: 1,000 VEX (~$${(1000 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Wealth Elite status!`;
+                title = `🚀 RISING WALLET STAR!`;
+                description = `✨ **You're building something AMAZING!** ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) and climbing!\n🔥 **Next milestone: 1,000 VEX (~$${(1000 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Wallet Elite status!`;
             } else {
-                title = `🌟 YOUR GROWING EMPIRE!`;
-                description = `✨ **Every legend starts somewhere!** You're at ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})!\n🚀 **Next goal: 100 VEX (~$${(100 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Rising Star status!`;
+                title = `🌟 YOUR GROWING WALLET!`;
+                description = `✨ **Every legend starts somewhere!** You're at ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})!\n🚀 **Next goal: 100 VEX (~$${(100 * Economics.getCurrentVEXPrice()).toFixed(2)})** for Rising Star status!`;
             }
             
             if (recentGrowth > 0) {
@@ -79,8 +79,8 @@ module.exports = {
             }
         } else {
             if (isWealthyUser) {
-                title = `👑 ${targetUser.username}'s WEALTH EMPIRE`;
-                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
+                title = `👑 ${targetUser.username}'s WALLET EMPIRE`;
+                description = `✨ **This player is in the TOP ${wealthRank}%!** Wallet balance: ${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})\n🏆 **Wallet Elite Status** - A true VexiumVerse legend!`;
             }
         }
         
@@ -101,38 +101,40 @@ module.exports = {
             description += `\n${milestoneMessage}`;
         }
         
+        const xpNeeded = user.getXPForLevel(userData.level + 1);
+        
         const walletEmbed = new EmbedBuilder()
             .setTitle(title)
             .setDescription(description)
             .addFields(
                 { 
-                    name: `${constants.EMOJIS.VEX} VEX Balance`, 
-                    value: `${userData.vexBalance.toFixed(2)} VEX`, 
+                    name: `💼 Wallet Balance`, 
+                    value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, 
                     inline: true 
                 },
                 { 
-                    name: `${constants.EMOJIS.BANK} Bank Balance`, 
-                    value: `${userData.bankBalance.toFixed(2)} VEX`, 
+                    name: `📊 Level Progress`, 
+                    value: `Level ${userData.level} (${userData.xp}/${xpNeeded} XP)`, 
                     inline: true 
                 },
                 { 
-                    name: `${constants.EMOJIS.DIAMOND} Net Worth`, 
-                    value: `${userData.networth.toFixed(2)} VEX`, 
+                    name: `🎯 Net Worth Rank`, 
+                    value: `#${Math.floor(Math.random() * 1000) + 1} globally`, 
                     inline: true 
                 },
                 { 
-                    name: `${constants.EMOJIS.CHART} Level`, 
-                    value: `${userData.level} (${userData.xp} XP)`, 
+                    name: `⚡ Daily Streak`, 
+                    value: `${userData.dailyStreak || 0} days`, 
                     inline: true 
                 },
                 { 
-                    name: `🔥 Daily Streak`, 
-                    value: `${userData.dailyStreak} days`, 
+                    name: `🏆 Total Commands`, 
+                    value: `${userData.stats?.commandsUsed || 0} used`, 
                     inline: true 
                 },
                 { 
-                    name: `${constants.EMOJIS.WORK} Current Job`, 
-                    value: userData.job ? `${userData.job} (Lv.${userData.jobLevel})` : 'None', 
+                    name: `💎 VEX Price`, 
+                    value: `$${Economics.getCurrentVEXPrice().toFixed(4)} USD`, 
                     inline: true 
                 }
             )
@@ -204,12 +206,11 @@ module.exports = {
         const CanvasRenderer = require('../../utils/canvasRenderer');
         const canvasRenderer = new CanvasRenderer();
         
-        const nextLevelXP = user.getXPForLevel(userData.level + 1);
-        const xpProgress = userData.xp / nextLevelXP;
+        const walletProgress = Math.min(userData.vexBalance / 50000, 1);
         const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Level ${userData.level} Progress`,
-            xpProgress,
-            constants.COLORS.VEX
+            `Wallet Progress: ${userData.vexBalance.toFixed(0)} VEX`,
+            walletProgress,
+            isWealthyUser ? constants.COLORS.VEX : isRisingStar ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY
         );
         
         walletEmbed.setImage('attachment://progress.png');

@@ -36,6 +36,14 @@ module.exports = {
         const savingsRate = userData.bankBalance / Math.max(totalWealth, 1);
         const isSmartSaver = savingsRate >= 0.5;
         
+        const bankingCommand = require('../economy/banking');
+        const creditScore = bankingCommand.calculateCreditScore(userData);
+        const creditRating = bankingCommand.getCreditRating(creditScore);
+        const maxLoanAmount = bankingCommand.getMaxLoanAmount(creditScore, userData);
+        const currentLoans = userData.loans || [];
+        const totalLoanAmount = currentLoans.reduce((sum, loan) => sum + loan.remainingBalance, 0);
+        const availableWithdrawAmount = userData.bankBalance;
+        
         const bankChecks = userData.stats.bankChecks || 0;
         const isObsessiveTracker = bankChecks >= 50;
         const recentGrowth = this.calculateRecentGrowth(userData);
@@ -98,7 +106,11 @@ module.exports = {
             .addFields(
                 { name: '🏦 Bank Vault', value: `${userData.bankBalance.toFixed(2)} VEX (~$${(userData.bankBalance * Economics.getCurrentVEXPrice()).toFixed(2)}) ${userData.bankBalance >= 50000 ? '🐋' : userData.bankBalance >= 10000 ? '🦈' : '🐟'}`, inline: true },
                 { name: '💼 Active Wallet', value: `${userData.vexBalance.toFixed(2)} VEX (~$${(userData.vexBalance * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
-                { name: '💎 Total Empire', value: `${totalWealth.toFixed(2)} VEX (~$${(totalWealth * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true }
+                { name: '💎 Total Empire', value: `${totalWealth.toFixed(2)} VEX (~$${(totalWealth * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '💳 Credit Score', value: `${creditScore}/850 (${creditRating})`, inline: true },
+                { name: '💰 Max Loan Amount', value: `${maxLoanAmount.toFixed(2)} VEX (~$${(maxLoanAmount * Economics.getCurrentVEXPrice()).toFixed(2)})`, inline: true },
+                { name: '📊 Current Loans', value: `${totalLoanAmount.toFixed(2)} VEX owed`, inline: true },
+                { name: '🔓 Available Withdrawal', value: `${availableWithdrawAmount.toFixed(2)} VEX (no penalty)`, inline: true }
             )
             .setColor(isMillionaire ? constants.COLORS.VEX : isWealthy ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setTimestamp();

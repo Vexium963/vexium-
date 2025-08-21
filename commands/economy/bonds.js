@@ -16,10 +16,10 @@ module.exports = {
                         .setDescription(`📈 Choose your investment strategy - Higher returns for longer commitments!`)
                         .setRequired(true)
                         .addChoices(
-                            { name: 'Short-term (30 days, 3% return)', value: 'short' },
-                            { name: 'Medium-term (90 days, 8% return)', value: 'medium' },
-                            { name: 'Long-term (180 days, 18% return)', value: 'long' },
-                            { name: 'Premium (365 days, 40% return)', value: 'premium' }))
+                            { name: 'Short-term (30 days, 1% return)', value: 'short' },
+                            { name: 'Medium-term (90 days, 3% return)', value: 'medium' },
+                            { name: 'Long-term (180 days, 8% return)', value: 'long' },
+                            { name: 'Premium (365 days, 15% return)', value: 'premium' }))
                 .addNumberOption(option =>
                     option.setName('amount')
                         .setDescription(`🔥 Amount of VEX to invest - The more you invest, the more you earn!`)
@@ -97,10 +97,10 @@ module.exports = {
         const isHighValueInvestor = totalInvested >= 10000;
         
         const bondTypes = {
-            short: { name: 'Short-term Bond', days: 30, returnRate: 0.03, minAmount: 100 },
-            medium: { name: 'Medium-term Bond', days: 90, returnRate: 0.08, minAmount: 500 },
-            long: { name: 'Long-term Bond', days: 180, returnRate: 0.18, minAmount: 1000 },
-            premium: { name: 'Premium Bond', days: 365, returnRate: 0.40, minAmount: 5000 }
+            short: { name: 'Short-term Bond', days: 30, returnRate: 0.01, minAmount: 100 },
+            medium: { name: 'Medium-term Bond', days: 90, returnRate: 0.03, minAmount: 500 },
+            long: { name: 'Long-term Bond', days: 180, returnRate: 0.08, minAmount: 1000 },
+            premium: { name: 'Premium Bond', days: 365, returnRate: 0.15, minAmount: 5000 }
         };
         
         const bond = bondTypes[bondType];
@@ -436,10 +436,10 @@ module.exports = {
             .setDescription('Secure, guaranteed returns backed by the VexiumVerse Treasury')
             .addFields(
                 { name: '📊 Market Overview', value: '**Status**: Open for Trading\n**Backed By**: VexiumVerse Treasury\n**Risk Level**: Zero Risk\n**Guarantee**: 100% Principal + Returns', inline: false },
-                { name: '💎 Short-term Bond (30 days)', value: '**Return**: 3.0% guaranteed\n**Min Investment**: $100 VEX\n**Best For**: Quick returns', inline: true },
-                { name: '📈 Medium-term Bond (90 days)', value: '**Return**: 8.0% guaranteed\n**Min Investment**: $500 VEX\n**Best For**: Balanced growth', inline: true },
-                { name: '🚀 Long-term Bond (180 days)', value: '**Return**: 18.0% guaranteed\n**Min Investment**: $1,000 VEX\n**Best For**: Serious investors', inline: true },
-                { name: '👑 Premium Bond (365 days)', value: '**Return**: 40.0% guaranteed\n**Min Investment**: $5,000 VEX\n**Best For**: Maximum returns', inline: true },
+                { name: '💎 Short-term Bond (30 days)', value: '**Return**: 1.0% guaranteed\n**Min Investment**: $100 VEX\n**Best For**: Quick returns', inline: true },
+                { name: '📈 Medium-term Bond (90 days)', value: '**Return**: 3.0% guaranteed\n**Min Investment**: $500 VEX\n**Best For**: Balanced growth', inline: true },
+                { name: '🚀 Long-term Bond (180 days)', value: '**Return**: 8.0% guaranteed\n**Min Investment**: $1,000 VEX\n**Best For**: Serious investors', inline: true },
+                { name: '👑 Premium Bond (365 days)', value: '**Return**: 15.0% guaranteed\n**Min Investment**: $5,000 VEX\n**Best For**: Maximum returns', inline: true },
                 { name: '🏛️ Government Backing', value: 'All bonds are backed by the VexiumVerse Treasury with 100% guarantee of principal and returns. No risk of default.', inline: false },
                 { name: '💡 Investment Tips', value: '• Diversify across different terms\n• Reinvest returns for compound growth\n• Bonds cannot be redeemed early\n• Perfect for risk-free growth', inline: false }
             )

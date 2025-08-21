@@ -432,11 +432,11 @@ module.exports = {
     },
 
     BANK_INTEREST_RATES: {
-        DAILY: 0.001,
-        WEEKLY: 0.005,
-        MONTHLY: 0.015,
-        YEARLY: 0.06,
-        PREMIUM_BONUS: 0.002
+        DAILY: 0.0001,
+        WEEKLY: 0.0005,
+        MONTHLY: 0.001,
+        YEARLY: 0.002,
+        PREMIUM_BONUS: 0.0002
     },
 
     LEVEL_XP_REQUIREMENTS: {
@@ -590,28 +590,28 @@ const STAKING = {
 const STAKING_POOLS = {
     FLEXIBLE: {
         name: 'Flexible Staking',
-        apy: 0.03,
+        apy: 0.02,
         lockPeriod: null,
         minStake: 10.0,
         riskLevel: 'Low'
     },
     THIRTY_DAYS: {
         name: '30-Day Lock',
-        apy: 0.05,
+        apy: 0.03,
         lockPeriod: 30,
         minStake: 50.0,
         riskLevel: 'Low'
     },
     NINETY_DAYS: {
         name: '90-Day Lock',
-        apy: 0.08,
+        apy: 0.05,
         lockPeriod: 90,
         minStake: 100.0,
         riskLevel: 'Medium'
     },
     ONE_YEAR: {
         name: '365-Day Lock',
-        apy: 0.12,
+        apy: 0.08,
         lockPeriod: 365,
         minStake: 500.0,
         riskLevel: 'Medium'
@@ -683,6 +683,7 @@ const COMEBACK_MESSAGES = [
     "🏆 **CHAMPION'S RETURN!** Your throne is ready!",
     "✨ **MAGICAL COMEBACK!** Fortune favors your return!"
 ];
+module.exports.STAKING_POOLS = STAKING_POOLS;
 module.exports.FOMO_MESSAGES = FOMO_MESSAGES;
 module.exports.SOCIAL_PROOF = SOCIAL_PROOF;
 module.exports.VARIABLE_REWARDS = VARIABLE_REWARDS;

@@ -301,37 +301,36 @@ class InteractionHandler {
 
     async handleInvestmentCategorySelect(interaction) {
         try {
-            await interaction.deferUpdate();
             const selectedCategory = interaction.values[0];
             
             const categoryCommands = {
-                'crypto': '/crypto',
-                'stocks': '/stocks', 
-                'realestate': '/real-estate',
-                'businesses': '/businesses',
-                'staking': '/staking',
-                'bonds': '/bonds'
+                'crypto': '/crypto market',
+                'stocks': '/stocks market', 
+                'realestate': '/real-estate market',
+                'businesses': '/businesses market',
+                'staking': '/staking pools',
+                'bonds': '/bonds market'
             };
             
             const { EmbedBuilder } = require('discord.js');
             const embed = new EmbedBuilder()
                 .setTitle(`🚀 ${selectedCategory.toUpperCase()} Investment Marketplace`)
-                .setDescription(`**Redirecting you to the ${selectedCategory} marketplace...**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
+                .setDescription(`**Welcome to the ${selectedCategory} marketplace!**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
                 .setColor('#FFD700');
             
-            await interaction.followUp({ embeds: [embed], ephemeral: true });
+            await interaction.update({ embeds: [embed] });
             
             const commandMap = {
-                'crypto': require('../commands/economy/crypto'),
-                'stocks': require('../commands/economy/stocks'),
-                'realestate': require('../commands/economy/real-estate'),
-                'businesses': require('../commands/economy/businesses'),
-                'staking': require('../commands/economy/staking'),
-                'bonds': require('../commands/economy/bonds')
+                'crypto': () => require('../commands/economy/crypto').handleMarket(interaction),
+                'stocks': () => require('../commands/economy/stocks').handleMarket(interaction),
+                'realestate': () => require('../commands/economy/real-estate').handleMarket(interaction),
+                'businesses': () => require('../commands/economy/businesses').handleMarket(interaction),
+                'staking': () => require('../commands/economy/staking').handlePools(interaction),
+                'bonds': () => require('../commands/economy/bonds').handleMarket(interaction)
             };
             
             if (commandMap[selectedCategory]) {
-                await commandMap[selectedCategory].execute(interaction);
+                await commandMap[selectedCategory]();
             }
         } catch (error) {
             console.error('Error in handleInvestmentCategorySelect:', error);
@@ -1690,37 +1689,36 @@ class InteractionHandler {
 
     async handleInvestmentCategorySelect(interaction) {
         try {
-            await interaction.deferUpdate();
             const selectedCategory = interaction.values[0];
             
             const categoryCommands = {
-                'crypto': '/crypto',
-                'stocks': '/stocks', 
-                'realestate': '/real-estate',
-                'businesses': '/businesses',
-                'staking': '/staking',
-                'bonds': '/bonds'
+                'crypto': '/crypto market',
+                'stocks': '/stocks market', 
+                'realestate': '/real-estate market',
+                'businesses': '/businesses market',
+                'staking': '/staking pools',
+                'bonds': '/bonds market'
             };
             
             const { EmbedBuilder } = require('discord.js');
             const embed = new EmbedBuilder()
                 .setTitle(`🚀 ${selectedCategory.toUpperCase()} Investment Marketplace`)
-                .setDescription(`**Redirecting you to the ${selectedCategory} marketplace...**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
+                .setDescription(`**Welcome to the ${selectedCategory} marketplace!**\n\nUse the command: \`${categoryCommands[selectedCategory]}\` to access this investment category directly in the future.`)
                 .setColor('#FFD700');
             
-            await interaction.followUp({ embeds: [embed], ephemeral: true });
+            await interaction.update({ embeds: [embed] });
             
             const commandMap = {
-                'crypto': require('../commands/economy/crypto'),
-                'stocks': require('../commands/economy/stocks'),
-                'realestate': require('../commands/economy/real-estate'),
-                'businesses': require('../commands/economy/businesses'),
-                'staking': require('../commands/economy/staking'),
-                'bonds': require('../commands/economy/bonds')
+                'crypto': () => require('../commands/economy/crypto').handleMarket(interaction),
+                'stocks': () => require('../commands/economy/stocks').handleMarket(interaction),
+                'realestate': () => require('../commands/economy/real-estate').handleMarket(interaction),
+                'businesses': () => require('../commands/economy/businesses').handleMarket(interaction),
+                'staking': () => require('../commands/economy/staking').handlePools(interaction),
+                'bonds': () => require('../commands/economy/bonds').handleMarket(interaction)
             };
             
             if (commandMap[selectedCategory]) {
-                await commandMap[selectedCategory].execute(interaction);
+                await commandMap[selectedCategory]();
             }
         } catch (error) {
             console.error('Error in handleInvestmentCategorySelect:', error);
