@@ -87,7 +87,7 @@ module.exports = {
             const user = new User(interaction.user.id);
             await user.addVEX(surpriseBonus, 'help_bonus');
             const Economics = require('../../utils/economics');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'help' } });
         }
         
         if (helpCount === 0) {

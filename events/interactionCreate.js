@@ -42,6 +42,11 @@ module.exports = {
             setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
             try {
+                const heavyCommands = ['businesses', 'shop', 'invest', 'marketplace', 'analytics', 'leaderboard', 'profile'];
+                if (heavyCommands.includes(interaction.commandName) && !interaction.deferred && !interaction.replied) {
+                    await interaction.deferReply();
+                }
+
                 if (interaction.client.psychologyEngine) {
                     const behaviorContext = {
                         consecutiveUse: false,

@@ -104,7 +104,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'pet_surprise_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'pets' } });
             userData.stats.lastPetActivity = Date.now();
         }
         
@@ -157,7 +157,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(adoptionCost, 'pet_adoption');
-        Economics.updateVEXMarket('purchase', adoptionCost);
+        Economics.apply({ event: 'purchase', amountVEX: adoptionCost, userId: interaction.user.id, meta: { command: 'pets' } });
         if (!result.success) {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()

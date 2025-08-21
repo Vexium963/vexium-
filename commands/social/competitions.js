@@ -227,7 +227,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', competition.entryFee, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: competition.entryFee, userId: interaction.user.id, meta: { command: 'competitions' } });
         
         userData.competitions[competitionId] = {
             registeredAt: Date.now(),

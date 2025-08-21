@@ -110,7 +110,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'governance_participation_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'dao' } });
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ DEMOCRACY BONUS!`)
                 .setDescription(`🎉 **Surprise reward for governance participation!**\n💸 **+${surpriseBonus} VEX** for being an active democracy participant!`)
@@ -355,7 +355,7 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        Economics.updateVEXMarket('stake', requiredStake);
+        Economics.apply({ event: 'stake', amountVEX: requiredStake, userId: interaction.user.id, meta: { command: 'dao' } });
         
         if (!global.daoProposals) global.daoProposals = [];
         

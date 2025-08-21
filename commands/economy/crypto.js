@@ -230,12 +230,10 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
-        
-        Economics.updateVEXMarket('buy', totalCost);
+        Economics.apply({ event: 'buy', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'crypto' } });
         
         await user.burnVEX(tradingFee, 'crypto_trading_fee');
-        Economics.updateVEXMarket('burn', tradingFee);
+        Economics.apply({ event: 'burn', amountVEX: tradingFee, userId: interaction.user.id, meta: { command: 'crypto' } });
         
         const cryptoAmount = vexAmount / crypto.price;
         

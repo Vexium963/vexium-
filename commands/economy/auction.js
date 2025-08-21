@@ -225,7 +225,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', listingFee, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: listingFee, userId: interaction.user.id, meta: { command: 'auction' } });
         
         await user.burnVEX(listingFee, 'auction_fee');
         await user.removeItem(itemId, 1);
@@ -339,7 +339,7 @@ module.exports = {
         if (auction.highestBidderId) {
             const previousBidder = new User(auction.highestBidderId);
             await previousBidder.addVEX(auction.currentBid, 'auction_refund');
-            Economics.updateVEXMarket('buy', auction.currentBid);
+            Economics.apply({ event: 'buy', amountVEX: auction.currentBid, userId: auction.highestBidderId, meta: { command: 'auction' } });
         }
         
         const result = await user.removeVEX(bidAmount, 'auction_bid', false);
@@ -352,7 +352,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', bidAmount, interaction.user.id);
+        Economics.apply({ event: 'buy', amountVEX: bidAmount, userId: interaction.user.id, meta: { command: 'auction' } });
         
         auction.currentBid = bidAmount;
         auction.highestBidder = interaction.user.username;

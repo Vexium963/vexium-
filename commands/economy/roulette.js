@@ -112,7 +112,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', playAmount, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: playAmount, userId: interaction.user.id, meta: { command: 'roulette' } });
         
         const winningNumber = Math.floor(Math.random() * 37);
         const isWin = this.checkWin(playType, number, winningNumber);
@@ -141,13 +141,13 @@ module.exports = {
                 winnings += jackpotBonus;
             }
             await user.addVEX(winnings, 'roulette_win');
-            Economics.updateVEXMarket('buy', winnings);
+            Economics.apply({ event: 'reward', amountVEX: winnings, userId: interaction.user.id, meta: { command: 'roulette' } });
             userData.stats.rouletteStreak = currentStreak + 1;
         } else {
             userData.stats.rouletteStreak = 0;
             if (comebackBonus > 0) {
                 await user.addVEX(comebackBonus, 'roulette_comeback');
-                Economics.updateVEXMarket('buy', comebackBonus);
+                Economics.apply({ event: 'reward', amountVEX: comebackBonus, userId: interaction.user.id, meta: { command: 'roulette' } });
             }
         }
         

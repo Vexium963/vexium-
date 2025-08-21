@@ -30,10 +30,11 @@ module.exports = {
             );
         }
         
-        const currentLevelXP = user.getXPForLevel(userData.level);
-        const nextLevelXP = user.getXPForLevel(userData.level + 1);
+        const { getXPForLevel } = require('../../utils/progression');
+        const currentLevelXP = getXPForLevel(userData.level);
+        const nextLevelXP = getXPForLevel(userData.level + 1);
         const xpForNextLevel = nextLevelXP - currentLevelXP;
-        const progress = userData.xp / xpForNextLevel;
+        const progress = (userData.xp - currentLevelXP) / xpForNextLevel;
         
         const xpChecks = userData.stats.xpChecked || 0;
         const isXpExpert = xpChecks >= 20;

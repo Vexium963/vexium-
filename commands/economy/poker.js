@@ -69,7 +69,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'poker_engagement_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'poker' } });
             userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
         }
         
@@ -154,7 +154,7 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        Economics.updateVEXMarket('buy', tournament.buyIn, interaction.user.id);
+        Economics.apply({ event: 'buy', amountVEX: tournament.buyIn, userId: interaction.user.id, meta: { command: 'poker' } });
         
         const burnAmount = tournament.buyIn * constants.TAX_SYSTEM.POKER.RAKE_RATE;
         await user.burnVEX(burnAmount, 'poker_rake');
@@ -164,7 +164,7 @@ module.exports = {
         
         if (prize > 0) {
             await user.addVEX(prize, 'poker_prize');
-            Economics.updateVEXMarket('reward', prize);
+            Economics.apply({ event: 'reward', amountVEX: prize, userId: interaction.user.id, meta: { command: 'poker' } });
         }
         
         userData.stats.pokerTournaments = (userData.stats.pokerTournaments || 0) + 1;

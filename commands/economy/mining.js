@@ -144,7 +144,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', energyCost, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: energyCost, userId: interaction.user.id, meta: { command: 'mining' } });
         
         const burnAmount = energyCost * constants.TAX_SYSTEM.MINING.ENERGY_BURN_RATE;
         await user.burnVEX(burnAmount, 'mining_energy_burn');
@@ -325,8 +325,8 @@ module.exports = {
         await user.addVEX(netAmount, 'mining_reward');
         await user.burnVEX(taxAmount, 'mining_tax');
         
-        Economics.updateVEXMarket('reward', netAmount);
-        Economics.updateVEXMarket('burn', taxAmount);
+        Economics.apply({ event: 'reward', amountVEX: netAmount, userId: interaction.user.id, meta: { command: 'mining' } });
+        Economics.apply({ event: 'burn', amountVEX: taxAmount, userId: interaction.user.id, meta: { command: 'mining' } });
         
         userData.mining.isActive = false;
         userData.mining.lastClaim = Date.now();

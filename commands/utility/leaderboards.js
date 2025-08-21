@@ -68,7 +68,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'leaderboard_engagement_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'leaderboards' } });
         }
         
         await user.save(userData);

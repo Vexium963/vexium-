@@ -424,7 +424,7 @@ module.exports = {
         }
         
         await user.addVEX(totalRewards, 'event_rewards');
-        Economics.updateVEXMarket('reward', totalRewards);
+        Economics.apply({ event: 'reward', amountVEX: totalRewards, userId: interaction.user.id, meta: { command: 'events' } });
         
         userData.stats.eventRewardsClaimed = (userData.stats.eventRewardsClaimed || 0) + totalRewards;
         userData.stats.commandsUsed++;

@@ -67,7 +67,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(playAmount, 'crash_play', false);
-        Economics.updateVEXMarket('sell', playAmount);
+        Economics.apply({ event: 'sell', amountVEX: playAmount, userId: interaction.user.id, meta: { command: 'crash' } });
         if (!result.success) {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
@@ -224,7 +224,7 @@ module.exports = {
         
         const winnings = game.playAmount * game.currentMultiplier;
         await user.addVEX(winnings, 'crash_win');
-        Economics.updateVEXMarket('buy', winnings);
+        Economics.apply({ event: 'reward', amountVEX: winnings, userId: game.userId, meta: { command: 'crash' } });
         
         const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;
         await user.burnVEX(burnAmount, 'crash_house_edge');

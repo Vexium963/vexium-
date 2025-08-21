@@ -78,7 +78,7 @@ module.exports = {
         if (socialBoost > 0) {
             await user.addVEX(socialBoost, 'social_activity_bonus');
             const Economics = require('../../utils/economics');
-            Economics.updateVEXMarket('reward', socialBoost);
+            Economics.apply({ event: 'reward', amountVEX: socialBoost, userId: interaction.user.id, meta: { command: 'friends' } });
             userData.stats.socialBonusesEarned = (userData.stats.socialBonusesEarned || 0) + 1;
         }
         

@@ -79,7 +79,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(playAmount, 'blackjack_play', false);
-        Economics.updateVEXMarket('sell', playAmount);
+        Economics.apply({ event: 'sell', amountVEX: playAmount, userId: interaction.user.id, meta: { command: 'blackjack' } });
         if (!result.success) {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 25);
@@ -358,7 +358,7 @@ module.exports = {
         
         if (winnings > 0) {
             await user.addVEX(winnings, 'blackjack_win');
-            Economics.updateVEXMarket('reward', winnings);
+            Economics.apply({ event: 'reward', amountVEX: winnings, userId: interaction.user.id, meta: { command: 'blackjack' } });
         }
         
         const burnAmount = game.playAmount * constants.TAX_SYSTEM.ENTERTAINMENT.HOUSE_EDGE;

@@ -149,9 +149,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
-        
-        Economics.updateVEXMarket('buy', totalCost);
+        Economics.apply({ event: 'buy', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'shop' } });
         
         const burnAmount = totalCost * (item.burnRate || constants.TAX_SYSTEM.PURCHASE.ITEM_BURN_RATE);
         await user.burnVEX(burnAmount, 'item_purchase');

@@ -193,11 +193,11 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', totalCost, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'lottery' } });
         
         const burnAmount = totalCost * constants.TAX_SYSTEM.LOTTERY.BURN_RATE;
         await user.burnVEX(burnAmount, 'lottery_tax');
-        Economics.updateVEXMarket('burn', burnAmount);
+        Economics.apply({ event: 'burn', amountVEX: burnAmount, userId: interaction.user.id, meta: { command: 'lottery' } });
         
         if (!userData.lotteryTickets) userData.lotteryTickets = {};
         if (!userData.lotteryTickets[lotteryWeek]) userData.lotteryTickets[lotteryWeek] = [];

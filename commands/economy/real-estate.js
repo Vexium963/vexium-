@@ -246,7 +246,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', property.price, interaction.user.id);
+        Economics.apply({ event: 'buy', amountVEX: property.price, userId: interaction.user.id, meta: { command: 'real-estate' } });
         
         const ownedProperty = {
             ...property,
@@ -436,7 +436,7 @@ module.exports = {
         }
         
         await user.addVEX(availableIncome, 'real_estate_income');
-        Economics.updateVEXMarket('reward', availableIncome);
+        Economics.apply({ event: 'reward', amountVEX: availableIncome, userId: interaction.user.id, meta: { command: 'real-estate' } });
         
         const now = new Date().toISOString();
         let propertiesCollected = 0;

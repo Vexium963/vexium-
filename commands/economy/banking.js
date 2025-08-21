@@ -195,7 +195,7 @@ module.exports = {
         
         userData.loans.push(newLoan);
         await user.addVEX(amount, 'loan_disbursement');
-        Economics.updateVEXMarket('buy', amount);
+        Economics.apply({ event: 'buy', amountVEX: amount, userId: interaction.user.id, meta: { command: 'banking' } });
         
         userData.stats.loansApplied = (userData.stats.loansApplied || 0) + 1;
         userData.stats.totalBorrowed = (userData.stats.totalBorrowed || 0) + amount;

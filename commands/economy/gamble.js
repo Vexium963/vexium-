@@ -207,7 +207,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const symbols = Economics.generateSlotsResult();
         const payout = Economics.calculateEntertainmentPayout('slots', amount, symbols);
@@ -217,7 +217,7 @@ module.exports = {
         
         if (payout > 0) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
@@ -314,7 +314,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const coinResult = Economics.flipCoin();
         const won = choice === coinResult;
@@ -326,7 +326,7 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
@@ -410,7 +410,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const diceRoll = Economics.rollDice();
         const won = prediction === diceRoll;
@@ -421,7 +421,7 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;

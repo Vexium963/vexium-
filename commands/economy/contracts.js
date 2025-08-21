@@ -115,7 +115,7 @@ module.exports = {
         };
         
         await user.removeVEX(amount, 'contract_escrow', false);
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'contracts' } });
         
         userData.contracts = userData.contracts || [];
         userData.contracts.push(contract);
@@ -246,7 +246,7 @@ module.exports = {
         contract.completedAt = Date.now();
         
         await user.addVEX(contract.amount, 'contract_completion');
-        Economics.updateVEXMarket('reward', contract.amount);
+        Economics.apply({ event: 'reward', amountVEX: contract.amount, userId: interaction.user.id, meta: { command: 'contracts' } });
         
         userData.stats.contractsCompleted = (userData.stats.contractsCompleted || 0) + 1;
         userData.stats.commandsUsed++;

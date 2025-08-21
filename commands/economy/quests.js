@@ -69,7 +69,7 @@ module.exports = {
         
         if (urgencyBonus > 0) {
             await user.addVEX(urgencyBonus, 'quest_urgency_bonus');
-            Economics.updateVEXMarket('reward', urgencyBonus);
+            Economics.apply({ event: 'reward', amountVEX: urgencyBonus, userId: interaction.user.id, meta: { command: 'quests' } });
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ SURPRISE QUEST BONUS!`)
@@ -250,7 +250,7 @@ module.exports = {
         }
         
         await user.addVEX(quest.reward, 'quest_reward');
-        Economics.updateVEXMarket('reward', quest.reward);
+        Economics.apply({ event: 'reward', amountVEX: quest.reward, userId: interaction.user.id, meta: { command: 'quests' } });
         userData.xp += quest.xp;
         
         quest.claimed = true;
@@ -274,7 +274,7 @@ module.exports = {
         
         if (variableBonus > 0) {
             await user.addVEX(variableBonus, 'quest_completion_bonus');
-            Economics.updateVEXMarket('reward', variableBonus);
+            Economics.apply({ event: 'reward', amountVEX: variableBonus, userId: interaction.user.id, meta: { command: 'quests' } });
         }
         
         let celebrationDescription = `**${quest.name}** has been completed successfully!\n\n${milestoneMessage}`;

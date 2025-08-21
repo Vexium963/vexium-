@@ -79,7 +79,7 @@ module.exports = {
         if (surpriseBonus > 0) {
             description += `\n✨ **SURPRISE INSPECTION BONUS: +${surpriseBonus} VEX (~$${(surpriseBonus * Economics.getCurrentVEXPrice()).toFixed(2)})!** Lucky you!`;
             await user.addVEX(surpriseBonus, 'bank_inspection_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'bank' } });
         }
         
         const activeInvestors = Math.floor(Math.random() * 200) + 50;

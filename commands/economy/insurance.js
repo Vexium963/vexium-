@@ -155,7 +155,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(totalCost, 'insurance_purchase');
-        Economics.updateVEXMarket('sell', totalCost);
+        Economics.apply({ event: 'sell', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'insurance' } });
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
@@ -281,7 +281,7 @@ module.exports = {
         const claimId = this.generateClaimId();
         
         await user.addVEX(coverageAmount, 'insurance_claim');
-        Economics.updateVEXMarket('reward', coverageAmount);
+        Economics.apply({ event: 'reward', amountVEX: coverageAmount, userId: interaction.user.id, meta: { command: 'insurance' } });
         
         userData.insurance.claimsUsed++;
         

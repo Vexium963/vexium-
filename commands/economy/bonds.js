@@ -126,7 +126,7 @@ module.exports = {
         }
         
         const result = await user.removeVEX(amount, 'bond_purchase');
-        Economics.updateVEXMarket('buy', amount);
+        Economics.apply({ event: 'buy', amountVEX: amount, userId: interaction.user.id, meta: { command: 'bonds' } });
         if (!result.success) {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
@@ -166,7 +166,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.15 ? Math.floor(amount * 0.02) : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'bond_purchase_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'bonds' } });
         }
         
         let title = `${constants.EMOJIS.SUCCESS} Bond Purchased Successfully!`;

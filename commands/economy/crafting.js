@@ -285,9 +285,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', totalVexCost, interaction.user.id);
-        
-        Economics.updateVEXMarket('sell', totalVexCost);
+        Economics.apply({ event: 'sell', amountVEX: totalVexCost, userId: interaction.user.id, meta: { command: 'crafting' } });
         
         for (const material of recipe.materials) {
             const required = material.quantity * quantity;

@@ -69,7 +69,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('deposit', amount, interaction.user.id);
+        Economics.apply({ event: 'deposit', amountVEX: amount, userId: interaction.user.id, meta: { command: 'bank' } });
         
         userData.bankBalance += amount;
         
@@ -130,7 +130,7 @@ module.exports = {
         
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'deposit_surprise_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'bank' } });
         }
         
         let title = `${constants.EMOJIS.BANK} WEALTH SECURED!`;

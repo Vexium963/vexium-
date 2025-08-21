@@ -165,7 +165,7 @@ module.exports = {
         switch (action) {
             case 'add':
                 await user.addVEX(amount, 'admin_add');
-                Economics.updateVEXMarket('buy', amount);
+                Economics.apply({ event: 'buy', amountVEX: amount, userId: targetUser.id, meta: { command: 'admin' } });
                 newBalance = userData.vexBalance + amount;
                 break;
             case 'remove':
@@ -180,17 +180,17 @@ module.exports = {
                     
                     return interaction.reply({ embeds: [embed], ephemeral: true });
                 }
-                Economics.updateVEXMarket('sell', amount);
+                Economics.apply({ event: 'sell', amountVEX: amount, userId: targetUser.id, meta: { command: 'admin' } });
                 newBalance = userData.vexBalance - amount;
                 break;
             case 'set':
                 const currentBalance = userData.vexBalance;
                 if (amount > currentBalance) {
                     await user.addVEX(amount - currentBalance, 'admin_set');
-                    Economics.updateVEXMarket('buy', amount - currentBalance);
+                    Economics.apply({ event: 'buy', amountVEX: amount - currentBalance, userId: targetUser.id, meta: { command: 'admin' } });
                 } else if (amount < currentBalance) {
                     await user.removeVEX(currentBalance - amount, 'admin_set', false);
-                    Economics.updateVEXMarket('sell', currentBalance - amount);
+                    Economics.apply({ event: 'sell', amountVEX: currentBalance - amount, userId: targetUser.id, meta: { command: 'admin' } });
                 }
                 newBalance = amount;
                 break;

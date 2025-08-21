@@ -331,7 +331,7 @@ module.exports = {
         }
         
         await user.addVEX(challenge.reward, 'challenge_reward');
-        Economics.updateVEXMarket('reward', challenge.reward);
+        Economics.apply({ event: 'reward', amountVEX: challenge.reward, userId: interaction.user.id, meta: { command: 'challenges' } });
         userData.xp += challenge.xp;
         
         challenge.claimed = true;
@@ -477,11 +477,26 @@ module.exports = {
         const empty = 20 - filled;
         return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${current}/${max}`;
     },
-    
+
+    getTimeUntilMidnight() {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        return Math.ceil((midnight - now) / (1000 * 60 * 60));
+    },
+
     getCompletionRate(userData) {
         const completed = userData.stats.challengesCompleted || 0;
-        const attempted = Math.max(completed, 1);
+        const totalAvailable = this.getDailyChallenges(userData).length + this.getWeeklyChallenges(userData).length;
+        const attempted = Math.max(totalAvailable, 1);
         return Math.round((completed / attempted) * 100);
+    },
+
+    getTimeUntilMidnight() {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        return Math.ceil((midnight - now) / (1000 * 60 * 60));
     },
     
     getAvgDaily(userData) {

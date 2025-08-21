@@ -180,7 +180,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', creationCost, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: creationCost, userId: interaction.user.id, meta: { command: 'guild_creation' } });
         
         const burnAmount = creationCost * constants.TAX_SYSTEM.GUILD.CREATION_BURN_RATE;
         await user.burnVEX(burnAmount, 'guild_creation_burn');
