@@ -1467,7 +1467,6 @@ class InteractionHandler {
             console.error('Error in handleEntertainmentHistory:', error);
         }
     }
-}
 
     async handleForecastPrice(interaction) {
         const forecastCommand = require('../commands/admin/forecast');
@@ -1492,5 +1491,6 @@ class InteractionHandler {
         await interaction.deferUpdate();
         await forecastCommand.handleOverview(interaction);
     }
+}
 
 module.exports = InteractionHandler;
