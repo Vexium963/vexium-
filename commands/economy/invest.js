@@ -6,14 +6,14 @@ const Economics = require('../../utils/economics');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('invest')
-        .setDescription('Invest your VEX in various assets for potential returns')
+        .setDescription(`📈 Build wealth through strategic investments - Join successful investors earning passive income!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Buy an investment')
+                .setDescription(`💸 Purchase high-yield assets - Limited-time market opportunities!`)
                 .addStringOption(option =>
                     option.setName('type')
-                        .setDescription('Investment type')
+                        .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Choose your wealth-building strategy - Crypto, stocks, bonds, o...`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Crypto', value: 'crypto' },
@@ -23,20 +23,20 @@ module.exports = {
                         ))
                 .addStringOption(option =>
                     option.setName('asset')
-                        .setDescription('Specific asset to invest in')
+                        .setDescription(`✨ Select your target asset - Research shows diversification increases returns by 40%`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to invest')
+                        .setDescription(`🚀 Investment amount - Start small, think big! Every dollar counts toward financial freedom`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sell')
-                .setDescription('Sell an investment')
+                .setDescription(`💥 Liquidate assets for instant VEX - Secure your profits before market volatility!`)
                 .addStringOption(option =>
                     option.setName('type')
-                        .setDescription('Investment type')
+                        .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Choose your wealth-building strategy - Crypto, stocks, bonds, o...`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Crypto', value: 'crypto' },
@@ -46,22 +46,22 @@ module.exports = {
                         ))
                 .addStringOption(option =>
                     option.setName('asset')
-                        .setDescription('Specific asset to sell')
+                        .setDescription(`📈 Target asset for liquidation - Smart investors take profits at peaks`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('percentage')
-                        .setDescription('Percentage of investment to sell (1-100)')
+                        .setDescription(`📊 Sell percentage (1-100%) - Partial sales preserve long-term growth potential`)
                         .setRequired(false)
                         .setMinValue(1)
                         .setMaxValue(100)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your investment portfolio'))
+                .setDescription(`🏆 Track your wealth empire - See real-time returns and portfolio performance`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription('View available investments and market data')),
+                .setDescription(`🌈 Explore market opportunities - Discover trending assets before they moon!`)),
     
     cooldown: 5,
     
@@ -105,7 +105,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`🎉 INVESTMENT NEWBIE BONUS!`)
-                .setDescription(`🌟 **Welcome to wealth building!** Here's $${bonusAmount} VEX to boost your first investments!\n💡 **Pro tip:** Diversify your portfolio for maximum returns!`)
+                .setDescription(`🎉 **Welcome to wealth building!** Here's $${bonusAmount} VEX to boost your first investments!\n\...`)
                 .setColor(constants.COLORS.SUCCESS)
                 .setTimestamp();
             
@@ -138,7 +138,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
+                .setDescription(`💥 **Investment opportunity slipping away!** You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **Hurry:** Market conditions change every hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -148,7 +148,7 @@ module.exports = {
         if (!investmentData || !investmentData[asset]) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Investment`)
-                .setDescription(`The asset **${asset}** is not available in the **${type}** category.`)
+                .setDescription(`💥 **Asset not found!** The asset **${asset}** is not available in the **${type}** category.\n\n✨ **Pro tip:** Use \`/invest market\` to see all available opportunities!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,7 +159,7 @@ module.exports = {
         if (amount < assetData.minInvestment) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`The minimum investment for **${assetData.name}** is $${assetData.minInvestment.toFixed(2)} VEX.`)
+                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is $${assetData.minAmount.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -201,9 +201,18 @@ module.exports = {
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
         const milestoneMessage = userData.stats.totalInvested >= 1000 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const investmentProgress = Math.min(userData.stats.totalInvested / 10000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Investment Portfolio: $${userData.stats.totalInvested.toFixed(0)} VEX`,
+            investmentProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHART} Investment Purchased!`)
-            .setDescription(`Successfully invested in **${assetData.name}**${variableReward ? `\n\n${variableReward}` : ''}${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
+            .setTitle(`📈 Investment Purchased!`)
+            .setDescription(`🎉 **Investment secured!** Successfully invested in **${assetData.name}**${variableReward ? `\n\n✨ ${variableReward}` : ''}${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}\n\n🔥 ${socialProof}\n\n🚀 **Your wealth empire grows stronger!**`)
             .addFields(
                 { name: '💰 Amount Invested', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Asset', value: `${assetData.name} (${assetData.symbol})`, inline: true },
@@ -213,10 +222,14 @@ module.exports = {
                 { name: '📊 Total Invested', value: `$${userData.stats.totalInvested.toFixed(2)}`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Investments carry risk. Past performance doesn\'t guarantee future results.' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleSell(interaction) {
@@ -230,7 +243,7 @@ module.exports = {
         if (!userData.investments[type] || !userData.investments[type][asset]) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Investment Not Found`)
-                .setDescription(`You don't have any investments in **${asset}** in the **${type}** category.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **Investment not found!** You don't have any investments in **${asset}** in the **${type}** category.\n\n${constants.ANIMATED_EMOJIS.CHART} **Build your portfolio:** Use \`/invest buy\` to start investing!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -242,7 +255,7 @@ module.exports = {
         if (daysSincePurchase < 1) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Investment Locked`)
-                .setDescription('Investments must be held for at least 24 hours before selling.')
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} **Investment locked for your protection!** Investments must ...`)
                 .addFields(
                     { name: '⏰ Time Remaining', value: `${24 - Math.floor((Date.now() - new Date(investment.purchaseDate).getTime()) / (1000 * 60 * 60))} hours`, inline: true }
                 )
@@ -283,7 +296,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.MONEY} Investment Sold!`)
-            .setDescription(`Successfully sold ${percentage}% of your **${assetData.name}** investment`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Profits secured!** Successfully sold ${percentage}% of ...`)
             .addFields(
                 { name: '💰 Gross Sale', value: `$${sellAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax (2%)', value: `$${taxAmount.toFixed(2)} VEX`, inline: true },
@@ -363,7 +376,19 @@ module.exports = {
             .setFooter({ text: 'Use /invest sell to liquidate investments' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgress = Math.min(totalInvestmentValue / 50000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Value: $${totalInvestmentValue.toFixed(0)} VEX`,
+            portfolioProgress,
+            totalProfit >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleMarket(interaction) {
@@ -388,6 +413,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /invest buy <type> <asset> <amount> to invest' });
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            components: [new ActionRowBuilder().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('invest_quick_buy')
+                    .setPlaceholder('🚀 Quick invest in trending assets')
+                    .addOptions([
+                        { label: 'Bitcoin (BTC)', value: 'crypto_bitcoin', emoji: '₿' },
+                        { label: 'Tesla Stock (TSLA)', value: 'stocks_tesla', emoji: '🚗' },
+                        { label: 'US Treasury Bonds', value: 'bonds_us_treasury', emoji: '🏛️' },
+                        { label: 'Manhattan Real Estate', value: 'real_estate_manhattan', emoji: '🏢' }
+                    ])
+            )]
+        });
     }
 };

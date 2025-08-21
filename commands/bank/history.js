@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('history')
-        .setDescription('View your transaction history and financial records')
+        .setDescription(`📈 Track your VEX empire's financial journey - Knowledge is wealth!`)
         .addStringOption(option =>
             option.setName('type')
                 .setDescription('Type of history to view')
@@ -96,7 +96,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} ${title}`)
-                .setDescription(`No records found yet!\n\n${randomMotivation}\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`✨ No records found yet!\n\n${randomMotivation}\n\n${fomoMessage}\n${socialProof}`)
                 .addFields({
                     name: '💡 Quick Start Tips',
                     value: '• Use `/daily` to earn your first VEX\n• Try `/work` to build consistent income\n• Use `/shop` to make your first purchase\n• Check `/invest` to multiply your wealth',
@@ -154,7 +154,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(enhancedTitle)
-            .setDescription(finalDescription)
+            .setDescription(`💸 ${finalDescription}`)
             .setColor(isFinancialGuru ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY);
         
         const recentRecords = records.slice(0, limit);
@@ -224,10 +224,22 @@ module.exports = {
         
         const randomFooter = footerMessages[Math.floor(Math.random() * footerMessages.length)];
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Financial Activity: ${totalTransactions} transactions`,
+            Math.min(totalTransactions / 100, 1),
+            constants.COLORS.PRIMARY
+        );
+
         embed.setFooter({ text: `${randomFooter} | Showing ${Math.min(limit, records.length)} of ${records.length} records` });
         embed.setTimestamp();
+        embed.setImage('attachment://progress.png');
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         userData.stats.commandsUsed++;
         await user.save(userData);

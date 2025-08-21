@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('withdraw')
-        .setDescription('Withdraw VEX tokens from your bank account')
+        .setDescription(`💸 Withdraw VEX tokens from your bank account - Instant access to your wealth!`)
         .addNumberOption(option =>
             option.setName('amount')
                 .setDescription('Amount of VEX to withdraw')
@@ -13,7 +13,7 @@ module.exports = {
                 .setMinValue(0.01))
         .addBooleanOption(option =>
             option.setName('force')
-                .setDescription('Force withdraw locked deposits (with penalty)')
+                .setDescription(`🔥 Force withdraw locked deposits (with penalty) - Emergency access available!`)
                 .setRequired(false)),
     
     cooldown: 30,
@@ -47,7 +47,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Bank Funds`)
-                .setDescription(`You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.\n\n${fomoMessage}\n💡 **Quick Fix:** Use `/work` or `/daily` to earn more VEX instantly!`)
+                .setDescription(`⏳ You only have $${userData.bankBalance.toFixed(2)} VEX in your bank account.\n\n${fomoMessage}\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX instantly!\n📈 **${Math.floor(Math.random() * 30) + 15} players** are earning VEX right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -64,7 +64,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Withdrawal Cooldown`)
-                .setDescription(`You can withdraw again in **${minutesLeft} minutes**.\n\n${socialProofMessage}\n💡 **Pro Tip:** Use this time to earn more with `/work` or `/invest`!`)
+                .setDescription(`⏳ You can withdraw again in **${minutesLeft} minutes**.\n\n${socialProofMessage}\n\n✨ **Pro Tip:** Use this time to earn more with \`/work\` or \`/invest\`!\n🔥 **Limited time:** 2x work bonuses active for ${Math.floor(Math.random() * 3) + 1} more hours!`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -92,7 +92,7 @@ module.exports = {
         if (amount > availableAmount && !force) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Funds Locked`)
-                .setDescription(`Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n$${lockedAmount.toFixed(2)} VEX is locked in term deposits.`)
+                .setDescription(`⏳ Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n🔥 $${lockedAmount.toFixed(2)} VEX is locked in deposits.`)
                 .addFields(
                     { name: '💡 Options', value: 'Use `force: true` to withdraw locked funds with 10% penalty', inline: false }
                 )
@@ -104,7 +104,7 @@ module.exports = {
         if (amount > availableAmount + lockedAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You don't have enough funds in your bank account.`)
+                .setDescription(`⏳ You don't have enough funds in your bank account.\n\n✨ **Build your wealth:** Start with \`/daily\` and \`/work\` commands!\n📈 **${Math.floor(Math.random() * 20) + 10} players** just earned their first $100 VEX today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -116,7 +116,7 @@ module.exports = {
         if (totalCost > userData.bankBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Fees`)
-                .setDescription(`Total cost including taxes and penalties: $${totalCost.toFixed(2)} VEX`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Total cost including taxes and penalties: $${totalCost.toFixed(2)} VEX`)
                 .addFields(
                     { name: '💰 Withdrawal', value: `$${amount.toFixed(2)}`, inline: true },
                     { name: '💸 Tax', value: `$${taxResult.taxAmount.toFixed(2)}`, inline: true },
@@ -193,7 +193,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${description}\n\n${constants.ANIMATED_EMOJIS.CHART} **Wealth Management Success!**`)
             .addFields(
                 { name: '💰 Withdrawn Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax Paid', value: `$${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },
@@ -224,6 +224,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Taxes support the VexiumVerse treasury and ecosystem' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const withdrawalProgress = Math.min(withdrawalCount / 50, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Withdrawal Experience: ${withdrawalCount}/50`,
+            withdrawalProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

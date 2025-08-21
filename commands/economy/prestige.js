@@ -6,15 +6,15 @@ const Progression = require('../../utils/progression');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('prestige')
-        .setDescription('Reset your level for massive VEX bonuses and exclusive perks')
+        .setDescription(`👑 Reset your level for MASSIVE VEX bonuses and exclusive perks!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('info')
-                .setDescription('View prestige requirements and rewards'))
+                .setDescription(`✨ View prestige requirements and LEGENDARY rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('confirm')
-                .setDescription('Confirm your prestige reset')),
+                .setDescription(`🔥 Confirm your EPIC prestige reset - Join the elite!`)),
     
     cooldown: 10,
     
@@ -122,7 +122,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🚀 ${description}\n\n🔥 **FOMO ALERT:** Only ${Math.floor(Math.random() * 15) + 5}% of players ev...`)
             .setColor(prestigeData.canPrestige ? constants.COLORS.GOLD : constants.COLORS.WARNING)
             .setThumbnail(interaction.user.displayAvatarURL());
         
@@ -151,7 +151,19 @@ module.exports = {
             
             embed.setFooter({ text: '⚠️ This action cannot be undone! You will lose all levels and job progress.' });
             
-            await interaction.reply({ embeds: [embed], components: [row] });
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Prestige Ready: Level ${userData.level}`,
+                1.0,
+                constants.COLORS.GOLD
+            );
+
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: [row],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
         } else {
             embed.addFields(
                 { name: '❌ Requirements Not Met', value: `You need to be level ${constants.PRESTIGE.MIN_LEVEL} to prestige`, inline: false },
@@ -160,7 +172,18 @@ module.exports = {
                 { name: '🏆 Current Prestige', value: `${userData.prestige || 0}`, inline: true }
             );
             
-            await interaction.reply({ embeds: [embed] });
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Level Progress: ${userData.level}/${constants.PRESTIGE.MIN_LEVEL}`,
+                userData.level / constants.PRESTIGE.MIN_LEVEL,
+                constants.COLORS.WARNING
+            );
+
+            await interaction.reply({ 
+                embeds: [embed],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
         }
     },
     
@@ -174,7 +197,7 @@ module.exports = {
             const motivationalMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Prestige`)
-                .setDescription(`You need to be level ${constants.PRESTIGE.MIN_LEVEL} to prestige.\n\n${motivationalMessage}\n\nKeep grinding to reach prestige eligibility!`)
+                .setDescription(`⏳ You need to be level ${constants.PRESTIGE.MIN_LEVEL} to prestige.\n\n🔥 ${motivationalMessage}\...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -204,7 +227,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CROWN} Prestige Complete!`)
-            .setDescription(`🎉 Congratulations! You've prestiged to level ${userData.prestige}!\n\n${milestoneMessage}\n\n${socialCelebration}`)
+            .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ ${milestoneMessage}`)
             .addFields(
                 { name: '💰 VEX Bonus Received', value: `$${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
                 { name: '⭐ New Prestige Level', value: `${userData.prestige}`, inline: true },
@@ -226,7 +249,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Your prestige journey begins now! Start leveling up again for even greater rewards.' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Prestige Level: ${userData.prestige}`,
+            Math.min(userData.prestige / 10, 1),
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     calculatePrestigeRewards(userData) {
@@ -251,7 +285,7 @@ module.exports = {
         ];
         
         if (prestigeLevel >= 5) {
-            perks.push(`${constants.EMOJIS.FIRE} Exclusive prestige shop access`);
+            perks.push(`🔥 Exclusive prestige shop access`);
         }
         
         if (prestigeLevel >= 10) {

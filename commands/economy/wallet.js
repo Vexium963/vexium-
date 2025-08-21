@@ -5,10 +5,10 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('wallet')
-        .setDescription('Check your VEX wallet balance and statistics')
+        .setDescription(`💸 Check your VEX wallet balance and statistics - Track your growing empire!`)
         .addUserOption(option =>
             option.setName('user')
-                .setDescription('Check another user\'s wallet (if public)')
+                .setDescription(`✨ Check another user's wallet (if public) - Get inspired by their success!`)
                 .setRequired(false)),
     
     async execute(interaction) {
@@ -40,7 +40,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Wallet`)
-                .setDescription(`${targetUser.username}'s wallet is set to private.\n\n${fomoMessage}\n💡 **Tip:** Make your wallet public to inspire others!`)
+                .setDescription(`⏳ ${targetUser.username}'s wallet is set to private.\n\n${fomoMessage}\n\n✨ **Tip:** Make your wa...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -53,18 +53,18 @@ module.exports = {
         const wealthRank = this.getWealthRank(userData.networth);
         
         let title = `${constants.EMOJIS.WALLET} ${isOwnWallet ? 'Your' : targetUser.username + "'s"} VEX Wallet`;
-        let description = `**USD-Pegged VEX Token Balance**\n1 VEX = $1.00 USD`;
+        let description = `💸 **USD-Pegged VEX Token Balance**\n🔥 1 VEX = $1.00 USD - Real money, real power!`;
         
         if (isOwnWallet) {
             if (isWealthyUser) {
                 title = `💎 YOUR WEALTH EMPIRE!`;
-                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **$${userData.networth.toFixed(2)} VEX**!\n💰 **1 VEX = $1.00 USD** - Real money, real power!`;
+                description = `🔥 **You're in the TOP ${wealthRank}%!** Your empire is worth **$${userData.networth.toFixed(2)} VEX**!\n💸 **1 VEX = $1.00 USD** - Real money, real power!`;
             } else if (isRisingStar) {
                 title = `🚀 RISING WEALTH STAR!`;
-                description = `⭐ **You're building something AMAZING!** $${userData.networth.toFixed(2)} VEX and climbing!\n🎯 **Next milestone: $1,000 VEX** for Wealth Elite status!`;
+                description = `✨ **You're building something AMAZING!** $${userData.networth.toFixed(2)} VEX and climbing!\n🔥 **Next milestone: $1,000 VEX** for Wealth Elite status!`;
             } else {
                 title = `🌟 YOUR GROWING EMPIRE!`;
-                description = `💪 **Every legend starts somewhere!** You're at $${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: $100 VEX** for Rising Star status!`;
+                description = `✨ **Every legend starts somewhere!** You're at $${userData.networth.toFixed(2)} VEX!\n🚀 **Next goal: $100 VEX** for Rising Star status!`;
             }
             
             if (recentGrowth > 0) {
@@ -73,7 +73,7 @@ module.exports = {
         } else {
             if (isWealthyUser) {
                 title = `👑 ${targetUser.username}'s WEALTH EMPIRE`;
-                description = `💎 **This player is in the TOP ${wealthRank}%!** Net worth: $${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
+                description = `✨ **This player is in the TOP ${wealthRank}%!** Net worth: $${userData.networth.toFixed(2)} VEX\n🏆 **Wealth Elite Status** - A true VexiumVerse legend!`;
             }
         }
         
@@ -119,7 +119,7 @@ module.exports = {
                     inline: true 
                 },
                 { 
-                    name: `${constants.EMOJIS.FIRE} Daily Streak`, 
+                    name: `🔥 Daily Streak`, 
                     value: `${userData.dailyStreak} days`, 
                     inline: true 
                 },
@@ -182,7 +182,7 @@ module.exports = {
         
         if (userData.achievements.length > 0) {
             walletEmbed.addFields({
-                name: `${constants.EMOJIS.ACHIEVEMENT} Achievements`,
+                name: `${constants.ANIMATED_EMOJIS.ACHIEVEMENT} Achievements`,
                 value: `${userData.achievements.length}/${constants.ACHIEVEMENTS.length} unlocked`,
                 inline: true
             });
@@ -194,7 +194,23 @@ module.exports = {
                 `Wallet viewed by ${interaction.user.username}` 
         });
         
-        await interaction.reply({ embeds: [walletEmbed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        const nextLevelXP = user.getXPForLevel(userData.level + 1);
+        const xpProgress = userData.xp / nextLevelXP;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Level ${userData.level} Progress`,
+            xpProgress,
+            constants.COLORS.VEX
+        );
+        
+        walletEmbed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [walletEmbed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         if (isOwnWallet) {
             userData.stats.commandsUsed++;

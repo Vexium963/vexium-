@@ -6,39 +6,39 @@ const CanvasRenderer = require('../../utils/canvasRenderer');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('profile')
-        .setDescription('View and customize your VexiumVerse profile')
+        .setDescription(`✨ View and customize your legendary VexiumVerse profile - Stand out from the crowd!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('view')
-                .setDescription('View a user profile')
+                .setDescription(`🔥 View a user's epic profile and achievements`)
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('User to view profile of')
+                        .setDescription(`✨ User to view profile of - Discover their empire!`)
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('bio')
-                .setDescription('Set your profile bio')
+                .setDescription(`💓 Set your profile bio - Express your legendary status!`)
                 .addStringOption(option =>
                     option.setName('text')
-                        .setDescription('Your bio text (max 200 characters)')
+                        .setDescription(`✨ Your bio text - Make it legendary! (max 200 characters)`)
                         .setRequired(true)
                         .setMaxLength(200)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('color')
-                .setDescription('Set your profile embed color')
+                .setDescription(`🌈 Set your profile embed color - Show your unique style!`)
                 .addStringOption(option =>
                     option.setName('color')
-                        .setDescription('Hex color code (e.g., #FF0000)')
+                        .setDescription(`🌈 Hex color code - Make your profile shine! (e.g., #FF0000)`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Set your profile status')
+                .setDescription(`🎉 Set your profile status - Let everyone know what you're conquering!`)
                 .addStringOption(option =>
                     option.setName('status')
-                        .setDescription('Your status')
+                        .setDescription(`🔥 Your status - Show your current empire activity!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Active', value: 'Active' },
@@ -87,7 +87,7 @@ module.exports = {
             
             const motivationEmbed = new EmbedBuilder()
                 .setTitle(`🌟 PROFILE POWER-UP OPPORTUNITY!`)
-                .setDescription(`🔥 **${socialProof} players are customizing profiles RIGHT NOW!**\n✨ **Limited Time:** Profile updates earn +${urgencyBonus} XP bonus today!\n💎 **Stand out from the crowd and show your legendary status!**`)
+                .setDescription(`🔥 **${socialProof} players are customizing profiles RIGHT NOW!**\n✨ **Limited Time:** Profile up...`)
                 .addFields(
                     { name: '🎯 Quick Actions', value: '`/profile bio` - **Express yourself!**\n`/profile color` - **Show your style!**\n`/profile status` - **Let others know what you\'re up to!**', inline: false },
                     { name: '🏆 Profile Benefits', value: `${isProfileExpert ? '👑 **Profile Master** - You inspire others!' : '🌟 **Build your reputation** - Customized profiles get 3x more views!'}`, inline: false }
@@ -124,7 +124,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)
-                .setDescription(`${targetUser.username}'s profile is set to private.\n\n${fomoMessage}\n💡 **Tip:** Customize your own profile to stand out!`)
+                .setDescription(`🔥 ${targetUser.username}'s profile is set to private.\n\n${fomoMessage}\n\n✨ **FOMO Alert:** Cus...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -148,9 +148,19 @@ module.exports = {
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
         const milestoneMessage = userData.level >= 10 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const levelProgressXPValue = userData.xp / (userData.level * 100);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Level ${userData.level} Progress: ${userData.xp}/${userData.level * 100} XP`,
+            levelProgressXPValue,
+            constants.COLORS.VEX
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(title)
+            .setTitle(`✨ ${title}`)
             .setColor(profileColor)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
         if (userData.profile.bio) {
@@ -158,12 +168,12 @@ module.exports = {
         }
         
         const wealthRank = userData.networth >= 10000 ? '🐋 Whale' : userData.networth >= 1000 ? '🦈 Shark' : '🐟 Fish';
-        const levelProgress = this.calculateLevelProgress(userData);
+        const levelProgressValue = this.calculateLevelProgress(userData);
         const statusEmoji = this.getStatusEmoji(userData.profile.status || 'Active');
         
         embed.addFields(
             { name: '💰 Net Worth', value: `$${userData.networth.toFixed(2)} VEX ${wealthRank}`, inline: true },
-            { name: '🎯 Level Progress', value: `${userData.level} ${levelProgress.bar}\n${levelProgress.percentage}% to next level`, inline: true },
+            { name: '🎯 Level Progress', value: `Level ${userData.level}\nSee progress bar below`, inline: true },
             { name: '📊 Status', value: `${statusEmoji} ${userData.profile.status || 'Active'}${recentActivity ? ' 🟢 ONLINE' : ''}`, inline: true }
         );
         
@@ -264,7 +274,7 @@ module.exports = {
             
             await interaction.reply({ 
                 embeds: [embed], 
-                files: [attachment],
+                files: [attachment, { attachment: progressBuffer, name: 'progress.png' }],
                 components: components.length > 0 ? components : undefined
             });
         } catch (error) {
@@ -272,6 +282,7 @@ module.exports = {
             embed.setThumbnail(targetUser.displayAvatarURL({ size: 256 }));
             await interaction.reply({ 
                 embeds: [embed],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }],
                 components: components.length > 0 ? components : undefined
             });
         }
@@ -292,7 +303,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bio Too Long`)
-                .setDescription(`Bio must be 200 characters or less.\n\n${fomoMessage}\n💡 **Pro Tip:** Shorter bios get 2x more profile views!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Bio must be 200 characters or less.\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Keep it concise and memorable!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -306,13 +317,24 @@ module.exports = {
         const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
         
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Profile Customization Progress',
+            0.75,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Bio Updated!`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} Bio Updated!`)
             .setDescription(`Your bio has been set to:\n\n*${bioText}*${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProofMessage}`)
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleColor(interaction) {
@@ -344,13 +366,24 @@ module.exports = {
         
         await user.save(userData);
         
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Profile Customization Progress',
+            0.85,
+            colorInput
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Color Updated!`)
-            .setDescription('Your profile color has been updated!')
+            .setTitle(`${constants.ANIMATED_EMOJIS.RAINBOW} Color Updated!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your profile color has been updated!`)
             .setColor(colorInput)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStatus(interaction) {
@@ -373,12 +406,23 @@ module.exports = {
             'Playing Games': '🎮'
         };
         
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Profile Customization Progress',
+            0.9,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Status Updated!`)
-            .setDescription(`Your status is now: ${statusEmojis[status] || '⚪'} **${status}**`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Status Updated!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} Your status is now: ${statusEmojis[status] || '⚪'} **${status.charAt(0).toUpperCase() + status.slice(1)}**!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Show the world your current vibe!**`)
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

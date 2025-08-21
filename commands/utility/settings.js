@@ -5,23 +5,23 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('settings')
-        .setDescription('Configure your VexiumVerse preferences')
+        .setDescription(`✨ Configure your VexiumVerse preferences and unlock optimization bonuses!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('view')
-                .setDescription('View current settings'))
+                .setDescription(`📈 View current settings and optimization score`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('privacy')
-                .setDescription('Configure privacy settings'))
+                .setDescription(`🔒 Configure privacy settings and protect your empire`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('display')
-                .setDescription('Configure display preferences'))
+                .setDescription(`🌈 Configure display preferences for maximum immersion`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('reset')
-                .setDescription('Reset all settings to default')),
+                .setDescription(`💥 Reset all settings to default and get a fresh start bonus`)),
     
     cooldown: 10,
     
@@ -104,15 +104,13 @@ module.exports = {
         const activeOptimizers = Math.floor(Math.random() * 25) + 10;
         description += `\n📊 **${activeOptimizers} players optimizing right now!** Join the efficiency revolution!`;
         
-        const progressBar = '█'.repeat(Math.floor(optimizationScore / 5)) + '░'.repeat(20 - Math.floor(optimizationScore / 5));
-        
         const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', activeOptimizers);
         const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n📊 **Optimization Score:** ${progressBar} ${optimizationScore}%\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(description + `\n\n📈 **Optimization Score:** ${optimizationScore}%\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}${variableReward ? `\n💸 ${variableReward}` : ''}`)
             .addFields(
                 { name: '🔒 Privacy Fortress', value: this.formatPrivacySettings(settings.privacy) + '\n💡 *Control your digital footprint*', inline: false },
                 { name: '🎨 Visual Experience', value: this.formatDisplaySettings(settings.display) + '\n🎯 *Personalize your interface*', inline: false },
@@ -120,6 +118,7 @@ module.exports = {
                 { name: '📈 Your Progress', value: `🎛️ **Settings Optimized:** ${settingsUsage} times\n🏆 **Status:** ${isSettingsPro ? '👑 Master' : settingsUsage >= 5 ? '⭐ Expert' : '🌟 Learning'}\n💡 **Tip:** ${this.getOptimizationTip(optimizationScore)}`, inline: false }
             )
             .setColor(isSettingsPro ? constants.COLORS.VEX : isFirstTime ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
         const buttons = [
@@ -142,7 +141,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buttons);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Optimization Score: ${optimizationScore}%`,
+            optimizationScore / 100,
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePrivacy(interaction, user, userData) {
@@ -155,7 +166,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOCK} Privacy Settings`)
-            .setDescription(`Control who can see your information and interact with you\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`🔒 Control who can see your information and interact with you\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Customize your privacy settings for maximum security!**`)
             .addFields(
                 { name: '👁️ Profile Visibility', value: privacy.profilePublic ? '🌐 Public' : '🔒 Private', inline: true },
                 { name: '💰 Balance Visibility', value: privacy.balancePublic ? '🌐 Public' : '🔒 Private', inline: true },
@@ -224,7 +235,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.PALETTE} Display Settings`)
-            .setDescription(`Customize how information is displayed to you\n\n${milestoneMessage}\n${socialProofMessage}`)
+            .setDescription(`🌈 Customize how information is displayed to you\n\n⬆️ ${milestoneMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Personalize your VexiumVerse experience!**`)
             .addFields(
                 { name: '🎨 Theme', value: display.theme || 'Default', inline: true },
                 { name: '🌍 Timezone', value: display.timezone || 'UTC', inline: true },
@@ -292,13 +303,25 @@ module.exports = {
         const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 1).toFixed(2)) : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Settings Reset Complete',
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Settings Reset`)
-            .setDescription(`🔄 All settings have been reset to their default values.\n\n${comebackMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setTitle(`✨ Settings Reset`)
+            .setDescription(`🎉 All settings have been reset to their default values.\n\n${comebackMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getDefaultSettings() {

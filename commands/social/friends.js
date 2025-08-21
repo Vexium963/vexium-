@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('friends')
-        .setDescription('Manage your friends list and social connections')
+        .setDescription(`✨ Build your social empire and unlock exclusive bonuses!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('add')
-                .setDescription('Send a friend request')
+                .setDescription(`💓 Connect with players and grow your network`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to add as friend')
@@ -17,7 +17,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('remove')
-                .setDescription('Remove a friend')
+                .setDescription(`💥 Remove someone from your network`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('Friend to remove')
@@ -25,15 +25,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('View your friends list'))
+                .setDescription(`🌈 See your social empire and network status`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('requests')
-                .setDescription('View pending friend requests'))
+                .setDescription(`⏳ Manage incoming connection requests`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('accept')
-                .setDescription('Accept a friend request')
+                .setDescription(`🎉 Welcome someone to your network`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User whose request to accept')
@@ -41,7 +41,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('decline')
-                .setDescription('Decline a friend request')
+                .setDescription(`🔥 Reject a connection request`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User whose request to decline')
@@ -49,7 +49,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('activity')
-                .setDescription('View friends activity feed')),
+                .setDescription(`📊 See what your network is up to`)),
     
     cooldown: 3,
     
@@ -110,7 +110,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Add Yourself`)
-                .setDescription(`You cannot add yourself as a friend.\n\n${fomoMessage}\n💡 **Pro Tip:** Add other players to unlock exclusive social bonuses!`)
+                .setDescription(`💬 You can't befriend yourself, but you can befriend EVERYONE ELSE!\n\n${fomoMessage}\n\n✨ **FOMO...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -119,7 +119,7 @@ module.exports = {
         if (targetUser.bot) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Add Bots`)
-                .setDescription('You cannot add bots as friends.')
+                .setDescription(`💥 Bots don't make good friends - they can't boost your social status!\n\n🔥 **Try adding real pl...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -130,7 +130,7 @@ module.exports = {
         if (userData.friends.list.includes(targetUser.id)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already Friends`)
-                .setDescription(`You're already friends with **${targetUser.username}**.`)
+                .setDescription(`💓 You're already connected to **${targetUser.username}**!\n\n✨ **Why not expand further?** Popul...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -139,7 +139,7 @@ module.exports = {
         if (userData.friends.requests.sent.includes(targetUser.id)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Request Already Sent`)
-                .setDescription(`You've already sent a friend request to **${targetUser.username}**.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Request already sent to **${targetUser.username}**!\n\n${constants.ANIMATED_EMOJIS.CLOCK} **Waiting for their response...**\n\n💡 *Tip: Friends get 2x rewards when playing together!*`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -183,8 +183,17 @@ module.exports = {
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 3 + 1).toFixed(2)) : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const socialProgress = Math.min(totalFriends / 25, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Social Network: ${totalFriends}/25 friends`,
+            socialProgress,
+            constants.COLORS.VEX
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(title)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} ${title.replace(constants.EMOJIS.SUCCESS, '')}`)
             .setDescription(description + `\n\n${randomTip}\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '👤 Target', value: `${targetUser.username} ${Math.random() > 0.5 ? '📈 Rising Star' : '⭐ Active Player'}`, inline: true },
@@ -196,10 +205,14 @@ module.exports = {
             )
             .setColor(isSocialButterfly ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
             .setThumbnail(targetUser.displayAvatarURL())
+            .setImage('attachment://progress.png')
             .setFooter({ text: '🔔 They\'ll be notified instantly! Social connections = success!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRemove(interaction) {
@@ -230,13 +243,25 @@ module.exports = {
         await user.save(userData);
         await targetUserData.save(targetData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Friend Removal Confirmation`,
+            1.0,
+            constants.COLORS.WARNING
+        );
+
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Friend Removed`)
             .setDescription(`**${targetUser.username}** has been removed from your friends list.`)
             .setColor(constants.COLORS.WARNING)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleList(interaction) {
@@ -259,7 +284,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.HEART} Your Social Empire Awaits!`)
-                .setDescription(`${randomMotivation}\n\n📊 **${activeUsers} players are networking RIGHT NOW!**\n🎯 **Start with /friends add** to join the social elite!\n\n${fomoMessage}\n${milestoneMessage}`)
+                .setDescription(`${randomMotivation}\n\n📊 **${activeUsers} players are networking RIGHT NOW!**\n🎯 **Start with /...`)
                 .addFields(
                     { name: '🎁 Friend Benefits', value: '💰 **Daily bonuses**\n🎮 **Exclusive events**\n📈 **Popularity boosts**\n🏆 **Social achievements**', inline: true },
                     { name: '⚡ Quick Start', value: '1️⃣ Add 5 friends = **Networker** status\n2️⃣ Add 10 friends = **Social Butterfly**\n3️⃣ Add 25 friends = **Social Legend**', inline: true },
@@ -312,9 +337,22 @@ module.exports = {
             .setStyle(ButtonStyle.Secondary)
             .setEmoji('📰');
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const socialProgress = Math.min(userData.friends.list.length / 25, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Social Network: ${userData.friends.list.length}/25 friends`,
+            socialProgress,
+            constants.COLORS.VEX
+        );
+
         const row = new ActionRowBuilder().addComponents(addButton, activityButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRequests(interaction) {
@@ -384,9 +422,23 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(acceptButton, declineButton);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const requestProgress = Math.min((userData.friends.requests.received.length + userData.friends.requests.sent.length) / 10, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Friend Requests: ${userData.friends.requests.received.length} received, ${userData.friends.requests.sent.length} sent`,
+            requestProgress,
+            constants.COLORS.PRIMARY
+        );
+
         embed.setFooter({ text: 'Use /friends accept or /friends decline to manage requests' });
+        embed.setImage('attachment://progress.png');
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleAccept(interaction) {

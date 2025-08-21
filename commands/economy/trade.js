@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('trade')
-        .setDescription('Trade VEX tokens or items with other users')
+        .setDescription(`✨ Trade VEX tokens or items with other users - Build your trading empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('offer')
-                .setDescription('Create a trade offer')
+                .setDescription(`💸 Create a trade offer - Start building wealth through trading!`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to trade with')
@@ -31,7 +31,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('request')
-                .setDescription('Request specific items/VEX in return')
+                .setDescription(`🔥 Request specific items/VEX in return - Get exactly what you want!`)
                 .addNumberOption(option =>
                     option.setName('vex_amount')
                         .setDescription('Amount of VEX requested')
@@ -93,7 +93,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Trade`)
-                .setDescription(`You cannot trade with yourself!\n\n${fomoMessage}\n💡 **Pro Tip:** Find other players in the leaderboard to trade with!`)
+                .setDescription(`💥 You cannot trade with yourself!\n\n${fomoMessage}\n\n✨ **Pro Tip:** Find other players in the ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -103,7 +103,7 @@ module.exports = {
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Trade`)
-                .setDescription(`You cannot trade with bots!\n\n${socialProofMessage}\n🤝 **Find real players** to build your trading empire!`)
+                .setDescription(`🔥 You cannot trade with bots!\n\n${socialProofMessage}\n\n💓 **Find real players** to build your...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -113,7 +113,7 @@ module.exports = {
             const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Empty Trade`)
-                .setDescription(`You must offer either VEX tokens or an item!\n\n💰 **Trading builds wealth!** Offer something valuable to create win-win deals!\n\n${milestoneMessage}`)
+                .setDescription(`💥 You must offer either VEX tokens or an item!\n\n💸 **Trading builds wealth!** Offer something ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -123,7 +123,7 @@ module.exports = {
             const variableReward = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2));
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`You only have $${userData.vexBalance.toFixed(2)} VEX.\n\n💡 **Earn more VEX:** Use /work, /daily, or /invest to build your trading power!\n\n${variableReward}`)
+                .setDescription(`🔥 You only have $${userData.vexBalance.toFixed(2)} VEX.\n\n🚀 **Earn more VEX:** Use /work, /dai...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -133,7 +133,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Items`)
-                .setDescription(`You don't have ${itemQuantity}x **${itemId}**.\n\n🛍️ **Get items:** Visit /shop to buy what you need for trading!\n\n${fomoMessage}`)
+                .setDescription(`💥 You don't have ${itemQuantity}x **${itemId}**.\n\n✨ **Get items:** Visit /shop to buy what you...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -143,7 +143,7 @@ module.exports = {
         if (tradeValue > constants.LIMITS.MAX_TRADE) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Trade Value Too High`)
-                .setDescription(`Maximum trade value is $${constants.LIMITS.MAX_TRADE.toFixed(2)} VEX.`)
+                .setDescription(`🔥 Maximum trade value is $${constants.LIMITS.MAX_TRADE.toFixed(2)} VEX.\n\n✨ **Pro Tip:** Break ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -209,7 +209,7 @@ module.exports = {
         }
         
         const embed = new EmbedBuilder()
-            .setTitle(title)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} ${title.replace(constants.EMOJIS.TRADE, '')}`)
             .setDescription(description)
             .addFields(
                 { name: '🎁 Your Epic Offer', value: offerText, inline: true },
@@ -220,6 +220,7 @@ module.exports = {
                 { name: '🎯 Success Tip', value: 'Fair trades build reputation!', inline: true }
             )
             .setColor(isHighValueTrade ? constants.COLORS.VEX : isTradeExpert ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setFooter({ text: '⚡ Quick responses get better deals!' })
             .setTimestamp();
         
@@ -235,11 +236,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(acceptButton, declineButton);
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Trade Value: $${totalTradeValue.toFixed(2)} VEX`,
+            Math.min(totalTradeValue / 1000, 1),
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         const targetEmbed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TRADE} Trade Offer Received`)
-            .setDescription(`${interaction.user.username} wants to trade with you!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${interaction.user.username} wants to trade with you!\n\...`)
             .addFields(
                 { name: '🎁 They Offer', value: offerText, inline: true },
                 { name: '⏰ Expires', value: '<t:' + Math.floor((Date.now() + 300000) / 1000) + ':R>', inline: true }
@@ -267,7 +279,34 @@ module.exports = {
             )
             .setColor(constants.COLORS.INFO);
         
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Trade Request Information',
+            0.5,
+            constants.COLORS.INFO
+        );
+
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('trade_help_offer')
+                    .setLabel('Create Offer')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('🎁'),
+                new ButtonBuilder()
+                    .setCustomId('trade_help_guide')
+                    .setLabel('Trading Guide')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📚')
+            );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [actionButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }],
+            ephemeral: true 
+        });
     },
     
     generateTradeId() {

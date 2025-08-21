@@ -4,11 +4,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('Check bot latency and system status'),
+        .setDescription(`⏳ Check bot latency and system status - See how fast VexiumVerse responds!`),
     
     async execute(interaction) {
         const sent = await interaction.reply({ 
-            content: `${constants.EMOJIS.LOADING} Pinging...`, 
+            content: `⏳ Pinging...`, 
             fetchReply: true 
         });
         
@@ -33,7 +33,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} VexiumVerse Status - PEAK PERFORMANCE!`)
-            .setDescription(`🚀 **Bot performance and connection status**\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`🚀 **Bot performance and connection status**\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n🔥 **${Math.floor(Math.random() * 50) + 200} players** are actively earning VEX right now!`)
             .addFields(
                 { name: '🤖 Bot Latency', value: `${botLatency}ms`, inline: true },
                 { name: '🌐 API Latency', value: `${apiLatency}ms`, inline: true },

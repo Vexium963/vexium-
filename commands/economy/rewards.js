@@ -5,19 +5,19 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('rewards')
-        .setDescription('Claim special rewards and bonuses')
+        .setDescription(`🎁 Claim exclusive rewards and bonuses - Limited time offers!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('claim')
-                .setDescription('Claim available rewards'))
+                .setDescription(`✨ Claim your available rewards now!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Check reward status and availability'))
+                .setDescription(`📈 Check your reward status and upcoming bonuses`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('history')
-                .setDescription('View reward claim history')),
+                .setDescription(`📜 View your reward claim history and achievements`)),
     
     cooldown: 10,
     
@@ -74,7 +74,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} No Rewards Available`)
-                .setDescription(`You have no rewards available to claim at this time.\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`⏳ You have no rewards available to claim right now.\n\n🔥 ${fomoMessage}\n👥 ${socialProof}\n\n✨ ...`)
                 .addFields({
                     name: '⏰ Next Reward',
                     value: 'Check back later for new rewards!',
@@ -99,18 +99,31 @@ module.exports = {
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 20);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const rewardProgress = Math.min((userData.stats.rewardsClaimed || 0) / 100, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Rewards Claimed: ${userData.stats.rewardsClaimed || 0}/100`,
+            rewardProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} ${milestoneMessage ? '🏆 MILESTONE ACHIEVED!' : 'Rewards Claimed!'}`)
-            .setDescription(`🎉 You've claimed ${availableRewards.length} reward(s)!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${socialProof}`)
+            .setTitle(`🎉 ${milestoneMessage ? '🏆 MILESTONE ACHIEVED!' : 'Rewards Claimed!'}`)
+            .setDescription(`💸 You've claimed ${availableRewards.length} reward(s)!${milestoneMessage ? `\n\n🏆 ${milestoneMessage}` : ''}${variableReward ? `\n✨ ${variableReward}` : ''}\n\n👥 ${socialProof}\n\n🔥 **Streak bonus active!** Keep claiming for bigger rewards!`)
             .addFields(
                 { name: '💰 Total Value', value: `$${totalValue.toFixed(2)} VEX`, inline: true },
                 { name: '🎁 Rewards Claimed', value: availableRewards.map(r => `• ${r.name}: $${r.value.toFixed(2)}`).join('\n'), inline: false },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(milestoneMessage ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStatus(interaction, user, userData) {
@@ -119,7 +132,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.GIFT} Reward Status`)
-            .setDescription('Your current reward status and upcoming opportunities')
+            .setDescription(`📈 Your current reward status and upcoming opportunities\n\n🔥 **${Math.floor(Math.random() * 50) + 20} players** claimed rewards in the last hour!`)
             .addFields(
                 { 
                     name: '🎁 Available Now', 
@@ -150,7 +163,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(claimButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const statusProgress = Math.min((userData.stats.rewardsClaimed || 0) / 50, 1);
+        const statusProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Reward Master Progress: ${userData.stats.rewardsClaimed || 0}/50`,
+            statusProgress,
+            constants.COLORS.PRIMARY
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: statusProgressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleHistory(interaction, user, userData) {
@@ -159,7 +185,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.HISTORY} Reward History`)
-            .setDescription('Your recent reward claims')
+            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** $${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`)
             .addFields(
                 { 
                     name: '📜 Recent Claims', 
@@ -174,7 +200,19 @@ module.exports = {
             .setColor(constants.COLORS.INFO)
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const historyProgress = Math.min((userData.stats.totalRewardsValue || 0) / 1000, 1);
+        const historyProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Reward Value Progress: $${(userData.stats.totalRewardsValue || 0).toFixed(2)}/1000 VEX`,
+            historyProgress,
+            constants.COLORS.INFO
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: historyProgressBuffer, name: 'progress.png' }]
+        });
     },
     
     getAvailableRewards(userData) {

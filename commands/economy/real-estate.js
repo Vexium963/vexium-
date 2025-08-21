@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('real-estate')
-        .setDescription('Invest in virtual real estate properties for passive income')
+        .setDescription(`🔥 Build your property empire! Earn passive VEX income 24/7!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription('Browse available properties for purchase'))
+                .setDescription(`✨ Discover premium properties with guaranteed ROI!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase a real estate property')
+                .setDescription(`💸 Secure your financial future with property investment!`)
                 .addStringOption(option =>
                     option.setName('property_id')
                         .setDescription('ID of the property to purchase')
@@ -21,15 +21,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your real estate portfolio and income'))
+                .setDescription(`📈 Track your growing empire and passive income streams!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('collect')
-                .setDescription('Collect rental income from your properties'))
+                .setDescription(`🎉 Claim your hard-earned rental profits!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('upgrade')
-                .setDescription('Upgrade a property to increase rental income')
+                .setDescription(`⬆️ Boost your property's earning potential!`)
                 .addStringOption(option =>
                     option.setName('property_id')
                         .setDescription('ID of the property to upgrade')
@@ -37,7 +37,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sell')
-                .setDescription('Sell a property from your portfolio')
+                .setDescription(`💥 Cash out your investment for instant VEX!`)
                 .addStringOption(option =>
                     option.setName('property_id')
                         .setDescription('ID of the property to sell')
@@ -134,7 +134,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${marketEmoji} **Market Status:** ${marketMessage}\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(description + `\n\n${marketEmoji} **Market Status:** ${marketMessage}\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}${variableReward ? `\n💸 ${variableReward}` : ''}`)
             .addFields(
                 { 
                     name: '🏘️ Market Intelligence', 
@@ -176,7 +176,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton, portfolioButton, calculatorButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const marketProgress = marketTrend === 'bullish' ? 0.75 : 0.35;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Market Trend: ${marketTrend.toUpperCase()}`,
+            marketProgress,
+            marketTrend === 'bullish' ? constants.COLORS.SUCCESS : constants.COLORS.WARNING
+        );
+
+        embed.setImage('attachment://market-trend.png');
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'market-trend.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -191,7 +206,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Property Not Found`)
-                .setDescription(`No property found with ID: ${propertyId}\n\n${nearMissMessage}\n\nUse \`/real-estate market\` to see available properties.`)
+                .setDescription(`💥 No property found with ID: ${propertyId}\n\n✨ ${nearMissMessage}\n\n🔥 Use \`/real-estate market\` to discover amazing properties!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -202,7 +217,7 @@ module.exports = {
         if (userData.realEstate.some(p => p.id === propertyId)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Property Already Owned`)
-                .setDescription(`You already own **${property.name}**.\n\nEach property can only be owned once per user.`)
+                .setDescription(`🎉 You already own **${property.name}**!\n\n✨ Each property can only be owned once. Try upgrading...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -211,7 +226,7 @@ module.exports = {
         if (userData.vexBalance < property.price) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Property price: $${property.price.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: $${property.price.toFixed(2)} VEX\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -278,7 +293,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const roiProgress = Math.min(parseFloat(annualROI) / 30, 1); // Cap at 30% for visualization
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Annual ROI: ${annualROI}%`,
+            roiProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        embed.setImage('attachment://roi-progress.png');
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'roi-progress.png' }]
+        });
     },
     
     async handlePortfolio(interaction) {
@@ -355,7 +385,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(collectButton, upgradeButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgress = Math.min(totalValue / 50000, 1); // Progress towards 50k portfolio
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Value: $${totalValue.toFixed(0)} VEX`,
+            portfolioProgress,
+            constants.COLORS.REAL_ESTATE
+        );
+
+        embed.setImage('attachment://portfolio-progress.png');
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'portfolio-progress.png' }]
+        });
     },
     
     async handleCollect(interaction) {
@@ -432,7 +477,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, upgradeButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const incomeProgress = Math.min(totalIncome / 1000, 1); // Progress visualization
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Income Collected: $${totalIncome.toFixed(2)} VEX`,
+            incomeProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        embed.setImage('attachment://income-progress.png');
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'income-progress.png' }]
+        });
     },
     
     getAvailableProperties() {

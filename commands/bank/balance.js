@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('bank')
-        .setDescription('View your bank account details and deposit information'),
+        .setDescription(`💸 Master your financial empire - Track wealth, earn interest, dominate leaderboards!`),
     
     async execute(interaction) {
         const user = new User(interaction.user.id);
@@ -43,7 +43,6 @@ module.exports = {
         const wealthGrowth = userData.stats.wealthGrowthRate || 0;
         const nextMilestone = Math.ceil(totalWealth / 10000) * 10000;
         const progressToMilestone = (totalWealth / nextMilestone) * 100;
-        const progressBar = '█'.repeat(Math.floor(progressToMilestone / 5)) + '░'.repeat(20 - Math.floor(progressToMilestone / 5));
         
         let title = `${constants.EMOJIS.BANK} Your Financial Empire`;
         let description = '💰 **Complete overview of your VexiumVerse wealth**';
@@ -93,7 +92,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`✨ ${description} 📈`)
             .addFields(
                 { name: '🏦 Bank Vault', value: `$${userData.bankBalance.toFixed(2)} VEX ${userData.bankBalance >= 50000 ? '🐋' : userData.bankBalance >= 10000 ? '🦈' : '🐟'}`, inline: true },
                 { name: '💼 Active Wallet', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
@@ -183,7 +182,21 @@ module.exports = {
         
         embed.setFooter({ text: 'Interest is calculated and paid daily at midnight UTC' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const wealthProgress = Math.min(totalWealth / 100000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Wealth Progress: $${totalWealth.toFixed(0)} VEX`,
+            wealthProgress,
+            isMillionaire ? constants.COLORS.VEX : isWealthy ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         userData.stats.commandsUsed++;
         await user.save(userData);

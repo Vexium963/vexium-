@@ -5,24 +5,24 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('nft-mint')
-        .setDescription('Mint unique NFTs using VEX tokens')
+        .setDescription(`✨ Mint unique NFTs using VEX tokens - Create digital masterpieces!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')
-                .setDescription('Mint a new NFT')
+                .setDescription(`🔥 Mint a new NFT - Join the digital art revolution!`)
                 .addStringOption(option =>
                     option.setName('name')
-                        .setDescription('Name for your NFT')
+                        .setDescription(`✨ Name for your NFT masterpiece`)
                         .setRequired(true)
                         .setMaxLength(50))
                 .addStringOption(option =>
                     option.setName('description')
-                        .setDescription('Description of your NFT')
+                        .setDescription(`🌈 Description of your NFT - Tell its story!`)
                         .setRequired(true)
                         .setMaxLength(200))
                 .addStringOption(option =>
                     option.setName('rarity')
-                        .setDescription('NFT rarity tier')
+                        .setDescription(`⬆️ NFT rarity tier - Higher rarity = More value!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Common - 50 VEX', value: 'common' },
@@ -33,11 +33,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('collection')
-                .setDescription('View your NFT collection'))
+                .setDescription(`🏆 View your NFT collection - Showcase your digital empire!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('marketplace')
-                .setDescription('Browse NFT marketplace')),
+                .setDescription(`💸 Browse NFT marketplace - Discover rare treasures!`)),
     
     cooldown: 30,
     
@@ -72,11 +72,23 @@ module.exports = {
         if (isFirstTime && Math.random() < 0.3) {
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`🎉 FIRST-TIME NFT CREATOR BONUS!`)
-                .setDescription(`🌟 **Welcome to the NFT world!** You're about to create digital history!\n✨ **SPECIAL OFFER:** 25% discount on your first mint!`)
+                .setDescription(`🎉 **Welcome to the NFT world!** You're about to create digital history!\n🔥 **SPECIAL OFFER:** 2...`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: '⏰ First-time bonus expires after this session!' });
             
-            await interaction.reply({ embeds: [bonusEmbed], ephemeral: true });
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'NFT Creation Bonus Progress',
+                0.25,
+                constants.COLORS.VEX
+            );
+            
+            await interaction.reply({ 
+                embeds: [bonusEmbed], 
+                files: [{ attachment: progressBuffer, name: 'progress.png' }],
+                ephemeral: true 
+            });
             
             setTimeout(async () => {
                 await interaction.followUp({ content: '🎨 Ready to create your masterpiece? Use the command again!', ephemeral: true });
@@ -119,7 +131,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`⏳ You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: $${userData.vexBalance.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -131,7 +143,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Transaction Failed`)
-                .setDescription(`${result.reason}\n\n${comebackMessage}`)
+                .setDescription(`💥 ${result.reason}\n\n💓 ${comebackMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -202,7 +214,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(tradeButton, viewButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `NFT Minting Progress: ${rarity.charAt(0).toUpperCase() + rarity.slice(1)}`,
+            1.0,
+            this.getRarityColor(rarity)
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCollection(interaction) {
@@ -258,7 +282,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(viewAllButton, marketplaceButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const collectionProgress = userData.nfts.length / 20; // Progress towards 20 NFT milestone
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Collection Progress: ${userData.nfts.length} NFTs`,
+            Math.min(collectionProgress, 1.0),
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleMarketplace(interaction) {
@@ -288,7 +325,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(mintButton, collectionButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const marketProgress = 0.6; // Marketplace development progress
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'NFT Marketplace Development',
+            marketProgress,
+            constants.COLORS.INFO
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateNFTId() {

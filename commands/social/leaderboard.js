@@ -5,10 +5,10 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
-        .setDescription('View VexiumVerse leaderboards and rankings')
+        .setDescription(`🏆 Compete with players worldwide! View rankings and climb the leaderboards`)
         .addStringOption(option =>
             option.setName('category')
-                .setDescription('Leaderboard category')
+                .setDescription(`📈 Choose your competitive category`)
                 .setRequired(false)
                 .addChoices(
                     { name: 'Net Worth', value: 'networth' },
@@ -23,7 +23,7 @@ module.exports = {
                 ))
         .addIntegerOption(option =>
             option.setName('page')
-                .setDescription('Page number (10 users per page)')
+                .setDescription(`⏳ Navigate through leaderboard pages`)
                 .setRequired(false)
                 .setMinValue(1)),
     
@@ -66,7 +66,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Leaderboard`)
-                .setDescription(`No users found for this leaderboard.\n\n${fomoMessage}\n🚀 **Be the FIRST to dominate this category!**`)
+                .setDescription(`✨ No users found for this leaderboard.\n\n${fomoMessage}\n🚀 **Be the FIRST to dominate this cate...`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -79,7 +79,7 @@ module.exports = {
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Page Not Found`)
-                .setDescription(`Page ${page} doesn't exist. There are only ${totalPages} pages.\n\n${socialProofMessage}`)
+                .setDescription(`❌ Page ${page} doesn't exist. There are only ${totalPages} pages.\n\n${socialProofMessage}\n\n📈 ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -133,10 +133,20 @@ module.exports = {
             description += `\n${milestoneMessage}`;
         }
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const userProgress = userRank > 0 ? Math.max(0, 1 - (userRank / allUsers.length)) : 0;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Leaderboard Position: ${userRank > 0 ? `#${userRank}` : 'Unranked'}`,
+            userProgress,
+            constants.COLORS.GOLD
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(description)
+            .setTitle(`🎉 ${categoryNames[category]} Leaderboard`)
+            .setDescription(`🔥 **LIVE COMPETITION ARENA**\n\n${description}\n\n🏆 **CLIMB THE RANKS:** Every position matters...`)
             .setColor(isCompetitive ? constants.COLORS.VEX : urgencyBonus > 0 ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
         const leaderboardText = await this.formatLeaderboard(interaction.client, pageUsers, category, startIndex);
@@ -223,7 +233,11 @@ module.exports = {
             embed.setFooter({ text: 'Select a different category to view other rankings' });
         }
         
-        await interaction.reply({ embeds: [embed], components });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components,
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         currentUserData.stats.commandsUsed++;
         await currentUser.save(currentUserData);

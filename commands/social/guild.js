@@ -152,7 +152,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already in Guild`)
-                .setDescription(`You must leave your current guild before creating a new one.\n\n${fomoMessage}`)
+                .setDescription(`🔥 You must leave your current guild before creating a new one!\n\n${fomoMessage}\n\n✨ **Pro Tip:...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -163,7 +163,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Creating a guild costs $${creationCost.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}`)
+                .setDescription(`💸 Creating a guild costs $${creationCost.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)} VEX!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Earn more VEX through /daily, /work, or /invest!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -173,7 +173,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Creation Failed`)
-                .setDescription(result.reason)
+                .setDescription(`💥 ${result.reason}\n\n⏳ Try again in a few moments!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -216,9 +216,17 @@ module.exports = {
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 25 + 10).toFixed(2)) : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Guild Level: ${guild.level}`,
+            guild.level / 10,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Guild Created!`)
-            .setDescription(`${milestoneMessage}\n\nSuccessfully created **${guildName}**!\n\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
+            .setTitle(`🎉 Guild Created!`)
+            .setDescription(`🎉 ${milestoneMessage}\n\n✨ Successfully created **${guildName}**!\n\n🔥 ${socialProof}${variableReward ? `\n💸 ${variableReward}` : ''}\n\n🚀 **You're now a Guild Leader!** Earn 2x VEX from all activities!`)
             .addFields(
                 { name: '🆔 Guild ID', value: guildId, inline: true },
                 { name: '👑 Leader', value: interaction.user.username, inline: true },
@@ -228,10 +236,14 @@ module.exports = {
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Start inviting members to grow your guild!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleJoin(interaction) {
@@ -243,7 +255,7 @@ module.exports = {
         if (userData.guild) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already in Guild`)
-                .setDescription('You must leave your current guild before joining another.')
+                .setDescription(`🔥 You must leave your current guild before joining another!\n\n✨ **Loyalty Bonus:** Stay in guil...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -262,7 +274,7 @@ module.exports = {
         if (guild.members.length >= constants.GUILD.MAX_MEMBERS) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Guild Full`)
-                .setDescription(`**${guild.name}** is at maximum capacity (${constants.GUILD.MAX_MEMBERS} members).`)
+                .setDescription(`🔥 **${guild.name}** is at maximum capacity (${constants.GUILD.MAX_MEMBERS} members)!\n\n🚀 **Hot...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -271,7 +283,7 @@ module.exports = {
         if (userData.level < guild.settings.minLevel) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Level Requirement`)
-                .setDescription(`**${guild.name}** requires level ${guild.settings.minLevel}. You are level ${userData.level}.`)
+                .setDescription(`⬆️ **${guild.name}** requires level ${guild.settings.minLevel}. You are level ${userData.level}!\...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -292,18 +304,31 @@ module.exports = {
         const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 40) + 25);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const memberProgress = guild.members.length / constants.GUILD.MAX_MEMBERS;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Guild Members: ${guild.members.length}/${constants.GUILD.MAX_MEMBERS}`,
+            memberProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Joined Guild!`)
-            .setDescription(`${milestoneMessage}\n\nWelcome to **${guild.name}**!\n\n${socialProof}`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Joined Guild!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Welcome to ${guild.name}!** You're now part of an elite guild community.`)
             .addFields(
                 { name: '🏰 Guild', value: guild.name, inline: true },
                 { name: '👥 Members', value: `${guild.members.length}/${constants.GUILD.MAX_MEMBERS}`, inline: true },
                 { name: '📊 Guild Level', value: `${guild.level}`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleInfo(interaction) {
@@ -340,7 +365,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHIELD} ${guild.name}`)
-            .setDescription(guild.description)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} ${guild.description}\n\n${constants.ANIMATED_EMOJIS.FIRE} *...`)
             .addFields(
                 { name: '🆔 Guild ID', value: guild.id, inline: true },
                 { name: '👑 Leader', value: leaderData.username || 'Unknown', inline: true },
@@ -360,7 +385,34 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const guildProgress = guild.level / 10;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Guild Level: ${guild.level}`,
+            guildProgress,
+            constants.COLORS.PRIMARY
+        );
+
+        const guildButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`guild_join_${guild.id}`)
+                    .setLabel('Join Guild')
+                    .setStyle(ButtonStyle.Success)
+                    .setEmoji('🏰'),
+                new ButtonBuilder()
+                    .setCustomId(`guild_members_${guild.id}`)
+                    .setLabel('View Members')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('👥')
+            );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [guildButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleList(interaction) {
@@ -371,11 +423,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHIELD} Available Guilds`)
-            .setDescription(`Browse and join public guilds!\n\n${fomoMessage}\n${socialProof}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} Browse and join public guilds!\n\n${constants.ANIMATED_EMOJIS.FIRE} **Join elite communities and earn exclusive rewards!**`)
             .setColor(constants.COLORS.PRIMARY);
         
         if (guilds.length === 0) {
-            embed.setDescription('No public guilds available. Create the first one!');
+            embed.setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} No public guilds available. Create the first one!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Be a pioneer and start the guild revolution!**`);
         } else {
             const guildList = guilds.slice(0, 10).map(guild => 
                 `**${guild.name}** (${guild.id})\n` +
@@ -392,7 +444,24 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /guild join <guild_id> to join a guild!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const guildListButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('guild_create_new')
+                    .setLabel('Create Guild')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('⚔️'),
+                new ButtonBuilder()
+                    .setCustomId('guild_refresh_list')
+                    .setLabel('Refresh List')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('🔄')
+            );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [guildListButtons]
+        });
     },
     
     generateGuildId() {

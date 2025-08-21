@@ -4,7 +4,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('report')
-        .setDescription('Report bugs, issues, or submit feedback about VexiumVerse')
+        .setDescription(`✨ Help shape VexiumVerse! Report bugs, request features, or share feedback to earn community rewa...`)
         .addStringOption(option =>
             option.setName('type')
                 .setDescription('Type of report')
@@ -149,8 +149,8 @@ module.exports = {
             });
         }
         
-        const title = interaction.fields.getTextInputValue('report_title');
-        const description = interaction.fields.getTextInputValue('report_description');
+        const reportTitle = interaction.fields.getTextInputValue('report_title');
+        const reportDescription = interaction.fields.getTextInputValue('report_description');
         const steps = interaction.fields.getTextInputValue('report_steps') || 'None provided';
         
         const reportId = this.generateReportId();
@@ -169,36 +169,36 @@ module.exports = {
         const variableReward = Math.random() < 0.3 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
         const milestoneMessage = isLegendaryContributor ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
         
-        let title = `${constants.EMOJIS.SUCCESS} Report Submitted`;
-        let description = `Your ${this.getReportTitle(reportType).toLowerCase()} has been submitted successfully!`;
+        let embedTitle = `${constants.EMOJIS.SUCCESS} Report Submitted`;
+        let embedDescription = `Your ${this.getReportTitle(reportType).toLowerCase()} has been submitted successfully!`;
         
         if (isLegendaryContributor) {
-            title = `👑 LEGENDARY CONTRIBUTOR! Report Submitted`;
-            description = `🔥 **COMMUNITY LEGEND!** Your ${reportsSubmitted}th report shows incredible dedication!\n\n${milestoneMessage}`;
+            embedTitle = `👑 LEGENDARY CONTRIBUTOR! Report Submitted`;
+            embedDescription = `🔥 **COMMUNITY LEGEND!** Your ${reportsSubmitted}th report shows incredible dedication!\n\n${milestoneMessage}`;
         } else if (isCommunityHelper) {
-            title = `⭐ COMMUNITY HERO! Report Submitted`;
-            description = `💎 **RISING STAR!** ${reportsSubmitted} reports submitted - you're making VexiumVerse better!`;
+            embedTitle = `⭐ COMMUNITY HERO! Report Submitted`;
+            embedDescription = `💎 **RISING STAR!** ${reportsSubmitted} reports submitted - you're making VexiumVerse better!`;
         } else if (isFirstReport) {
-            title = `🌟 FIRST REPORT! Welcome to the Team`;
-            description = `✨ **WELCOME TO THE IMPROVEMENT SQUAD!** Your first report is the beginning of something amazing!`;
+            embedTitle = `🌟 FIRST REPORT! Welcome to the Team`;
+            embedDescription = `✨ **WELCOME TO THE IMPROVEMENT SQUAD!** Your first report is the beginning of something amazing!`;
         }
         
         if (variableReward) {
-            description += `\n\n${variableReward}`;
+            embedDescription += `\n\n${variableReward}`;
         }
         
-        description += `\n\n${fomoMessage}\n${socialProofMessage}`;
+        embedDescription += `\n\n${fomoMessage}\n${socialProofMessage}`;
         
         userData.stats.reportsSubmitted = reportsSubmitted;
         userData.stats.commandsUsed++;
         await user.save(userData);
         
         const embed = new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(description)
+            .setTitle(embedTitle)
+            .setDescription(`🎉 ${embedDescription}`)
             .addFields(
                 { name: '🆔 Report ID', value: reportId, inline: true },
-                { name: '📋 Title', value: title, inline: false },
+                { name: '📋 Title', value: reportTitle, inline: false },
                 { name: '📝 Status', value: 'Under Review', inline: true },
                 { name: '🏆 Community Impact', value: `${reportsSubmitted} reports submitted\n${isLegendaryContributor ? '👑 **Legendary Status**' : isCommunityHelper ? '⭐ **Hero Status**' : '🌟 **Growing Contributor**'}`, inline: true }
             )
@@ -206,15 +206,37 @@ module.exports = {
             .setFooter({ text: 'Your feedback shapes the future of VexiumVerse!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        const ActionRowBuilder = require('discord.js').ActionRowBuilder;
+        const ButtonBuilder = require('discord.js').ButtonBuilder;
+        const ButtonStyle = require('discord.js').ButtonStyle;
         
-        await this.logReport(interaction, reportType, reportId, title, description, steps);
+        const reportButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('report_status_check')
+                    .setLabel('Check Status')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📋'),
+                new ButtonBuilder()
+                    .setCustomId('report_another')
+                    .setLabel('Submit Another')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('📝')
+            );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [reportButtons],
+            ephemeral: true 
+        });
+        
+        await this.logReport(interaction, reportType, reportId, reportTitle, reportDescription, steps);
     },
     
     async logReport(interaction, type, reportId, title, description, steps) {
         const logEmbed = new EmbedBuilder()
             .setTitle(`${this.getReportTitle(type)} - ${reportId}`)
-            .setDescription(`**Title:** ${title}`)
+            .setDescription(`🔥 **Title:** ${title}`)
             .addFields(
                 { name: '👤 Reporter', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
                 { name: '🏛️ Server', value: interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DM', inline: true },

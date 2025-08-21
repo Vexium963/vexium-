@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('xp')
-        .setDescription('View detailed XP information and level requirements'),
+        .setDescription(`📈 Track your legendary progression and unlock massive rewards!`),
     
     async execute(interaction) {
         const user = new User(interaction.user.id);
@@ -72,12 +72,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`✨ ${description}\n\n🔥 **${activeOptimizers} players** are optimizing their XP right now!\n🚀 **D...`)
             .setColor(isCloseToLevel ? constants.COLORS.VEX : isXpExpert ? constants.COLORS.SUCCESS : constants.COLORS.INFO)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setTimestamp();
         
-        const progressBar = this.createProgressBar(progress);
         
         embed.addFields(
             { name: '🎯 Current Level', value: userData.level.toString(), inline: true },
@@ -88,11 +87,6 @@ module.exports = {
             { name: '📊 Progress', value: `${Math.floor(progress * 100)}%`, inline: true }
         );
         
-        embed.addFields({
-            name: '📊 Progress Bar',
-            value: progressBar,
-            inline: false
-        });
         
         const xpSources = [
             { name: 'Daily Reward', xp: '25 + (streak × 2)', description: 'Claim daily rewards' },
@@ -144,7 +138,20 @@ module.exports = {
         const randomMotivation = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
         embed.setFooter({ text: `${randomMotivation} | XP gained through VexiumVerse activities` });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Level ${userData.level} Progress: ${Math.floor(progress * 100)}%`,
+            progress,
+            constants.COLORS.VEX
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         userData.stats.commandsUsed++;
         userData.stats.xpChecked = xpChecks + 1;
@@ -153,7 +160,7 @@ module.exports = {
         if (surpriseBonus > 0) {
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAR} Progress Check Bonus!`)
-                .setDescription(`🎉 **+${surpriseBonus} XP** for staying engaged with your progression!`)
+                .setDescription(`🎉 **+${surpriseBonus} XP** for staying engaged with your progression!\n💸 **Bonus XP rain activa...`)
                 .setColor(constants.COLORS.GOLD)
                 .setTimestamp();
             
@@ -161,10 +168,4 @@ module.exports = {
         }
     },
     
-    createProgressBar(progress, length = 20) {
-        const filled = Math.floor(progress * length);
-        const empty = length - filled;
-        
-        return '█'.repeat(filled) + '░'.repeat(empty) + ` ${Math.floor(progress * 100)}%`;
-    }
 };

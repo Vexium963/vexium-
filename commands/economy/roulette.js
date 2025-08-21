@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('roulette')
-        .setDescription('Play skill-based European roulette entertainment game for VEX rewards (21+ verification required)')
+        .setDescription(`🎲 Play skill-based European roulette entertainment game for VEX rewards (21+ verification required)`)
         .addNumberOption(option =>
             option.setName('play_amount')
-                .setDescription('Amount of VEX to play with')
+                .setDescription(`💸 Amount of VEX to play with`)
                 .setRequired(true)
                 .setMinValue(0.01))
         .addStringOption(option =>
             option.setName('play_type')
-                .setDescription('Type of play to make')
+                .setDescription(`✨ Type of play to make`)
                 .setRequired(true)
                 .addChoices(
                     { name: 'Red', value: 'red' },
@@ -26,7 +26,7 @@ module.exports = {
                 ))
         .addIntegerOption(option =>
             option.setName('number')
-                .setDescription('Specific number to play on (0-36, required for single number plays)')
+                .setDescription(`🔥 Specific number to play on (0-36, required for single number plays)`)
                 .setRequired(false)
                 .setMinValue(0)
                 .setMaxValue(36)),
@@ -62,7 +62,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`⚠️ **LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\...`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -83,7 +83,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Number Required`)
-                .setDescription(`You must specify a number (0-36) for single number plays.\n\n${nearMiss}`)
+                .setDescription(`⚠️ You must specify a number (0-36) for single number plays.\n\n✨ ${nearMiss}\n\n🔥 **Pro tip:** ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -95,7 +95,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n${comeback}\n${socialProof}`)
+                .setDescription(`💸 You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n✨ **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n🔥 ${comeback}\n📈 ${socialProof}\n\n🚀 **${Math.floor(Math.random() * 20) + 10} players** just earned VEX in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -105,7 +105,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
-                .setDescription(result.reason)
+                .setDescription(`⚠️ ${result.reason}\n\n✨ Try again in a moment!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -163,7 +163,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DICE} Roulette Result`)
-            .setDescription(`The ball landed on **${winningNumber}** ${numberEmoji}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.DICE_ROLL} The ball landed on **${winningNumber}** ${numberEmoji}\n\n${isWin ? `${constants.ANIMATED_EMOJIS.CELEBRATION} **WINNER!** You beat the odds!` : `${constants.ANIMATED_EMOJIS.FIRE} So close! Try again for your comeback!`}\n\n${constants.ANIMATED_EMOJIS.CHART} **${Math.floor(Math.random() * 15) + 5} players** are spinning right now!`)
             .addFields(
                 { name: '🎯 Winning Number', value: `${winningNumber} (${numberColor})`, inline: true },
                 { name: '🎲 Your Play', value: this.formatPlay(playType, number), inline: true },
@@ -190,7 +190,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(playAgainButton, statsButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Roulette Spin Result: ${isWin ? 'WIN' : 'LOSE'}`,
+            isWin ? 1.0 : 0.0,
+            isWin ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     checkWin(playType, number, winningNumber) {
@@ -270,9 +282,17 @@ module.exports = {
         const wins = stats.rouletteWins || 0;
         const winRate = spins > 0 ? (wins / spins * 100).toFixed(1) : '0.0';
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Roulette Win Rate: ${winRate}%`,
+            Math.min(parseFloat(winRate) / 100, 1),
+            constants.COLORS.PRIMARY
+        );
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.DICE} Your Roulette Statistics`)
-            .setDescription('Your roulette gaming performance')
+            .setTitle(`${constants.ANIMATED_EMOJIS.DICE_ROLL} Your Roulette Statistics`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your roulette gaming performance`)
             .addFields(
                 { name: '🎲 Total Spins', value: `${spins}`, inline: true },
                 { name: '🏆 Wins', value: `${wins}`, inline: true },
@@ -283,12 +303,16 @@ module.exports = {
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL())
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
         if (spins === 0) {
-            embed.setDescription('You haven\'t played roulette yet. Use `/roulette` to get started!');
+            embed.setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You haven't played roulette yet. Use \`/roulette\` to get started!`);
         }
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

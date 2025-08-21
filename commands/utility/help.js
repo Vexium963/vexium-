@@ -4,10 +4,10 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
-        .setDescription('Get help with VexiumVerse commands and features')
+        .setDescription(`✨ Get help with VexiumVerse commands and unlock hidden bonuses!`)
         .addStringOption(option =>
             option.setName('category')
-                .setDescription('Specific help category')
+                .setDescription(`⏳ Choose a specific help category for detailed guidance`)
                 .setRequired(false)
                 .addChoices(
                     { name: 'Economy', value: 'economy' },
@@ -111,7 +111,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🚀 ${description}`)
             .addFields(
                 {
                     name: '💰 Economy Commands',
@@ -193,7 +193,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(selectMenu);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const helpProgress = Math.min((userData?.stats?.helpUsed || 0) / 20, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Help Explorer: ${userData?.stats?.helpUsed || 0}/20 sessions`,
+            helpProgress,
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async showCategoryHelp(interaction, category) {
@@ -410,7 +423,7 @@ module.exports = {
         if (!data) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Category Not Found`)
-                .setDescription('Invalid help category.\n\n' + constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)])
+                .setDescription(`💥 Invalid help category! Don't miss out on valuable knowledge!\n\n${constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)]}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Use a valid category to unlock exclusive tips!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -425,14 +438,31 @@ module.exports = {
             enhancedDescription += `\n${milestoneMessage}`;
         }
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const User = require('../../database/models/User');
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const helpProgress = Math.min((userData?.stats?.helpUsed || 0) / 10, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Help Mastery: ${userData?.stats?.helpUsed || 0}/10 sessions`,
+            helpProgress,
+            constants.COLORS.PRIMARY
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(data.title)
-            .setDescription(enhancedDescription)
+            .setTitle(`✨ ${data.title}`)
+            .setDescription(`🔥 ${enhancedDescription}\n\n📈 Knowledge seekers earn 25% more VEX on average!`)
             .addFields(data.fields)
             .setColor(constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Need more help? Join our support server!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

@@ -5,34 +5,34 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('statistics')
-        .setDescription('View comprehensive statistics and analytics for your VexiumVerse journey')
+        .setDescription(`📈 View comprehensive statistics and analytics for your VexiumVerse journey - Track your empire's...`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('overview')
-                .setDescription('View your complete statistics overview'))
+                .setDescription(`✨ View your complete statistics overview - See how you compare to other players!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('economy')
-                .setDescription('View detailed economic statistics and trends'))
+                .setDescription(`💸 View detailed economic statistics and trends - Optimize your wealth strategy!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('entertainment')
-                .setDescription('View skill-based entertainment game statistics'))
+                .setDescription(`🎲 View skill-based entertainment game statistics - Master your winning strategies!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('social')
-                .setDescription('View social interaction and community statistics'))
+                .setDescription(`💓 View social interaction and community statistics - Build your network empire!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('achievements')
-                .setDescription('View achievement progress and completion statistics'))
+                .setDescription(`🏆 View achievement progress and completion statistics - Unlock exclusive rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('compare')
                 .setDescription('Compare your statistics with another user')
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('User to compare statistics with')
+                        .setDescription(`🔥 User to compare statistics with - See who's dominating the leaderboards!`)
                         .setRequired(true))),
     
     cooldown: 15,
@@ -82,7 +82,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAR} Data Explorer Bonus!`)
-                .setDescription(`🎉 **First-time statistics bonus!** Knowledge is power!\n✨ **+${bonusXP} XP** for exploring your data!`)
+                .setDescription(`🎉 **First-time statistics bonus!** Knowledge is power!\n✨ **+${bonusXP} XP** for exploring your ...`)
                 .setColor(constants.COLORS.SUCCESS)
                 .setFooter({ text: 'Understanding your progress accelerates growth!' });
             
@@ -92,7 +92,7 @@ module.exports = {
         if (recentAchievements > 0) {
             const celebrationEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Fresh Achievements Detected!`)
-                .setDescription(`🔥 **${recentAchievements} new achievement${recentAchievements > 1 ? 's' : ''} in the last 24 hours!**\n🚀 **You're on fire!** Check your achievement stats below!`)
+                .setDescription(`🔥 **${recentAchievements} new achievement${recentAchievements > 1 ? 's' : ''} in the last 24 hou...`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: 'Achievement momentum = Exponential growth!' });
             
@@ -132,7 +132,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STATISTICS} ${interaction.user.displayName}'s VexiumVerse Statistics`)
-            .setDescription(`Your complete journey through the VexiumVerse ecosystem\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n${fomoMessage}`)
+            .setDescription(`📈 Your complete journey through the VexiumVerse ecosystem\n\n🔥 ${socialProofMessage}${milestoneMessage ? `\n🏆 ${milestoneMessage}` : ''}\n⏳ ${fomoMessage}`)
             .addFields(
                 { name: '📊 General Statistics', value: `**Commands Used**: ${totalCommands.toLocaleString()}\n**Days Active**: ${daysActive}\n**Avg Commands/Day**: ${avgCommandsPerDay}\n**Account Level**: ${userData.level || 1}`, inline: true },
                 { name: '💰 Economic Overview', value: `**Net Worth**: $${(userData.networth || 0).toLocaleString()} VEX\n**Total Earned**: $${(stats.totalEarned || 0).toLocaleString()} VEX\n**Total Spent**: $${(stats.totalSpent || 0).toLocaleString()} VEX\n**Work Sessions**: ${stats.workSessions || 0}`, inline: true },
@@ -180,7 +180,19 @@ module.exports = {
         const row1 = new ActionRowBuilder().addComponents(economyButton, entertainmentButton);
         const row2 = new ActionRowBuilder().addComponents(socialButton, achievementsButton);
         
-        await interaction.reply({ embeds: [embed], components: [row1, row2] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Statistics Overview Progress`,
+            Math.min(totalCommands / 1000, 1.0),
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row1, row2],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleEconomy(interaction) {
@@ -241,7 +253,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(investButton, realEstateButton, cryptoButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Economic Growth Progress`,
+            Math.min((userData.networth || 0) / 10000, 1.0),
+            constants.COLORS.ECONOMY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleEntertainment(interaction) {
@@ -294,7 +318,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(tournamentsButton, skillButton, historyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const winRate = this.calculateWinRate(stats);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Entertainment Skill Progress`,
+            winRate / 100,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     calculateWinRate(stats) {

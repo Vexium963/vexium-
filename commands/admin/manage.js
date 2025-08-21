@@ -5,18 +5,18 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('admin')
-        .setDescription('Administrative commands for VexiumVerse management')
+        .setDescription(`👑 Administrative commands for VexiumVerse management - Control the empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('balance')
-                .setDescription('Modify user VEX balance')
+                .setDescription(`💸 Modify user VEX balance - Shape their financial destiny!`)
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('User to modify')
+                        .setDescription(`🎯 User to modify - Choose their fate!`)
                         .setRequired(true))
                 .addStringOption(option =>
                     option.setName('action')
-                        .setDescription('Action to perform')
+                        .setDescription(`⚡ Action to perform - Wield your power!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Add', value: 'add' },
@@ -25,20 +25,20 @@ module.exports = {
                         ))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX')
+                        .setDescription(`💎 Amount of VEX - Every token matters!`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('level')
-                .setDescription('Modify user level')
+                .setDescription(`⬆️ Modify user level - Elevate their status instantly!`)
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('User to modify')
+                        .setDescription(`🎯 User to modify - Choose their fate!`)
                         .setRequired(true))
                 .addStringOption(option =>
                     option.setName('action')
-                        .setDescription('Action to perform')
+                        .setDescription(`⚡ Action to perform - Wield your power!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Add', value: 'add' },
@@ -47,29 +47,29 @@ module.exports = {
                         ))
                 .addIntegerOption(option =>
                     option.setName('amount')
-                        .setDescription('Number of levels')
+                        .setDescription(`🚀 Number of levels - Launch them to new heights!`)
                         .setRequired(true)
                         .setMinValue(1)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('reset')
-                .setDescription('Reset user account')
+                .setDescription(`💥 Reset user account - Nuclear option! Use with extreme caution!`)
                 .addUserOption(option =>
                     option.setName('user')
-                        .setDescription('User to reset')
+                        .setDescription(`⚠️ User to reset - This will erase their empire!`)
                         .setRequired(true))
                 .addBooleanOption(option =>
                     option.setName('confirm')
-                        .setDescription('Confirm the reset action')
+                        .setDescription(`🛡️ Confirm the reset action - Double-check before destruction!`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('treasury')
-                .setDescription('View treasury information'))
+                .setDescription(`💰 View treasury information - Peek into the vault of power!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stats')
-                .setDescription('View bot statistics')),
+                .setDescription(`📈 View bot statistics - Monitor the empire's pulse!`)),
     
     async execute(interaction) {
         if (interaction.client.immersionEngine) {
@@ -133,7 +133,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`👑 ADMIN COMMAND CENTER`)
-            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.\n\n⚡ **System Status:** ${systemLoad}% optimal | 🛡️ **${activeAdmins} admins online** | 📊 **${adminUsage} admin actions** today\n\n${milestoneMessage}\n${socialProofMessage}`)
+            .setDescription(`🔥 **Welcome, ${adminLevel}!** You're accessing the VexiumVerse control panel.\n\n⚡ **System Stat...`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
         
@@ -173,7 +173,7 @@ module.exports = {
                     
                     const embed = new EmbedBuilder()
                         .setTitle(`${constants.EMOJIS.ERROR} Operation Failed`)
-                        .setDescription(`${result.reason}\n\n${nearMissMessage}`)
+                        .setDescription(`⚠️ ${result.reason}\n\n✨ ${nearMissMessage}`)
                         .setColor(constants.COLORS.ERROR);
                     
                     return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -249,18 +249,30 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Level Progress: ${newLevel}`,
+            Math.min(newLevel / 100, 1),
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Level Modified`)
-            .setDescription(`Successfully ${action}ed level for ${targetUser.username}`)
+            .setTitle(`⬆️ Level Modified`)
+            .setDescription(`✨ Successfully ${action}ed level for ${targetUser.username}`)
             .addFields(
                 { name: '👤 User', value: targetUser.username, inline: true },
                 { name: '⚙️ Action', value: action.charAt(0).toUpperCase() + action.slice(1), inline: true },
                 { name: '📊 New Level', value: newLevel.toString(), inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleReset(interaction) {
@@ -270,7 +282,7 @@ module.exports = {
         if (!confirm) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Confirmation Required`)
-                .setDescription('You must set confirm to true to reset a user account.')
+                .setDescription(`⚠️ You must set confirm to true to reset a user account. 💥 This action cannot be undone!`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -294,9 +306,17 @@ module.exports = {
         
         await user.save(newUserData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Account Reset: Fresh Start`,
+            0.1,
+            constants.COLORS.WARNING
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Account Reset`)
-            .setDescription(`Successfully reset account for ${targetUser.username}`)
+            .setTitle(`💥 Account Reset`)
+            .setDescription(`✨ Successfully reset account for ${targetUser.username}`)
             .addFields(
                 { name: '👤 User', value: targetUser.username, inline: true },
                 { name: '💰 Previous Balance', value: `$${backupData.oldBalance.toFixed(2)} VEX`, inline: true },
@@ -305,9 +325,13 @@ module.exports = {
                 { name: '🎯 New Level', value: '1', inline: true }
             )
             .setColor(constants.COLORS.WARNING)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleTreasury(interaction) {
@@ -315,7 +339,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TREASURY} VexiumVerse Treasury`)
-            .setDescription('Current treasury status and recent transactions')
+            .setDescription(`💰 Current treasury status and recent transactions - The heart of VexiumVerse wealth!`)
             .addFields(
                 { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
@@ -358,9 +382,17 @@ module.exports = {
         
         const treasuryData = await User.getTreasuryData();
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Bot Performance: ${totalUsers} Users | ${activeUsers} Active`,
+            Math.min(activeUsers / totalUsers, 1),
+            constants.COLORS.PRIMARY
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CHART} VexiumVerse Statistics`)
-            .setDescription('Complete bot and economy statistics')
+            .setTitle(`${constants.ANIMATED_EMOJIS.CHART} VexiumVerse Statistics`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Complete bot and economy statistics`)
             .addFields(
                 { name: '👥 Total Users', value: totalUsers.toString(), inline: true },
                 { name: '🟢 Active Users (7d)', value: activeUsers.toString(), inline: true },
@@ -373,9 +405,13 @@ module.exports = {
                 { name: '📊 Commands Available', value: '64+', inline: true }
             )
             .setColor(constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     isAdmin(userId) {

@@ -4,7 +4,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('invite')
-        .setDescription('Get the VexiumVerse bot invite link and support server'),
+        .setDescription(`🚀 Transform your server into a wealth empire! Get VexiumVerse bot invite link and support server`),
     
     async execute(interaction) {
         const botId = interaction.client.user.id;
@@ -17,7 +17,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ROCKET} EXPLOSIVE GROWTH OPPORTUNITY!`)
-            .setDescription(`🔥 **Transform your server into a WEALTH EMPIRE!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`🔥 **Transform your server into a WEALTH EMPIRE!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n✨ **FOMO Alert:** Only ${Math.floor(Math.random() * 50) + 20} server slots left for premium features!`)
             .addFields(
                 {
                     name: '💎 EXCLUSIVE SERVER BENEFITS',

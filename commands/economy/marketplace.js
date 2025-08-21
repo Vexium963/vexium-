@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('marketplace')
-        .setDescription('Buy and sell items, services, and assets with other players')
+        .setDescription(`💸 Trade with players worldwide! Buy low, sell high, build your empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('browse')
-                .setDescription('Browse available items and services')
+                .setDescription(`✨ Discover amazing deals and rare items from the community!`)
                 .addStringOption(option =>
                     option.setName('category')
                         .setDescription('Category to browse')
@@ -23,7 +23,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sell')
-                .setDescription('List an item or service for sale')
+                .setDescription(`🔥 Turn your items into VEX! List now and start earning!`)
                 .addStringOption(option =>
                     option.setName('item')
                         .setDescription('Item to sell from your inventory')
@@ -42,7 +42,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase an item from the marketplace')
+                .setDescription(`🎉 Grab that perfect item before someone else does!`)
                 .addStringOption(option =>
                     option.setName('listing_id')
                         .setDescription('ID of the listing to purchase')
@@ -50,11 +50,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('my-listings')
-                .setDescription('View and manage your active listings'))
+                .setDescription(`📈 Track your sales empire and optimize your profits!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('search')
-                .setDescription('Search for specific items or services')
+                .setDescription(`⏳ Find exactly what you need with lightning-fast search!`)
                 .addStringOption(option =>
                     option.setName('query')
                         .setDescription('Search term')
@@ -99,7 +99,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} SURPRISE MARKETPLACE BONUS!`)
-                .setDescription(`🎉 **Lucky you!** You found a hidden marketplace bonus!\n💰 **+$${surpriseBonus} VEX** added to your wallet!`)
+                .setDescription(`🎉 **Lucky you!** You found a hidden marketplace bonus!\n💸 **+$${surpriseBonus} VEX** added to y...`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: '✨ Random bonuses reward active traders!' });
             
@@ -109,8 +109,8 @@ module.exports = {
         const totalTransactions = (userData.stats.itemsPurchased || 0) + (userData.stats.itemsListed || 0);
         if (totalTransactions === 10 || totalTransactions === 50 || totalTransactions === 100) {
             const achievementEmbed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ACHIEVEMENT} TRADING MILESTONE ACHIEVED!`)
-                .setDescription(`🏆 **${totalTransactions} Total Transactions!**\n💎 You're becoming a marketplace legend!`)
+                .setTitle(`🏆 TRADING MILESTONE ACHIEVED!`)
+                .setDescription(`🏆 **${totalTransactions} Total Transactions!**\n✨ You're becoming a marketplace legend!\n\n🔥 Le...`)
                 .addFields({
                     name: '🎁 Milestone Reward',
                     value: `$${totalTransactions * 2} VEX bonus!`,
@@ -170,7 +170,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${socialProofMessage}\n🔥 **${hotDeals.length} hot deals**${variableReward ? `\n${variableReward}` : ''}\n\n${fomoMessage}`)
+            .setDescription(description + `\n\n${socialProofMessage}\n🔥 **${hotDeals.length} hot deals**${variableReward ? `\n${variableReward}` : ''}\n\n⏳ ${fomoMessage}`)
             .setColor(flashSale ? constants.COLORS.VEX : isActiveTrader ? constants.COLORS.SUCCESS : constants.COLORS.MARKETPLACE)
             .setFooter({ text: `💡 Pro tip: ${isActiveTrader ? 'You get priority on rare items!' : 'Buy low, sell high!'}` })
             .setTimestamp();
@@ -230,7 +230,19 @@ module.exports = {
         const row1 = new ActionRowBuilder().addComponents(categorySelect);
         const row2 = new ActionRowBuilder().addComponents(buyButton, sellButton, myListingsButton);
         
-        await interaction.reply({ embeds: [embed], components: [row1, row2] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const marketActivityBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Market Activity: ${marketActivity} active traders`,
+            Math.min(marketActivity / 100, 1.0),
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row1, row2],
+            files: [{ attachment: marketActivityBuffer, name: 'market-activity.png' }]
+        });
     },
     
     async handleSell(interaction) {
@@ -244,7 +256,7 @@ module.exports = {
         if (!userData.inventory || !userData.inventory[itemName]) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Found`)
-                .setDescription(`You don't have **${itemName}** in your inventory.\n\nUse \`/wallet\` to check your inventory.`)
+                .setDescription(`⏳ You don't have **${itemName}** in your inventory.\n\n✨ Use \`/wallet\` to check your inventory and find items to sell!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -253,7 +265,7 @@ module.exports = {
         if (userData.inventory[itemName] < quantity) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Quantity`)
-                .setDescription(`You only have ${userData.inventory[itemName]} **${itemName}** but want to sell ${quantity}.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} You only have ${userData.inventory[itemName]} **${itemName}*...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -273,7 +285,7 @@ module.exports = {
         if (userData.vexBalance < listingFee) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Listing Fee`)
-                .setDescription(`Listing fee (5%): $${listingFee.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Listing fee (5%): $${listingFee.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)}...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -348,7 +360,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(viewButton, browseButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const listingProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Listing Success: ${itemName} now live!`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: listingProgressBuffer, name: 'listing-success.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -458,7 +482,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(inventoryButton, browseButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const purchaseProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Purchase Complete: ${listing.itemName} acquired!`,
+            1.0,
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: purchaseProgressBuffer, name: 'purchase-success.png' }]
+        });
     },
     
     getMarketplaceListings(category) {

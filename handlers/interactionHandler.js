@@ -30,6 +30,32 @@ class InteractionHandler {
         this.handlers.set('progression_refresh', this.handleProgressionRefresh.bind(this));
         this.handlers.set('progression_compare', this.handleProgressionCompare.bind(this));
         this.handlers.set('progression_goals', this.handleProgressionGoals.bind(this));
+
+        this.handlers.set('select_job', this.handleJobSelection.bind(this));
+
+        this.handlers.set('help_category_select', this.handleHelpCategorySelect.bind(this));
+
+        this.handlers.set('analytics_economy', this.handleAnalyticsEconomy.bind(this));
+        this.handlers.set('analytics_entertainment', this.handleAnalyticsEntertainment.bind(this));
+        this.handlers.set('analytics_social', this.handleAnalyticsSocial.bind(this));
+        this.handlers.set('analytics_export', this.handleAnalyticsExport.bind(this));
+        this.handlers.set('analytics_overview', this.handleAnalyticsOverview.bind(this));
+
+        this.handlers.set('settings_privacy', this.handleSettingsPrivacy.bind(this));
+        this.handlers.set('settings_display', this.handleSettingsDisplay.bind(this));
+        this.handlers.set('settings_reset', this.handleSettingsReset.bind(this));
+
+        this.handlers.set('immersion_status', this.handleImmersionStatus.bind(this));
+        this.handlers.set('immersion_challenges', this.handleImmersionChallenges.bind(this));
+
+        this.handlers.set('verify_age_confirm', this.handleAgeVerification.bind(this));
+        this.handlers.set('responsible_gaming', this.handleResponsibleGaming.bind(this));
+
+        this.handlers.set('leaderboards_wealth', this.handleLeaderboardsWealth.bind(this));
+        this.handlers.set('leaderboards_entertainment', this.handleLeaderboardsEntertainment.bind(this));
+        this.handlers.set('leaderboards_social', this.handleLeaderboardsSocial.bind(this));
+        this.handlers.set('leaderboards_achievements', this.handleLeaderboardsAchievements.bind(this));
+        this.handlers.set('leaderboards_refresh', this.handleLeaderboardsRefresh.bind(this));
     }
 
     async handleInteraction(interaction) {
@@ -252,6 +278,113 @@ class InteractionHandler {
             content: `${constants.EMOJIS.TARGET} Goal setting feature coming soon! Set personal targets and track your progress.`,
             ephemeral: true
         });
+    }
+
+    async handleJobSelection(interaction) {
+        const User = require('../database/models/User');
+        const Economics = require('../utils/economics');
+        const constants = require('../utils/constants');
+        const { EmbedBuilder } = require('discord.js');
+
+        const user = new User(interaction.user.id);
+        const userData = await user.load();
+        
+        const selectedJobId = interaction.values[0];
+        const jobData = Economics.getJobData(selectedJobId);
+        
+        if (!jobData) {
+            return interaction.reply({ content: 'Invalid job selection.', ephemeral: true });
+        }
+        
+        userData.job = selectedJobId;
+        userData.jobLevel = 1;
+        userData.jobXp = 0;
+        await user.save(userData);
+        
+        const embed = new EmbedBuilder()
+            .setTitle(`${constants.EMOJIS.SUCCESS} Job Selected!`)
+            .setDescription(`🎉 **Congratulations!** You're now working as a **${jobData.name}**!\n\n💰 **Earning Potential:** $${jobData.minPay.toFixed(2)} - $${jobData.maxPay.toFixed(2)} VEX per work session\n\n🚀 **Ready to start earning?** Use \`/work\` to begin your first shift!`)
+            .addFields(
+                { name: '💼 Your New Job', value: jobData.name, inline: true },
+                { name: '📊 Starting Level', value: '1', inline: true },
+                { name: '⚡ Next Step', value: 'Use `/work` to start earning!', inline: true }
+            )
+            .setColor(constants.COLORS.SUCCESS)
+            .setTimestamp();
+        
+        await interaction.update({ embeds: [embed], components: [] });
+    }
+
+    async handleHelpCategorySelect(interaction) {
+        return interaction.reply({ content: 'Help category selection coming soon!', ephemeral: true });
+    }
+
+    async handleAnalyticsEconomy(interaction) {
+        return interaction.reply({ content: 'Analytics economy view coming soon!', ephemeral: true });
+    }
+
+    async handleAnalyticsEntertainment(interaction) {
+        return interaction.reply({ content: 'Analytics entertainment view coming soon!', ephemeral: true });
+    }
+
+    async handleAnalyticsSocial(interaction) {
+        return interaction.reply({ content: 'Analytics social view coming soon!', ephemeral: true });
+    }
+
+    async handleAnalyticsExport(interaction) {
+        return interaction.reply({ content: 'Analytics export coming soon!', ephemeral: true });
+    }
+
+    async handleAnalyticsOverview(interaction) {
+        return interaction.reply({ content: 'Analytics overview coming soon!', ephemeral: true });
+    }
+
+    async handleSettingsPrivacy(interaction) {
+        return interaction.reply({ content: 'Privacy settings coming soon!', ephemeral: true });
+    }
+
+    async handleSettingsDisplay(interaction) {
+        return interaction.reply({ content: 'Display settings coming soon!', ephemeral: true });
+    }
+
+    async handleSettingsReset(interaction) {
+        return interaction.reply({ content: 'Settings reset coming soon!', ephemeral: true });
+    }
+
+    async handleImmersionStatus(interaction) {
+        return interaction.reply({ content: 'Immersion status coming soon!', ephemeral: true });
+    }
+
+    async handleImmersionChallenges(interaction) {
+        return interaction.reply({ content: 'Immersion challenges coming soon!', ephemeral: true });
+    }
+
+    async handleAgeVerification(interaction) {
+        return interaction.reply({ content: 'Age verification confirmed!', ephemeral: true });
+    }
+
+    async handleResponsibleGaming(interaction) {
+        return interaction.reply({ content: 'Responsible gaming info displayed!', ephemeral: true });
+    }
+
+    async handleLeaderboardsWealth(interaction) {
+        return interaction.reply({ content: 'Wealth leaderboard coming soon!', ephemeral: true });
+    }
+
+    async handleLeaderboardsEntertainment(interaction) {
+        return interaction.reply({ content: 'Entertainment leaderboard coming soon!', ephemeral: true });
+    }
+
+    async handleLeaderboardsSocial(interaction) {
+        return interaction.reply({ content: 'Social leaderboard coming soon!', ephemeral: true });
+    }
+
+    async handleLeaderboardsAchievements(interaction) {
+        return interaction.reply({ content: 'Achievements leaderboard coming soon!', ephemeral: true });
+    }
+
+    async handleLeaderboardsRefresh(interaction) {
+        return interaction.reply({ content: 'Leaderboards refreshed!', ephemeral: true });
     }
 }
 

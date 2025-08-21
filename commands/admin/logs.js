@@ -7,10 +7,10 @@ const path = require('path');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('logs')
-        .setDescription('View system logs and audit trails')
+        .setDescription(`⏳ Access powerful admin logs and audit trails - Monitor your empire's data flow!`)
         .addStringOption(option =>
             option.setName('type')
-                .setDescription('Type of logs to view')
+                .setDescription(`📈 Choose which critical data stream to analyze`)
                 .setRequired(true)
                 .addChoices(
                     { name: 'Treasury Transactions', value: 'treasury' },
@@ -21,13 +21,13 @@ module.exports = {
                 ))
         .addIntegerOption(option =>
             option.setName('limit')
-                .setDescription('Number of log entries to show')
+                .setDescription(`📊 How many recent entries to display (1-50)`)
                 .setRequired(false)
                 .setMinValue(1)
                 .setMaxValue(50))
         .addUserOption(option =>
             option.setName('user')
-                .setDescription('Filter logs by specific user')
+                .setDescription(`✨ Focus on a specific user's activity trail`)
                 .setRequired(false)),
     
     async execute(interaction) {
@@ -37,7 +37,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Access Denied`)
-                .setDescription(`🚫 **ADMIN ONLY!** You need legendary admin powers to access the system logs!\n\n💡 **Tip:** Become a trusted community member to unlock special privileges!\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`🔥 **ADMIN ONLY!** You need legendary admin powers to access the system logs!\n\n✨ **Tip:** Becom...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -92,7 +92,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TREASURY} Treasury Transaction Logs`)
-            .setDescription(`Recent ${limit} treasury transactions\n\n${milestoneMessage}\n${socialProof}`)
+            .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${socialProofMessage}`)
             .addFields(
                 { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }
@@ -120,7 +120,48 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        let progressBuffer;
+        if (embed.data.title.includes('Treasury')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Treasury Health: ${Math.min(treasuryData.balance / 10000, 1) * 100}%`,
+                Math.min(treasuryData.balance / 10000, 1),
+                constants.COLORS.TREASURY
+            );
+        } else if (embed.data.title.includes('Transaction')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Transaction Activity: ${Math.min(transactions.length / limit, 1) * 100}%`,
+                Math.min(transactions.length / limit, 1),
+                constants.COLORS.PRIMARY
+            );
+        } else if (embed.data.title.includes('Burn')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Burn Activity: ${Math.min(burns.length / limit, 1) * 100}%`,
+                Math.min(burns.length / limit, 1),
+                constants.COLORS.ERROR
+            );
+        } else if (embed.data.title.includes('Security')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Security Status: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        } else {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'System Health: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        }
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleTransactionLogs(interaction, limit, filterUser) {
@@ -182,7 +223,48 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        let progressBuffer;
+        if (embed.data.title.includes('Treasury')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Treasury Health: ${Math.min(treasuryData.balance / 10000, 1) * 100}%`,
+                Math.min(treasuryData.balance / 10000, 1),
+                constants.COLORS.TREASURY
+            );
+        } else if (embed.data.title.includes('Transaction')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Transaction Activity: ${Math.min(transactions.length / limit, 1) * 100}%`,
+                Math.min(transactions.length / limit, 1),
+                constants.COLORS.PRIMARY
+            );
+        } else if (embed.data.title.includes('Burn')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Burn Activity: ${Math.min(burns.length / limit, 1) * 100}%`,
+                Math.min(burns.length / limit, 1),
+                constants.COLORS.ERROR
+            );
+        } else if (embed.data.title.includes('Security')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Security Status: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        } else {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'System Health: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        }
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBurnLogs(interaction, limit, filterUser) {
@@ -243,13 +325,54 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        let progressBuffer;
+        if (embed.data.title.includes('Treasury')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Treasury Health: ${Math.min(treasuryData.balance / 10000, 1) * 100}%`,
+                Math.min(treasuryData.balance / 10000, 1),
+                constants.COLORS.TREASURY
+            );
+        } else if (embed.data.title.includes('Transaction')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Transaction Activity: ${Math.min(transactions.length / limit, 1) * 100}%`,
+                Math.min(transactions.length / limit, 1),
+                constants.COLORS.PRIMARY
+            );
+        } else if (embed.data.title.includes('Burn')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Burn Activity: ${Math.min(burns.length / limit, 1) * 100}%`,
+                Math.min(burns.length / limit, 1),
+                constants.COLORS.ERROR
+            );
+        } else if (embed.data.title.includes('Security')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Security Status: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        } else {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'System Health: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        }
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleSecurityLogs(interaction, limit) {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.WARNING} Security Logs`)
-            .setDescription('Security events and suspicious activity monitoring')
+            .setDescription(`⏳ Security events and suspicious activity monitoring - Your empire's shield is active!`)
             .addFields(
                 { name: '🔒 Security Status', value: 'All systems operational', inline: true },
                 { name: '⚠️ Recent Alerts', value: 'No recent security alerts', inline: true }
@@ -263,13 +386,54 @@ module.exports = {
             inline: false
         });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        let progressBuffer;
+        if (embed.data.title.includes('Treasury')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Treasury Health: ${Math.min(treasuryData.balance / 10000, 1) * 100}%`,
+                Math.min(treasuryData.balance / 10000, 1),
+                constants.COLORS.TREASURY
+            );
+        } else if (embed.data.title.includes('Transaction')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Transaction Activity: ${Math.min(transactions.length / limit, 1) * 100}%`,
+                Math.min(transactions.length / limit, 1),
+                constants.COLORS.PRIMARY
+            );
+        } else if (embed.data.title.includes('Burn')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Burn Activity: ${Math.min(burns.length / limit, 1) * 100}%`,
+                Math.min(burns.length / limit, 1),
+                constants.COLORS.ERROR
+            );
+        } else if (embed.data.title.includes('Security')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Security Status: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        } else {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'System Health: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        }
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleErrorLogs(interaction, limit) {
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ERROR} System Error Logs`)
-            .setDescription('Recent system errors and exceptions')
+            .setDescription(`📊 Recent system errors and exceptions - Monitoring system health!`)
             .addFields(
                 { name: '✅ System Status', value: 'All systems operational', inline: true },
                 { name: '📊 Error Count (24h)', value: '0', inline: true }
@@ -283,7 +447,48 @@ module.exports = {
             inline: false
         });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        let progressBuffer;
+        if (embed.data.title.includes('Treasury')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Treasury Health: ${Math.min(treasuryData.balance / 10000, 1) * 100}%`,
+                Math.min(treasuryData.balance / 10000, 1),
+                constants.COLORS.TREASURY
+            );
+        } else if (embed.data.title.includes('Transaction')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Transaction Activity: ${Math.min(transactions.length / limit, 1) * 100}%`,
+                Math.min(transactions.length / limit, 1),
+                constants.COLORS.PRIMARY
+            );
+        } else if (embed.data.title.includes('Burn')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Burn Activity: ${Math.min(burns.length / limit, 1) * 100}%`,
+                Math.min(burns.length / limit, 1),
+                constants.COLORS.ERROR
+            );
+        } else if (embed.data.title.includes('Security')) {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Security Status: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        } else {
+            progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'System Health: 100% Operational',
+                1.0,
+                constants.COLORS.SUCCESS
+            );
+        }
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getTransactionEmoji(type) {

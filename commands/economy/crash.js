@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crash')
-        .setDescription('Skill-based crash game - cash out before the multiplier crashes! (21+ verification required)')
+        .setDescription(`🚀 Skill-based crash game - cash out before the multiplier crashes! 🔥 (21+ verification required)`)
         .addNumberOption(option =>
             option.setName('play_amount')
                 .setDescription('Amount of VEX to play with')
@@ -41,7 +41,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}`)
+                .setDescription(`⚠️ **LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\...`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -59,7 +59,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}\n\n💡 **Pro Tip:** Use `/work` or `/daily` to earn more VEX!`)
+                .setDescription(`💸 You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${socialProof}\n\n✨ **Pro Tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n📈 **Quick earnings:** Most players earn $50+ VEX in 10 minutes!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -70,7 +70,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
-                .setDescription(`${result.reason}\n\n${nearMiss}`)
+                .setDescription(`💥 ${result.reason}\n\n${nearMiss}\n\n🔄 **Don't give up!** Your next play could be the big win!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -109,7 +109,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🚀 ${description}\n\n🔥 **LIVE ACTION:** Multiplier climbing fast!\n💸 **Big wins happening now!**`)
             .addFields(
                 { name: '💰 Play Amount', value: `$${playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Current Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
@@ -131,7 +131,19 @@ module.exports = {
         
         this.saveCrashGame(game);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Crash Game: ${game.currentMultiplier.toFixed(2)}x Multiplier`,
+            Math.min(game.currentMultiplier / 10, 1),
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         this.startCrashSequence(interaction, game);
     },
@@ -223,7 +235,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Cashed Out!`)
-            .setDescription(`🎉 You successfully cashed out at ${game.currentMultiplier.toFixed(2)}x!`)
+            .setDescription(`🎉 You successfully cashed out at ${game.currentMultiplier.toFixed(2)}x!\n\n💸 **PERFECT TIMING!*...`)
             .addFields(
                 { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '📈 Cash Out Multiplier', value: `${game.currentMultiplier.toFixed(2)}x`, inline: true },
@@ -259,7 +271,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ERROR} Crashed!`)
-            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!`)
+            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!\n\n🔄 **So close!** You were ${(game.crashPoint - targetMultiplier).toFixed(2)}x away from winning!`)
             .addFields(
                 { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💥 Crash Point', value: `${game.crashPoint.toFixed(2)}x`, inline: true },

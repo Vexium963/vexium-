@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('duel')
-        .setDescription('Challenge other players to VEX duels and competitions')
+        .setDescription(`🔥 Challenge players to EPIC VEX duels! Prove your dominance and earn massive rewards!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('challenge')
-                .setDescription('Challenge another player to a duel')
+                .setDescription(`💥 Challenge another player to an EPIC duel for VEX supremacy!`)
                 .addUserOption(option =>
                     option.setName('opponent')
                         .setDescription('Player to challenge')
@@ -32,7 +32,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('accept')
-                .setDescription('Accept a duel challenge')
+                .setDescription(`🔥 Accept the challenge and prove your worth in combat!`)
                 .addStringOption(option =>
                     option.setName('duel_id')
                         .setDescription('Duel ID to accept')
@@ -40,7 +40,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('decline')
-                .setDescription('Decline a duel challenge')
+                .setDescription(`✨ Decline a duel challenge (but glory awaits the brave!)`)
                 .addStringOption(option =>
                     option.setName('duel_id')
                         .setDescription('Duel ID to decline')
@@ -48,15 +48,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('pending')
-                .setDescription('View your pending duels'))
+                .setDescription(`⏳ View your active duel challenges - time is running out!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('history')
-                .setDescription('View your duel history'))
+                .setDescription(`📈 View your legendary duel history and battle statistics!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View duel leaderboard')),
+                .setDescription(`🏆 See the ultimate duel champions - will you join their ranks?`)),
     
     cooldown: 5,
     
@@ -120,7 +120,7 @@ module.exports = {
         if (opponent.id === interaction.user.id) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Duel Yourself`)
-                .setDescription('You cannot challenge yourself to a duel.')
+                .setDescription(`✨ You cannot challenge yourself to a duel! Find a worthy opponent to test your skills against!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -129,7 +129,7 @@ module.exports = {
         if (opponent.bot) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Duel Bots`)
-                .setDescription('You cannot challenge bots to duels.')
+                .setDescription(`🔥 Bots are not worthy opponents! Challenge real players for true glory and VEX rewards!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -138,7 +138,7 @@ module.exports = {
         if (prizeAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${prizeAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`💸 You need $${prizeAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}! Earn...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -150,7 +150,7 @@ module.exports = {
         if (prizeAmount > opponentData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Opponent Insufficient Funds`)
-                .setDescription(`**${opponent.username}** doesn't have enough VEX for this competition.`)
+                .setDescription(`✨ **${opponent.username}** doesn't have enough VEX for this epic competition! Choose a smaller pr...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -186,9 +186,17 @@ module.exports = {
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 10);
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 1).toFixed(2)) : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Duel Power: ${userData.level} vs ${opponentData.level}`,
+            Math.min(userData.level / 50, 1),
+            constants.COLORS.PRIMARY
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SWORD} DUEL CHALLENGE SENT!`)
-            .setDescription(`🔥 **You've challenged ${opponent.username} to EPIC COMBAT!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.FIRE} DUEL CHALLENGE SENT!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **You've challenged ${opponent.username} to EPIC COMBAT!**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields(
                 { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
                 { name: '💰 Prize Pool', value: `$${prizeAmount.toFixed(2)} VEX`, inline: true },
@@ -197,15 +205,19 @@ module.exports = {
             )
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(opponent.displayAvatarURL())
+            .setImage('attachment://progress.png')
             .setFooter({ text: '⚡ Your opponent has 5 minutes to respond - GLORY AWAITS!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         try {
             const challengeEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SWORD} Duel Challenge!`)
-                .setDescription(`**${interaction.user.username}** has challenged you to a duel!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **${interaction.user.username}** has challenged you to an ...`)
                 .addFields(
                     { name: '⚔️ Duel Type', value: duelTypeNames[duelType], inline: true },
                     { name: '💰 Prize Pool', value: `$${prizeAmount.toFixed(2)} VEX`, inline: true },
@@ -313,13 +325,25 @@ module.exports = {
         
         this.deleteDuel(duelId);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Duel Status: Declined',
+            0.3,
+            constants.COLORS.WARNING
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Duel Declined`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} Duel Declined`)
             .setDescription(`You've declined the duel challenge.`)
             .setColor(constants.COLORS.WARNING)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePending(interaction) {
@@ -327,7 +351,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SWORD} Pending Duels`)
-            .setDescription('Your active duel challenges')
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Your active duel challenges - glory and VEX await the victorious!`)
             .setColor(constants.COLORS.PRIMARY);
         
         if (pendingDuels.length === 0) {
@@ -351,7 +375,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /duel accept or /duel decline to respond to challenges' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Pending Duels Status',
+            pendingDuels.length / 10,
+            constants.COLORS.PRIMARY
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleHistory(interaction) {
@@ -385,7 +420,18 @@ module.exports = {
             embed.setDescription('You haven\'t completed any duels yet. Use `/duel challenge` to start dueling!');
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Win Rate: ${winRate}%`,
+            parseFloat(winRate) / 100,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleLeaderboard(interaction) {

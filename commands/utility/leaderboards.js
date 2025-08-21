@@ -5,31 +5,31 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboards')
-        .setDescription('View comprehensive leaderboards across all VexiumVerse categories')
+        .setDescription(`🔥 Compete for legendary status! View comprehensive leaderboards and climb the rankings!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('global')
-                .setDescription('View global leaderboards across all categories'))
+                .setDescription(`✨ Dominate all categories! See who rules VexiumVerse!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('wealth')
-                .setDescription('Top players by net worth and VEX holdings'))
+                .setDescription(`💸 The elite wealth masters! See who's building empires!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('entertainment')
-                .setDescription('Top performers in skill-based entertainment games'))
+                .setDescription(`🔥 Pure skill legends! Masters of entertainment domination!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('social')
-                .setDescription('Most active social players and traders'))
+                .setDescription(`💓 Community champions! Social butterflies and trading masters!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('achievements')
-                .setDescription('Players with the most achievements unlocked'))
+                .setDescription(`🏆 Achievement hunters! Unlock your potential and compete!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('streaks')
-                .setDescription('Longest daily streaks and consistency leaders')),
+                .setDescription(`🔥 Consistency legends! Build unstoppable daily streaks!`)),
     
     cooldown: 15,
     
@@ -94,7 +94,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`🏆 GLOBAL LEADERBOARDS - COMPETE FOR GLORY!`)
-            .setDescription(`💎 **COMPETE FOR LEGENDARY STATUS!** Climb the rankings and dominate VexiumVerse!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`✨ **COMPETE FOR LEGENDARY STATUS!** Climb the rankings and dominate VexiumVerse!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n🔥 **${Math.floor(Math.random() * 50) + 200} players** are competing right now!`)
             .addFields(
                 { name: '💰 Wealth Leaders', value: 'Top players by net worth\nand VEX accumulation', inline: true },
                 { name: '🎮 Entertainment Masters', value: 'Skill-based game champions\nand win rate leaders', inline: true },
@@ -144,7 +144,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`💰 WEALTH EMPIRE LEADERBOARD - THE ELITE!`)
-            .setDescription(`👑 **THESE ARE THE LEGENDS!** Top VEX accumulation masters!\n\n${milestoneMessage}\n${socialProofMessage}`)
+            .setDescription(`💸 **THESE ARE THE LEGENDS!** Top VEX accumulation masters!\n\n${milestoneMessage}\n${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Climb the ranks and join the elite!**`)
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Rankings based on total net worth (wallet + bank + investments)' })
             .setTimestamp();
@@ -200,7 +200,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`🎮 SKILL MASTERS LEADERBOARD - PURE TALENT!`)
-            .setDescription(`⚡ **SKILL-BASED ENTERTAINMENT LEGENDS!** These players dominate through pure talent!\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SKILL-BASED ENTERTAINMENT LEGENDS!** These players dominate t...`)
             .setColor(constants.COLORS.ENTERTAINMENT)
             .addFields(
                 { name: '🎯 Ranking Criteria', value: '• Win rate percentage\n• Total games won\n• Skill progression\n• Consistency score', inline: true },
@@ -261,7 +261,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`👥 SOCIAL CHAMPIONS - COMMUNITY LEGENDS!`)
-            .setDescription(`🤝 **THESE PLAYERS BUILD THE COMMUNITY!** Most active traders and social contributors!\n\n${milestoneMessage}\n${socialProofMessage}`)
+            .setDescription(`🤝 **THESE PLAYERS BUILD THE COMMUNITY!** Most active traders and social contributors!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Build connections and climb the social ranks!**`)
             .setColor(constants.COLORS.SOCIAL)
             .addFields(
                 { name: '🤝 Social Activities', value: '• Successful trades\n• Gifts sent/received\n• Community participation\n• Guild contributions', inline: true },
@@ -317,7 +317,7 @@ module.exports = {
         const topPlayers = await this.getTopPlayersByAchievements();
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.ACHIEVEMENTS} Achievement Leaderboard`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.ACHIEVEMENT} Achievement Leaderboard`)
             .setDescription('Players with the most achievements unlocked')
             .setColor(constants.COLORS.ACHIEVEMENTS)
             .addFields(

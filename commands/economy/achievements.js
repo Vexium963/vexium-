@@ -5,27 +5,27 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('achievements')
-        .setDescription('View and track your VexiumVerse achievements')
+        .setDescription(`🏆 Unlock legendary achievements and become a VexiumVerse legend!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('View all available achievements'))
+                .setDescription(`✨ Browse all epic achievements waiting to be conquered!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('progress')
-                .setDescription('Check your achievement progress'))
+                .setDescription(`📊 Track your journey to becoming a VexiumVerse champion!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('showcase')
-                .setDescription('Display your favorite achievements')
+                .setDescription(`🎉 Show off your most prestigious achievements to the world!`)
                 .addStringOption(option =>
                     option.setName('achievement_id')
-                        .setDescription('Achievement to showcase')
+                        .setDescription(`🔥 Choose your most impressive achievement to display!`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View achievement leaderboard')),
+                .setDescription(`${constants.ANIMATED_EMOJIS.LEADERBOARD} See who dominates the achievement rankings!`)),
     
     cooldown: 10,
     
@@ -79,7 +79,7 @@ module.exports = {
         const recentUnlocks = userAchievements.slice(-3);
         const streakBonus = userData.dailyStreak >= 7 ? 1.5 : 1.0;
         
-        let title = `${constants.EMOJIS.ACHIEVEMENTS} Achievement Hunter`;
+        let title = `🏆 Achievement Hunter`;
         let description = `🏆 **${completedIds.length}** out of **${allAchievements.length}** achievements unlocked!`;
         
         if (isCompletionist) {
@@ -90,7 +90,13 @@ module.exports = {
             description = `🏆 **AMAZING PROGRESS!** ${completedIds.length}/${allAchievements.length} achievements!\n⭐ **You're almost a completionist!**`;
         }
         
-        const progressBar = '█'.repeat(Math.floor(completionRate / 5)) + '░'.repeat(20 - Math.floor(completionRate / 5));
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Achievement Progress: ${completedIds.length}/${allAchievements.length}`,
+            completionRate / 100,
+            constants.COLORS.VEX
+        );
         const nextMilestone = Math.ceil(completedIds.length / 10) * 10;
         const toNextMilestone = nextMilestone - completedIds.length;
         
@@ -100,12 +106,13 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n🎯 **"Collect them all and become legendary!"**\n\n${fomoMessage}\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
+            .setDescription(description + `\n\n🔥 **"Collect them all and become legendary!"**\n\n${fomoMessage}\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n🚀 **Limited time:** Double XP weekend active!`)
             .addFields({
                 name: '📊 Completion Progress',
-                value: `${progressBar} **${completionRate.toFixed(1)}%**\n🎯 **Next Milestone:** ${toNextMilestone} achievements to ${nextMilestone}\n🔥 **Streak Bonus:** ${streakBonus > 1 ? `+${((streakBonus - 1) * 100).toFixed(0)}%` : 'None'}`,
+                value: `🎯 **Next Milestone:** ${toNextMilestone} achievements to ${nextMilestone}\n🔥 **Streak Bonus:** ${streakBonus > 1 ? `+${((streakBonus - 1) * 100).toFixed(0)}%` : 'None'}`,
                 inline: false
             })
+            .setImage('attachment://progress.png')
             .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFooter({ text: `🎮 ${completedIds.length >= 10 ? 'Achievement Master' : 'Rising Hunter'} | Use buttons to explore categories` });
@@ -152,7 +159,11 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(economyButton, socialButton, entertainmentButton, progressButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleProgress(interaction) {
@@ -177,8 +188,8 @@ module.exports = {
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(0)) : null;
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.PROGRESS} Achievement Progress`)
-            .setDescription(`Track your progress toward unlocking new achievements!\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setTitle(`📊 Achievement Progress`)
+            .setDescription(`⏳ Track your progress toward unlocking new achievements!\n\n📈 **${Math.floor(Math.random() * 150) + 50} players** are hunting achievements right now!\n\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n🔥 **Pro tip:** Complete daily streaks for bonus achievement progress!`)
             .setColor(constants.COLORS.INFO)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFooter({ text: 'Keep playing to unlock more achievements!' });
@@ -190,15 +201,39 @@ module.exports = {
                 inline: false
             });
         } else {
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            
             for (const achievement of inProgressAchievements) {
-                const progressBar = this.createProgressBar(achievement.progress.current, achievement.progress.target);
                 const percentage = Math.round((achievement.progress.current / achievement.progress.target) * 100);
+                const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                    `${achievement.name} Progress`,
+                    achievement.progress.current / achievement.progress.target,
+                    constants.COLORS.SUCCESS
+                );
                 
                 embed.addFields({
                     name: `${achievement.emoji} ${achievement.name}`,
-                    value: `${achievement.description}\n${progressBar} ${percentage}%\n**Reward**: ${achievement.reward} VEX + ${achievement.xp} XP`,
+                    value: `${achievement.description}\n📊 **Progress:** ${percentage}%\n**Reward**: ${achievement.reward} VEX + ${achievement.xp} XP`,
                     inline: true
                 });
+            }
+            
+            if (inProgressAchievements.length > 0) {
+                const firstAchievement = inProgressAchievements[0];
+                const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                    `${firstAchievement.name} Progress`,
+                    firstAchievement.progress.current / firstAchievement.progress.target,
+                    constants.COLORS.SUCCESS
+                );
+                embed.setImage('attachment://progress.png');
+                
+                await interaction.reply({ 
+                    embeds: [embed], 
+                    components: [row],
+                    files: [{ attachment: progressBuffer, name: 'progress.png' }]
+                });
+                return;
             }
         }
         
@@ -248,7 +283,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Achievement Not Found`)
-                .setDescription(`You haven't unlocked achievement ID: ${achievementId}\n\nUse \`/achievements progress\` to see available achievements.\n\n${nearMissMessage}`)
+                .setDescription(`⏳ You haven't unlocked achievement ID: ${achievementId}\n\n✨ Use \`/achievements progress\` to see available achievements.\n\n${nearMissMessage}\n\n🔥 **Motivation:** You're closer than you think to your next achievement!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -262,7 +297,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SUCCESS} Achievement Removed from Showcase`)
-                .setDescription(`**${achievement.name}** is no longer showcased on your profile.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} **${achievement.name}** is no longer showcased on your prof...`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

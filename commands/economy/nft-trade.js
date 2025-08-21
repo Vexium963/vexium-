@@ -5,24 +5,24 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('nft-trade')
-        .setDescription('Trade NFTs with other players')
+        .setDescription(`🎨 Trade exclusive NFTs with other players - Build your digital empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('List your NFT for trade')
+                .setDescription(`💸 List your NFT for trade - Turn art into profit!`)
                 .addStringOption(option =>
                     option.setName('nft_id')
-                        .setDescription('ID of the NFT to list')
+                        .setDescription(`✨ ID of the NFT to list for maximum profit`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('price')
-                        .setDescription('Price in VEX tokens')
+                        .setDescription(`🔥 Set your price in VEX tokens - Aim high!`)
                         .setRequired(true)
                         .setMinValue(1)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Buy an NFT from the marketplace')
+                .setDescription(`🎉 Buy exclusive NFTs - Rare finds disappear fast!`)
                 .addStringOption(option =>
                     option.setName('listing_id')
                         .setDescription('ID of the listing to purchase')
@@ -38,11 +38,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('browse')
-                .setDescription('Browse available NFTs for sale'))
+                .setDescription(`🌈 Browse premium NFT marketplace - Discover hidden gems!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('offer')
-                .setDescription('Make an offer on an NFT')
+                .setDescription(`🔥 Make competitive offers on NFTs - Negotiate like a pro!`)
                 .addStringOption(option =>
                     option.setName('nft_id')
                         .setDescription('ID of the NFT to make an offer on')
@@ -130,7 +130,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} No NFTs Found`)
-                .setDescription(`You don\'t own any NFTs to trade.\n\nUse \`/nft-mint create\` to mint your first NFT!\n\n${fomoMessage}`)
+                .setDescription(`✨ **${interaction.user.username}**, you don't own any NFTs yet!\n\n🎨 **Start your collection:** Use \`/nft-mint create\` to mint your first exclusive NFT!\n💎 **Pro tip:** Early minters often see 10x returns!\n\n${fomoMessage}\n\n🔥 **${Math.floor(Math.random() * 15) + 5} players** minted NFTs in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -140,7 +140,7 @@ module.exports = {
         if (!nft) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} NFT Not Found`)
-                .setDescription(`You don't own an NFT with ID #${nftId}.\n\nUse \`/nft-mint collection\` to view your NFTs.`)
+                .setDescription(`💥 **NFT #${nftId} not found!**\n\n📋 **Check your collection:** Use \`/nft-mint collection\` to view all your NFTs\n💡 **Tip:** Double-check the NFT ID for accuracy\n\n🎯 **${Math.floor(Math.random() * 8) + 3} traders** are actively listing NFTs right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -189,7 +189,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} NFT Listed for Trade!`)
-            .setDescription(`**${nft.name}** is now available for purchase\n\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION || '🎉'} **${nft.name}** is now live on the marketplace!\n\n🔥 **Hot listing:** Your NFT is featured prominently!\n📈 **Market activity:** ${Math.floor(Math.random() * 12) + 8} buyers are browsing right now\n\n${socialProof}${variableReward ? `\n${variableReward}` : ''}\n\n💎 **Pro tip:** Rare NFTs often sell within the first hour!`)
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: `${rarityEmojis[nft.rarity]} ${nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1)}`, inline: true },
@@ -218,7 +218,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(cancelButton, viewButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `NFT Listed: ${nft.name}`,
+            1.0,
+            this.getRarityColor(nft.rarity)
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -313,7 +325,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} NFT Purchase Successful!`)
-            .setDescription(`You've successfully purchased **${nft.name}**!\n\n${socialProof}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN || '💰'} **CONGRATULATIONS!** You've acquired **${nft.name}**!\n\n🎯 **Smart purchase:** This NFT could appreciate in value!\n📈 **Collection growth:** You're building an impressive portfolio!\n\n${socialProof}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n🔥 **Market insight:** ${Math.floor(Math.random() * 6) + 3} similar NFTs sold today!`)
             .addFields(
                 { name: '🏷️ NFT Name', value: nft.name, inline: true },
                 { name: '✨ Rarity', value: nft.rarity.charAt(0).toUpperCase() + nft.rarity.slice(1), inline: true },
@@ -341,7 +353,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(viewButton, collectionButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `NFT Purchased: ${nft.name}`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBrowse(interaction) {
@@ -351,7 +375,7 @@ module.exports = {
         if (activeListings.length === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.NFT} NFT Marketplace`)
-                .setDescription('No NFTs are currently listed for sale.\n\nBe the first to list your NFT!')
+                .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES || '✨'} **Empty marketplace = HUGE opportunity!**\n\n🚀 **Be...`)
                 .addFields(
                     { name: '💡 How to List', value: 'Use `/nft-trade list` to put your NFT up for sale', inline: false },
                     { name: '🎨 Need NFTs?', value: 'Use `/nft-mint create` to mint new NFTs', inline: false }
@@ -370,7 +394,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.NFT} NFT Marketplace`)
-            .setDescription(`**${activeListings.length}** NFTs available for purchase\n\n${socialProof}\n${fomoMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE || '🔥'} **${activeListings.length} EXCLUSIVE NFTs** available f...`)
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Use /nft-trade buy <listing_id> to purchase' });
         
@@ -403,7 +427,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton, refreshButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `NFT Marketplace: ${activeListings.length} listings`,
+            Math.min(activeListings.length / 20, 1.0),
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateListingId() {

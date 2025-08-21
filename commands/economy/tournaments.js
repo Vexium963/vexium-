@@ -5,31 +5,31 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('tournaments')
-        .setDescription('Participate in skill-based entertainment tournaments for prizes')
+        .setDescription(`🔥 Compete in epic tournaments! Win VEX tokens and glory!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('active')
-                .setDescription('View currently active tournaments'))
+                .setDescription(`✨ See live tournaments with massive prize pools!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('join')
-                .setDescription('Join a tournament')
+                .setDescription(`🚀 Enter the arena and compete for VEX rewards!`)
                 .addStringOption(option =>
                     option.setName('tournament_id')
-                        .setDescription('ID of the tournament to join')
+                        .setDescription(`⏳ Tournament ID - check /tournaments active for options`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')
-                .setDescription('Create a private tournament (Premium feature)')
+                .setDescription(`🎉 Host your own tournament! Premium members only`)
                 .addStringOption(option =>
                     option.setName('name')
-                        .setDescription('Tournament name')
+                        .setDescription(`✨ Choose an epic name for your tournament`)
                         .setRequired(true)
                         .setMaxLength(50))
                 .addStringOption(option =>
                     option.setName('game_type')
-                        .setDescription('Type of skill-based game')
+                        .setDescription(`🎲 Select the game type for maximum excitement`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Slots Tournament', value: 'slots' },
@@ -37,22 +37,22 @@ module.exports = {
                             { name: 'Mixed Games', value: 'mixed' }))
                 .addIntegerOption(option =>
                     option.setName('entry_fee')
-                        .setDescription('Entry fee in VEX (minimum 100)')
+                        .setDescription(`💸 Set entry fee - higher stakes = bigger rewards!`)
                         .setRequired(true)
                         .setMinValue(100)
                         .setMaxValue(10000)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View tournament leaderboard')
+                .setDescription(`🏆 See who's dominating the competition!`)
                 .addStringOption(option =>
                     option.setName('tournament_id')
-                        .setDescription('ID of the tournament')
+                        .setDescription(`📈 Tournament ID to view rankings and scores`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('history')
-                .setDescription('View your tournament history and achievements')),
+                .setDescription(`🏆 Your legendary tournament journey and victories!`)),
     
     cooldown: 10,
     
@@ -144,7 +144,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n⚡ **"Champions are made in tournaments!"**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(description + `\n\n⚡ **"Champions are made in tournaments!"**\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n🔥 **${Math.floor(Math.random() * 50) + 100} players** are competing right now!`)
             .addFields(
                 { name: '⚖️ Legal Notice', value: 'All tournaments feature skill-based entertainment games, not gambling', inline: false },
                 { name: '🔞 Age Requirement', value: 'Must be 21+ and age verified to participate', inline: true },
@@ -193,7 +193,24 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(joinButton, createButton, historyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const tournamentProgress = activeTournaments.length > 0 ? 
+            activeTournaments.reduce((sum, t) => sum + (t.participants.length / t.maxPlayers), 0) / activeTournaments.length : 0;
+        
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament Activity: ${activeTournaments.length} Active`,
+            tournamentProgress,
+            constants.COLORS.TOURNAMENT
+        );
+        
+        embed.setImage('attachment://tournament_progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'tournament_progress.png' }]
+        });
     },
     
     async handleJoin(interaction) {
@@ -204,7 +221,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Age Verification Required`)
-                .setDescription(`You must be 21+ and age verified to participate in tournaments.\n\nUse \`/verify-age\` to complete verification.\n\n${fomoMessage}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} **Age verification required!** You must be 21+ to join tournaments.\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Use \`/verify-age\` to unlock tournament access!\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Don't miss out** - tournaments are filling up fast!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -307,7 +324,23 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(playButton, leaderboardButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const participationProgress = tournament.participants.length / tournament.maxPlayers;
+        
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament Capacity: ${tournament.participants.length}/${tournament.maxPlayers}`,
+            participationProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        embed.setImage('attachment://participation_progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'participation_progress.png' }]
+        });
     },
     
     async handleCreate(interaction) {
@@ -405,7 +438,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(shareButton, manageButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament "${name}" Created Successfully`,
+            1.0, // Full progress for successful creation
+            constants.COLORS.SUCCESS
+        );
+        
+        embed.setImage('attachment://creation_success.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'creation_success.png' }]
+        });
     },
     
     async handleHistory(interaction) {
@@ -447,7 +495,25 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(activeButton, achievementsButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const userStats = await (new User(interaction.user.id)).load();
+        const winRate = userStats.stats.tournamentsJoined > 0 ? 
+            (userStats.stats.tournamentsWon || 0) / userStats.stats.tournamentsJoined : 0;
+        
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament Win Rate: ${Math.round(winRate * 100)}%`,
+            winRate,
+            constants.COLORS.VEX
+        );
+        
+        embed.setImage('attachment://history_progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'history_progress.png' }]
+        });
     },
     
     getActiveTournaments() {

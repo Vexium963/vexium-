@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('blackjack')
-        .setDescription('Play skill-based blackjack entertainment game for VEX rewards (21+ verification required)')
+        .setDescription(`🃏 Play skill-based blackjack entertainment game for VEX rewards (21+ verification required)`)
         .addNumberOption(option =>
             option.setName('play_amount')
                 .setDescription('Amount of VEX to play with')
@@ -43,7 +43,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}\n${socialProofMessage}`)
+                .setDescription(`⚠️ **LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\...`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -71,7 +71,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n💡 **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n${comebackMessage}\n${socialProofMessage}`)
+                .setDescription(`💸 You need $${playAmount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n✨ **Build your empire first!** Use \`/work\`, \`/daily\`, or \`/invest\` to earn more VEX!\n\n🔄 ${comebackMessage}\n📈 ${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -84,7 +84,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Play Failed`)
-                .setDescription(`${result.reason}\n\n${nearMissMessage}\n${socialProofMessage}`)
+                .setDescription(`💥 ${result.reason}\n\n🎯 ${nearMissMessage}\n📈 ${socialProofMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -126,7 +126,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🃏 ${description}`)
             .addFields(
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${this.calculateHandValue(game.playerHand)}`, inline: true },
@@ -159,7 +159,20 @@ module.exports = {
         
         this.saveGame(game);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const gameProgress = Math.min(userData.stats.blackjackGames || 0, 50) / 50;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Blackjack Mastery: ${userData.stats.blackjackGames || 0}/50 games`,
+            gameProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     initializeGame(playAmount) {
@@ -250,7 +263,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CARDS} Blackjack Game`)
-            .setDescription('You drew a card!')
+            .setDescription(`🃏 You drew a card! 🔥 Keep the momentum going!`)
             .addFields(
                 { name: '🃏 Your Hand', value: this.formatHand(game.playerHand), inline: true },
                 { name: '🎯 Your Total', value: `${playerValue}`, inline: true },
@@ -360,7 +373,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CARDS} Blackjack Result`)
-            .setDescription(resultText)
+            .setDescription(`🎉 ${resultText} 💸`)
             .addFields(
                 { name: '🃏 Your Hand', value: `${this.formatHand(game.playerHand)} (${playerValue})`, inline: true },
                 { name: '🏠 Dealer Hand', value: `${this.formatHand(game.dealerHand)} (${dealerValue})`, inline: true },

@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quests')
-        .setDescription('Complete daily and weekly quests for rewards and progression')
+        .setDescription(`✨ Complete epic quests for massive VEX rewards and legendary progression!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('active')
-                .setDescription('View your active quests and progress'))
+                .setDescription(`⏳ View your active quests and track your legendary progress!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('complete')
-                .setDescription('Complete a finished quest and claim rewards')
+                .setDescription(`🎉 Complete a finished quest and claim your epic rewards!`)
                 .addStringOption(option =>
                     option.setName('quest_id')
                         .setDescription('ID of the quest to complete')
@@ -21,7 +21,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('abandon')
-                .setDescription('Abandon an active quest')
+                .setDescription(`💥 Abandon an active quest (lose all progress!)`)
                 .addStringOption(option =>
                     option.setName('quest_id')
                         .setDescription('ID of the quest to abandon')
@@ -29,11 +29,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('history')
-                .setDescription('View your completed quest history'))
+                .setDescription(`🏆 View your legendary quest completion history and achievements!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View quest completion leaderboard')),
+                .setDescription(`🔥 View the quest completion leaderboard - compete with legends!`)),
     
     cooldown: 10,
     
@@ -71,7 +71,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ SURPRISE QUEST BONUS!`)
-                .setDescription(`🎉 **Lucky you!** Random quest bonus activated!\n💰 **+$${urgencyBonus} VEX** for being an active adventurer!`)
+                .setDescription(`🎉 **Lucky you!** Random quest bonus activated!\n💸 **+$${urgencyBonus} VEX** for being an active...`)
                 .setColor(constants.COLORS.VEX)
                 .setFooter({ text: 'Random bonuses reward dedicated questers!' });
             
@@ -142,7 +142,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`${description}\n\n🚀 **${Math.floor(Math.random() * 150) + 50} players** are completing quests ri...`)
             .setColor(hasUrgentQuests ? constants.COLORS.VEX : isQuestMaster ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setFooter({ text: 'New legendary quests unlock as you level up!' })
             .setTimestamp();
@@ -156,12 +156,11 @@ module.exports = {
         } else {
             for (const quest of activeQuests) {
                 const status = quest.completed ? (quest.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${quest.progress}/${quest.target}`;
-                const progressBar = this.createProgressBar(quest.progress, quest.target);
                 const reward = `$${quest.reward.toFixed(2)} VEX + ${quest.xp} XP`;
                 
                 embed.addFields({
                     name: `${quest.emoji} ${quest.name}`,
-                    value: `${quest.description}\n${progressBar}\n**Reward**: ${reward}\n**Status**: ${status}`,
+                    value: `${quest.description}\n**Progress**: ${quest.progress}/${quest.target}\n**Reward**: ${reward}\n**Status**: ${status}`,
                     inline: true
                 });
             }
@@ -196,7 +195,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(completeButton, historyButton, leaderboardButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const overallProgress = activeQuests.length > 0 ? completedCount / activeQuests.length : 0;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Quest Progress: ${completedCount}/${activeQuests.length} completed`,
+            overallProgress,
+            hasUrgentQuests ? constants.COLORS.VEX : constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleComplete(interaction) {
@@ -211,7 +223,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Quest Not Found`)
-                .setDescription(`No active quest found with ID: ${questId}\n\nUse \`/quests active\` to see your quests.\n\n${nearMissMessage}`)
+                .setDescription(`💥 No active quest found with ID: ${questId}\n\nUse \`/quests active\` to see your epic quests.\n\n${nearMissMessage}\n\n✨ **Pro tip:** Complete quests faster for bonus rewards!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -220,7 +232,7 @@ module.exports = {
         if (!quest.completed) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Quest Not Completed`)
-                .setDescription(`**${quest.name}** is not yet completed!\n\n**Progress**: ${quest.progress}/${quest.target}`)
+                .setDescription(`⏳ **${quest.name}** is not yet completed!\n\n**Progress**: ${quest.progress}/${quest.target}\n\n�...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -229,7 +241,7 @@ module.exports = {
         if (quest.claimed) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already Claimed`)
-                .setDescription('You have already claimed this quest reward.')
+                .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} You have already claimed this quest reward!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Check out more epic quests with \`/quests active\`!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -302,7 +314,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(moreButton, historyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `${quest.name} - COMPLETED!`,
+            1.0, // 100% completion
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleHistory(interaction) {
@@ -360,7 +384,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(activeButton, leaderboardButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const completionRate = this.getCompletionRate(userData) / 100;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Quest Mastery: ${this.getQuestRank(questsCompleted)}`,
+            completionRate,
+            constants.COLORS.INFO
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getActiveQuests(userData) {
@@ -446,8 +483,7 @@ module.exports = {
     
     createProgressBar(current, max, length = 10) {
         const percentage = Math.min(current / max, 1);
-        const filled = Math.floor(percentage * length);
-        const empty = length - filled;
+        return `${Math.round(percentage * 100)}%`;
         
         return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${current}/${max}`;
     },

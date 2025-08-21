@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('competitions')
-        .setDescription('Participate in competitive tournaments and challenges')
+        .setDescription(`🔥 Dominate epic tournaments and claim massive VEX rewards!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('active')
-                .setDescription('View active competitions'))
+                .setDescription(`🏆 See live tournaments with massive prize pools!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('join')
-                .setDescription('Join a competition')
+                .setDescription(`🚀 Enter the arena and compete for glory!`)
                 .addStringOption(option =>
                     option.setName('competition_id')
                         .setDescription('Competition ID to join')
@@ -21,7 +21,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('bracket')
-                .setDescription('View tournament bracket')
+                .setDescription(`📈 Track your path to victory in the tournament bracket!`)
                 .addStringOption(option =>
                     option.setName('competition_id')
                         .setDescription('Competition ID to view bracket for')
@@ -29,11 +29,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View competition leaderboards'))
+                .setDescription(`👑 See who dominates the competitive scene!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('history')
-                .setDescription('View your competition history')),
+                .setDescription(`🏅 Review your legendary tournament achievements!`)),
     
     cooldown: 5,
     
@@ -109,11 +109,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(enhancedDescription)
+            .setDescription(`🔥 ${enhancedDescription} 🏆`)
             .setColor(urgencyCount > 0 ? constants.COLORS.ERROR : isCompetitive ? constants.COLORS.VEX : constants.COLORS.GOLD);
         
         if (activeCompetitions.length === 0) {
-            embed.setDescription('No active competitions right now. Check back soon for new tournaments!');
+            embed.setDescription(`⏳ No active competitions right now. ✨ Check back soon for epic new tournaments with massive rewards!`);
         } else {
             for (const comp of activeCompetitions) {
                 const timeLeft = comp.registrationEnd - Date.now();
@@ -147,7 +147,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /competitions join <competition_id> to enter!' });
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Active Tournaments: ${activeCompetitions.length} competitions`,
+            activeCompetitions.length / 10,
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleJoin(interaction) {
@@ -160,7 +172,7 @@ module.exports = {
         if (!competition) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Competition Not Found`)
-                .setDescription(`Competition **${competitionId}** doesn't exist.`)
+                .setDescription(`❌ Competition **${competitionId}** doesn't exist. 🔍 Use \`/competitions active\` to see available tournaments!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -169,7 +181,7 @@ module.exports = {
         if (Date.now() > competition.registrationEnd) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Registration Closed`)
-                .setDescription(`Registration for **${competition.name}** has ended.`)
+                .setDescription(`⏰ Registration for **${competition.name}** has ended. 🔥 Don't miss the next tournament - stay al...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -178,7 +190,7 @@ module.exports = {
         if (competition.participants >= competition.maxParticipants) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Competition Full`)
-                .setDescription(`**${competition.name}** is at maximum capacity.`)
+                .setDescription(`🚫 **${competition.name}** is at maximum capacity! 🚀 Join the next tournament faster to secure y...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -189,7 +201,7 @@ module.exports = {
         if (userData.competitions[competitionId]) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already Registered`)
-                .setDescription(`You're already registered for **${competition.name}**.`)
+                .setDescription(`✅ You're already registered for **${competition.name}**! 🏆 Get ready to dominate the competition!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -198,7 +210,7 @@ module.exports = {
         if (competition.entryFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Entry fee is $${competition.entryFee.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`💰 Entry fee is $${competition.entryFee.toFixed(2)} VEX but you only have $${userData.vexBalance.toFixed(2)}. ⚒️ Earn more VEX with \`/work\` or \`/daily\` to join this epic tournament!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -208,7 +220,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Registration Failed`)
-                .setDescription(result.reason)
+                .setDescription(`❌ ${result.reason} 🔄 Please try again or contact support!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -231,9 +243,17 @@ module.exports = {
         const competitorCount = Math.floor(Math.random() * 30) + 15;
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', competitorCount);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Competition Progress: Registered for ${competition.name}`,
+            0.25,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Registration Successful!`)
-            .setDescription(`Successfully registered for **${competition.name}**!\n\n${milestoneMessage}\n${socialProof}`)
+            .setTitle(`🎉 Registration Successful!`)
+            .setDescription(`🎉 Successfully registered for **${competition.name}**! 🔥\n\n${milestoneMessage}\n${socialProof} 🚀`)
             .addFields(
                 { name: '🏆 Competition', value: competition.name, inline: true },
                 { name: '💰 Entry Fee', value: `$${competition.entryFee.toFixed(2)} VEX`, inline: true },
@@ -242,10 +262,14 @@ module.exports = {
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Good luck in the competition!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBracket(interaction) {
@@ -255,7 +279,7 @@ module.exports = {
         if (!competition) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Competition Not Found`)
-                .setDescription(`Competition **${competitionId}** doesn't exist.`)
+                .setDescription(`❌ Competition **${competitionId}** doesn't exist. 🔍 Use \`/competitions active\` to see available tournaments!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -265,7 +289,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} ${competition.name} - Tournament Bracket`)
-            .setDescription(`Current tournament bracket and matchups`)
+            .setDescription(`📈 Current tournament bracket and epic matchups! 🔥 Track your path to victory!`)
             .setColor(constants.COLORS.GOLD);
         
         if (bracket.length === 0) {
@@ -290,7 +314,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Brackets update as matches are completed' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament Bracket: ${competition.name}`,
+            bracket.length > 0 ? 0.75 : 0.25,
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleLeaderboard(interaction) {
@@ -302,11 +337,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Competition Leaderboard`)
-            .setDescription(`Top competitive players across all tournaments\n\n${socialProofMessage}\n${fomoMessage}`)
+            .setDescription(`👑 Top competitive legends across all tournaments! 🏆\n\n${socialProofMessage}\n${fomoMessage} 🔥`)
             .setColor(constants.COLORS.GOLD);
         
         if (leaderboard.length === 0) {
-            embed.setDescription('No competition data yet. Be the first to join a tournament!');
+            embed.setDescription(`🚀 No competition data yet. 👑 Be the first legend to join a tournament and claim your place in h...`);
         } else {
             const leaderboardText = leaderboard.slice(0, 10).map((player, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
@@ -322,7 +357,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Rankings based on tournament wins and earnings' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Competition Leaderboard: Top ${leaderboard.length} players`,
+            Math.min(leaderboard.length / 50, 1),
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleHistory(interaction) {
@@ -332,7 +378,7 @@ module.exports = {
         if (!userData.competitions || Object.keys(userData.competitions).length === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Competition History`)
-                .setDescription('You haven\'t participated in any competitions yet. Use `/competitions active` to see available tournaments!')
+                .setDescription(`🚀 You haven't participated in any competitions yet! 🔥 Use \`/competitions active\` to see epic tournaments and start your legendary journey!`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -340,7 +386,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Your Competition History`)
-            .setDescription('Your performance across all competitions')
+            .setDescription(`🏅 Your legendary performance across all epic competitions! 📈 Track your rise to greatness!`)
             .setColor(constants.COLORS.PRIMARY)
             .setThumbnail(interaction.user.displayAvatarURL());
         

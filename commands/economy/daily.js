@@ -6,7 +6,7 @@ const Progression = require('../../utils/progression');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('daily')
-        .setDescription('Claim your daily VEX reward with streak bonuses'),
+        .setDescription(`💸 Claim your daily VEX reward with streak bonuses - Don't break the chain!`),
     
     cooldown: 5,
     
@@ -34,7 +34,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward Charging Up!`)
-                .setDescription(`${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(2)} VEX** reward!\n${streakRisk}`)
+                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(2)} VEX** reward!`)
                 .addFields(
                     { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
                     { name: '💰 Reward Building', value: `$${nextReward.toFixed(2)} VEX`, inline: true },
@@ -101,7 +101,6 @@ module.exports = {
         }
         
         const progressToNext = Math.min(userData.dailyStreak, 30) / 30;
-        const progressBar = '█'.repeat(Math.floor(progressToNext * 20)) + '░'.repeat(20 - Math.floor(progressToNext * 20));
         
         const motivationalMessages = [
             "🚀 Your empire grows stronger every day!",
@@ -119,7 +118,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${randomMotivation}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n${dailyFomoMessage}\n${dailySocialProof}`)
+            .setDescription(`🎉 ${description}\n\n✨ ${randomMotivation}${milestoneMessage ? `\n🏆 ${milestoneMessage}` : ''}\n\n🔥 ${dailyFomoMessage}\n💓 ${dailySocialProof}`)
             .addFields(
                 { name: '💰 Base Reward', value: `$${baseReward.toFixed(2)}`, inline: true },
                 { name: '🔥 Streak Power', value: `$${streakBonus.toFixed(2)} ${userData.dailyStreak >= 30 ? '👑' : ''}`, inline: true },
@@ -127,10 +126,10 @@ module.exports = {
                 { name: '📊 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
                 { name: '🎯 XP Gained', value: `+${xpGained} XP ${xpResult.leveledUp ? '🆙' : ''}`, inline: true },
                 { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
-                { name: '📊 Streak Progress', value: `${progressBar} ${Math.min(userData.dailyStreak, 30)}/30`, inline: false },
                 { name: '⏰ Next Reward', value: `<t:${Math.floor((Date.now() + 86400000) / 1000)}:R> - Don't break the chain!`, inline: false }
             )
             .setColor(isStreakMilestone ? constants.COLORS.VEX : constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: '💡 Pro Tip: Longer streaks = EXPONENTIALLY bigger rewards!' })
             .setTimestamp();
         
@@ -142,12 +141,24 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const streakProgress = Math.min(userData.dailyStreak / 30, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Daily Streak: ${userData.dailyStreak}/30 days`,
+            streakProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         if (xpResult.leveledUp) {
             const levelEmbed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.LEVEL_UP} Level Up!`)
-                .setDescription(`Congratulations! You've reached **Level ${xpResult.newLevel}**!`)
+                .setTitle(`⬆️ Level Up!`)
+                .setDescription(`⬆️ Congratulations! You've reached **Level ${xpResult.newLevel}**!\n\n✨ Your empire grows stronge...`)
                 .addFields(
                     { name: '🎁 Level Reward', value: `$${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
                 )
@@ -160,8 +171,8 @@ module.exports = {
         if (achievements.length > 0) {
             for (const achievement of achievements) {
                 const achievementEmbed = new EmbedBuilder()
-                    .setTitle(`${constants.EMOJIS.ACHIEVEMENT} Achievement Unlocked!`)
-                    .setDescription(`**${achievement.name}**\n${achievement.description}`)
+                    .setTitle(`🏆 Achievement Unlocked!`)
+                    .setDescription(`🏆 **${achievement.name}**\n${achievement.description}\n\n✨ You're becoming a VexiumVerse legend!...`)
                     .addFields(
                         { name: '💰 Reward', value: `$${achievement.reward.toFixed(2)} VEX`, inline: true }
                     )
@@ -178,7 +189,7 @@ module.exports = {
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAR} Weekly Streak Bonus!`)
-                .setDescription(`Amazing! You've maintained a ${userData.dailyStreak}-day streak!`)
+                .setDescription(`🔥 Amazing! You've maintained a ${userData.dailyStreak}-day streak!\n\n💸 Weekly bonuses are wher...`)
                 .addFields(
                     { name: '🎁 Bonus Reward', value: `$${weeklyBonus.toFixed(2)} VEX`, inline: true }
                 )

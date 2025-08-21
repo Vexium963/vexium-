@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('avatar')
-        .setDescription('Customize your profile avatar frame and effects')
+        .setDescription(`✨ Transform your identity with exclusive avatar frames and effects!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('frames')
-                .setDescription('View available avatar frames'))
+                .setDescription(`🌈 Browse stunning avatar frames - limited collection!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('equip')
-                .setDescription('Equip an avatar frame')
+                .setDescription(`🔥 Equip your premium avatar frame and stand out!`)
                 .addStringOption(option =>
                     option.setName('frame')
                         .setDescription('Frame to equip')
@@ -93,7 +93,6 @@ module.exports = {
             description = '⭐ **AMAZING COLLECTION!** You\'re almost a completionist!\n🎯 **Just a few more frames to legendary status!**';
         }
         
-        const progressBar = '█'.repeat(Math.floor(collectionProgress / 5)) + '░'.repeat(20 - Math.floor(collectionProgress / 5));
         const flashSale = Math.random() < 0.3;
         
         const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
@@ -110,7 +109,7 @@ module.exports = {
                 `\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields({
                 name: '📊 Collection Progress',
-                value: `${progressBar} **${collectionProgress.toFixed(1)}%**\n🎨 **${ownedFrames}**/${totalFrames} frames owned`,
+                value: `**${collectionProgress.toFixed(1)}%** complete\n🎨 **${ownedFrames}**/${totalFrames} frames owned`,
                 inline: false
             })
             .setColor(isCompletionist ? constants.COLORS.VEX : isCollector ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
@@ -134,8 +133,20 @@ module.exports = {
         }
         
         embed.setFooter({ text: 'Purchase frames from /shop or equip owned frames with /avatar equip' });
+        embed.setImage('attachment://progress.png');
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Frame Collection: ${ownedFrames}/${totalFrames}`,
+            collectionProgress / 100,
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleEquip(interaction) {
@@ -150,7 +161,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Frame Not Owned`)
-                .setDescription(`You don't own the **${frameId}** avatar frame. Purchase it from the shop first!\n\n${fomoMessage}\n${socialProofMessage}`)
+                .setDescription(`⏳ You don't own the **${frameId}** avatar frame yet!\n\n💎 **Exclusive frames are flying off the ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -184,8 +195,8 @@ module.exports = {
         const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(2)) : null;
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Avatar Frame Updated!`)
-            .setDescription(`You've equipped the **${frameNames[frameId]}**!\n\n${milestoneMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setTitle(`✨ Avatar Frame Updated!`)
+            .setDescription(`🎉 You've equipped the **${frameNames[frameId]}**!\n\n🔥 **Your profile just got 10x more attractive!**\n📈 **Other players are already noticing your style!**\n\n${milestoneMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
             .addFields({
                 name: `${frameEmojis[frameId]} Current Frame`,
                 value: frameNames[frameId],
@@ -195,6 +206,17 @@ module.exports = {
             .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Customization Level: ${userData.level}`,
+            Math.min(userData.level / 50, 1),
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

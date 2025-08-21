@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('deposit')
-        .setDescription('Deposit VEX tokens into your bank account to earn interest')
+        .setDescription(`💸 Deposit VEX tokens to earn compound interest - Build wealth while you sleep!`)
         .addNumberOption(option =>
             option.setName('amount')
                 .setDescription('Amount of VEX to deposit')
@@ -13,7 +13,7 @@ module.exports = {
                 .setMinValue(0.01))
         .addStringOption(option =>
             option.setName('term')
-                .setDescription('Deposit term for higher interest rates')
+                .setDescription(`🔥 Choose your deposit term for MASSIVE interest rates - Higher risk, higher rewards!`)
                 .setRequired(false)
                 .addChoices(
                     { name: 'No Lock (0.1% daily)', value: 'none' },
@@ -51,7 +51,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick tip:** Use \`/work\` or \`/daily\` to earn more VEX!`)
+                .setDescription(`⏳ You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick tip:** Use \`/work\` or \`/daily\` to earn more VEX!\n🔥 **FOMO Alert:** ${Math.floor(Math.random() * 50) + 20} players just made deposits in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -62,7 +62,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Deposit Failed`)
-                .setDescription(`${result.reason}\n\n${nearMissMessage}`)
+                .setDescription(`💥 ${result.reason}\n\n${nearMissMessage}\n\n✨ **Don't give up!** Every successful investor faces...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -170,7 +170,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🎉 ${description}\n\n📈 **Compound Interest Magic:** Your money grows ${compoundingPower}% annual...`)
             .addFields(
                 { name: '💰 Deposited Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Interest Rate', value: `${(interestRate * 100).toFixed(3)}% daily`, inline: true },
@@ -201,7 +201,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Interest is calculated and paid daily at midnight UTC' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const depositProgress = Math.min(userData.bankBalance / 10000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Bank Balance: $${userData.bankBalance.toFixed(2)} VEX`,
+            depositProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateDepositId() {

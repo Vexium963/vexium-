@@ -6,11 +6,7 @@ const Economics = require('../../utils/economics');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('work')
-        .setDescription('Work at your job to earn VEX tokens')
-        .addStringOption(option =>
-            option.setName('job')
-                .setDescription('Choose a specific job to work')
-                .setRequired(false)),
+        .setDescription(`⚒️ Work at your job to earn VEX tokens and build your empire!`),
     
     cooldown: 10,
     
@@ -49,7 +45,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Work Cooldown Active`)
-                .setDescription(`You need to rest for **${minutesLeft} minutes** before working again.\n\n${fomoMessage}\n${socialProofMessage}`)
+                .setDescription(`⏳ You need to rest for **${minutesLeft} minutes** before working again.\n\n🔥 ${fomoMessage}\n📈 ...`)
                 .addFields(
                     { name: '💡 Tip', value: 'Use an Energy Drink from `/shop` to skip cooldown!', inline: false }
                 )
@@ -59,34 +55,8 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        const jobChoice = interaction.options.getString('job');
-        
-        if (!userData.job && !jobChoice) {
+        if (!userData.job) {
             return this.showJobSelection(interaction, userData);
-        }
-        
-        if (jobChoice) {
-            const availableJobs = Economics.getAvailableJobs(userData.level);
-            const selectedJob = availableJobs.find(job => job.id === jobChoice);
-            
-            if (!selectedJob) {
-                const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
-                
-                const embed = new EmbedBuilder()
-                    .setTitle(`${constants.EMOJIS.ERROR} Job Not Available`)
-                    .setDescription(`You don't have access to the **${jobChoice}** job yet.\n\n🎯 **Level up to unlock more opportunities!**\n${milestoneMessage}`)
-                    .addFields(
-                        { name: '📊 Your Level', value: userData.level.toString(), inline: true },
-                        { name: '🔓 Required Level', value: 'Check available jobs below', inline: true }
-                    )
-                    .setColor(constants.COLORS.ERROR);
-                
-                return interaction.reply({ embeds: [embed], ephemeral: true });
-            }
-            
-            userData.job = jobChoice;
-            userData.jobLevel = 1;
-            userData.jobXp = 0;
         }
         
         const jobData = Economics.getJobData(userData.job);
@@ -185,7 +155,14 @@ module.exports = {
         }
         
         const jobProgress = (userData.jobXp || 0) / ((userData.jobLevel + 1) * 500);
-        const progressBar = '█'.repeat(Math.floor(jobProgress * 15)) + '░'.repeat(15 - Math.floor(jobProgress * 15));
+        
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const jobProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Job Progress: Level ${userData.jobLevel}`,
+            jobProgress,
+            constants.COLORS.VEX
+        );
         
         const motivationalMessages = [
             "🚀 You're building an empire!",
@@ -203,12 +180,12 @@ module.exports = {
         
         const workEmbed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${randomMotivation}`)
+            .setDescription(description + `\n\n✨ ${randomMotivation}\n📈 **${Math.floor(Math.random() * 50) + 20} players** are working right now!`)
             .addFields(
                 { name: '💼 Career', value: `${jobData.name} (Level ${userData.jobLevel})`, inline: true },
                 { name: '💰 Total Earned', value: `$${(vexEarned + bonusAmount).toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
-                { name: '📊 Job Progress', value: `${progressBar} ${Math.floor(jobProgress * 100)}%`, inline: false },
+                { name: '📊 Job Progress', value: `${Math.floor(jobProgress * 100)}% to next level`, inline: false },
                 { name: '🔥 Work Streak', value: `${workStreak} days ${workStreak >= 10 ? '👑' : ''}`, inline: true },
                 { name: '⏰ Next Work', value: `<t:${Math.floor((now + workCooldown) / 1000)}:R>`, inline: true }
             )
@@ -223,12 +200,17 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [workEmbed] });
+        workEmbed.setImage('attachment://progress.png');
+
+        await interaction.reply({ 
+            embeds: [workEmbed],
+            files: [{ attachment: jobProgressBuffer, name: 'progress.png' }]
+        });
         
         if (xpResult.leveledUp) {
             const levelEmbed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.LEVEL_UP} Level Up!`)
-                .setDescription(`You've reached **Level ${xpResult.newLevel}**!`)
+                .setTitle(`⬆️ Level Up!`)
+                .setDescription(`⬆️ You've reached **Level ${xpResult.newLevel}**!\n\n🎉 **New opportunities unlocked!** Check out...`)
                 .addFields(
                     { name: '🎁 Level Reward', value: `$${xpResult.levelReward.toFixed(2)} VEX`, inline: true }
                 )
@@ -243,7 +225,7 @@ module.exports = {
             
             const jobLevelEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Job Level Up!`)
-                .setDescription(`Your **${jobData.name}** skills improved to Level ${userData.jobLevel}!`)
+                .setDescription(`🏆 Your **${jobData.name}** skills improved to Level ${userData.jobLevel}!\n\n💸 **Higher earning...`)
                 .addFields(
                     { name: '🎁 Bonus', value: `$${jobBonus.toFixed(2)} VEX`, inline: true }
                 )
@@ -261,7 +243,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} No Jobs Available`)
-                .setDescription(`You need to reach level 1 to unlock jobs.\n\n${comebackMessage}`)
+                .setDescription(`⏳ You need to reach level 1 to unlock jobs.\n\n🚀 ${comebackMessage}\n\n✨ **Quick Start:** Use \`/daily\` to gain XP and level up fast!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -275,14 +257,14 @@ module.exports = {
         
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('select_job')
-            .setPlaceholder('Choose a job to work')
+            .setPlaceholder(`${constants.ANIMATED_EMOJIS.PROGRESS} Choose your job to start earning VEX`)
             .addOptions(jobOptions);
         
         const row = new ActionRowBuilder().addComponents(selectMenu);
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.WORK} Choose Your Job`)
-            .setDescription('Select a job from the menu below to start working and earning VEX!')
+            .setDescription(`${constants.ANIMATED_EMOJIS.WORK || '⚒️'} Select a job from the menu below to start working and e...`)
             .addFields(
                 { name: '📊 Your Level', value: userData.level.toString(), inline: true },
                 { name: '🔓 Available Jobs', value: availableJobs.length.toString(), inline: true }
@@ -290,6 +272,22 @@ module.exports = {
             .setColor(constants.COLORS.PRIMARY)
             .setFooter({ text: 'Higher level jobs pay more VEX!' });
         
-        await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const levelProgress = userData.level / 10; // Show level progress
+        const levelProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Your Level: ${userData.level}`,
+            levelProgress,
+            constants.COLORS.PRIMARY
+        );
+
+        embed.setImage('attachment://progress.png');
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row], 
+            files: [{ attachment: levelProgressBuffer, name: 'progress.png' }],
+            ephemeral: true 
+        });
     }
 };

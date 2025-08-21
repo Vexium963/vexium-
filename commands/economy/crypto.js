@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crypto')
-        .setDescription('Trade virtual cryptocurrencies and manage your crypto portfolio')
+        .setDescription(`🚀 Trade virtual cryptocurrencies and build your digital empire! 💸`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription('View cryptocurrency market prices and trends'))
+                .setDescription(`📈 View explosive crypto opportunities and market trends! 🔥`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase cryptocurrency with VEX')
+                .setDescription(`💸 Purchase cryptocurrency and multiply your VEX fortune! ✨`)
                 .addStringOption(option =>
                     option.setName('currency')
                         .setDescription('Cryptocurrency to purchase')
@@ -32,7 +32,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sell')
-                .setDescription('Sell cryptocurrency for VEX')
+                .setDescription(`💥 Cash out your crypto gains for instant VEX profits! 🎉`)
                 .addStringOption(option =>
                     option.setName('currency')
                         .setDescription('Cryptocurrency to sell')
@@ -51,11 +51,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your cryptocurrency portfolio and performance'))
+                .setDescription(`📈 Track your crypto empire's explosive growth and performance! ⬆️`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stake')
-                .setDescription('Stake cryptocurrency for rewards')
+                .setDescription(`🔥 Stake crypto for passive income - earn while you sleep! 💸`)
                 .addStringOption(option =>
                     option.setName('currency')
                         .setDescription('Cryptocurrency to stake')
@@ -131,7 +131,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`🚀 CRYPTO EMPIRE AWAITS!`)
-            .setDescription(`💎 **EXPLOSIVE CRYPTO OPPORTUNITIES!** Trade virtual cryptocurrencies and build your digital fortune!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`💥 **EXPLOSIVE CRYPTO OPPORTUNITIES!** 🚀 Trade virtual cryptocurrencies and build your digital fortune!\n\n🔥 **URGENT:** Crypto prices are surging! Don't miss out!\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n✨ **Limited Time:** Early traders get bonus rewards!`)
             .addFields(
                 { name: '📊 Market Overview', value: '**Total Market Cap**: $1.2M VEX\n**24h Volume**: $85K VEX\n**Active Traders**: 892', inline: true },
                 { name: '📈 Market Trends', value: '**Trending**: VexCoin (+15.2%)\n**Top Gainer**: QuantumVex (+28.7%)\n**Most Traded**: EtherVex', inline: true },
@@ -172,7 +172,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton, portfolioButton, stakeButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const marketProgress = Math.random() * 0.8 + 0.2; // Random market activity
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Market Activity & Trading Volume',
+            marketProgress,
+            constants.COLORS.CRYPTO
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'market-progress.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -188,7 +201,7 @@ module.exports = {
         if (!crypto) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cryptocurrency Not Found`)
-                .setDescription('Invalid cryptocurrency selection.')
+                .setDescription(`💥 Invalid cryptocurrency selection! Choose from our explosive crypto options to start building y...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -200,7 +213,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Total cost: $${totalCost.toFixed(2)} VEX (including 2% fee)\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`🔥 **INSUFFICIENT FUNDS!** You need more VEX to join the crypto revolution!\n\n💰 **Required:** $${totalCost.toFixed(2)} VEX (including 2% fee)\n💸 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/daily\` or \`/work\` to earn more VEX instantly!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -210,7 +223,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **PURCHASE FAILED!** ${result.reason}\n\n${constants.ANIMATED_EMOJIS.CHART} Try again with different parameters!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -274,7 +287,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const purchaseProgress = Math.min(cryptoAmount / 100, 1.0); // Progress based on amount
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `${crypto.name} Purchase Progress`,
+            purchaseProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'purchase-progress.png' }]
+        });
     },
     
     async handlePortfolio(interaction) {
@@ -372,7 +398,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(sellButton, buyButton, stakeButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgress = Math.max(0, Math.min(1, (totalGainLossPercent + 100) / 200)); // Normalize to 0-1
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Performance: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(1)}%`,
+            portfolioProgress,
+            totalGainLoss >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'portfolio-progress.png' }]
+        });
     },
     
     getCryptoData() {

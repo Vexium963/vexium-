@@ -5,27 +5,27 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('analytics')
-        .setDescription('View detailed personal analytics and statistics')
+        .setDescription(`📈 Unlock powerful insights into your VexiumVerse empire! Track earnings, performance, and domina...`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('overview')
-                .setDescription('View your complete VexiumVerse analytics dashboard'))
+                .setDescription(`✨ Your complete empire dashboard - see how you stack against top players!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('economy')
-                .setDescription('Detailed economic activity analysis'))
+                .setDescription(`💸 Deep dive into your wealth generation - discover hidden profit opportunities!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('entertainment')
-                .setDescription('Entertainment games performance analytics'))
+                .setDescription(`🔥 Master your gaming strategy - see what the top 1% are doing differently!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('social')
-                .setDescription('Social interaction and community analytics'))
+                .setDescription(`💓 Unlock social influence metrics - build your VexiumVerse network like a pro!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('export')
-                .setDescription('Export your data for external analysis')),
+                .setDescription(`💥 Download your complete empire data - take control of your financial future!`)),
     
     cooldown: 30,
     
@@ -100,7 +100,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ANALYTICS} ${interaction.user.displayName}'s Analytics Dashboard`)
-            .setDescription(`Comprehensive overview of your VexiumVerse journey\n\n${milestoneMessage ? milestoneMessage + '\n' : ''}${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`🚀 **Your Empire at a Glance** - Comprehensive overview of your VexiumVerse domination!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Track your progress and optimize your strategy!**`)
             .addFields(
                 { name: '💰 Wealth Overview', value: this.formatWealthStats(userData), inline: true },
                 { name: '📊 Activity Summary', value: this.formatActivityStats(stats), inline: true },
@@ -158,7 +158,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Analytics`)
-            .setDescription(`Detailed analysis of your economic activity\n\n${variableReward ? variableReward + '\n' : ''}${socialProofMessage}`)
+            .setDescription(`💸 **Master Your Wealth Strategy** - Detailed analysis of your economic domination!\n\n${variableReward || ''}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Optimize your earnings and maximize profits!**`)
             .addFields(
                 { name: '💵 Income Sources', value: this.formatIncomeBreakdown(stats), inline: true },
                 { name: '💸 Spending Categories', value: this.formatSpendingBreakdown(stats), inline: true },
@@ -202,7 +202,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ENTERTAINMENT} Entertainment Analytics`)
-            .setDescription(`Performance analysis of your skill-based entertainment activities\n\n${nearMissMessage ? nearMissMessage + '\n' : ''}${socialProofMessage}`)
+            .setDescription(`🔥 **Gaming Mastery Analytics** - Performance analysis of your skill-based entertainment dominati...`)
             .addFields(
                 { name: '🎰 Game Statistics', value: this.formatGameStats(stats), inline: true },
                 { name: '🏆 Win/Loss Record', value: `**Total Games**: ${totalPlayed}\n**Games Won**: ${totalWon}\n**Win Rate**: ${winRate}%\n**Current Streak**: ${stats.currentStreak || 0}`, inline: true },
@@ -242,7 +242,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SOCIAL} Social Analytics`)
-            .setDescription(`Analysis of your community interactions and social activity\n\n${milestoneMessage ? milestoneMessage + '\n' : ''}${socialProofMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} **Social Empire Analytics** - Analysis of your community ...`)
             .addFields(
                 { name: '🤝 Trading Activity', value: this.formatTradingStats(stats), inline: true },
                 { name: '🎁 Gift Exchange', value: this.formatGiftStats(stats), inline: true },

@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('banking')
-        .setDescription('Advanced banking services including loans, credit, and financial planning')
+        .setDescription(`💸 Advanced banking empire - Build wealth through smart financial decisions!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('loan')
-                .setDescription('Apply for or manage personal loans')
+                .setDescription(`🔥 Unlock instant capital - Fuel your empire's growth!`)
                 .addStringOption(option =>
                     option.setName('action')
-                        .setDescription('Loan action to perform')
+                        .setDescription(`✨ Choose your wealth-building strategy`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Apply for Loan', value: 'apply' },
@@ -21,20 +21,20 @@ module.exports = {
                             { name: 'Loan Calculator', value: 'calculate' }))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Loan amount or payment amount')
+                        .setDescription(`💸 Investment amount - Every VEX counts toward your empire!`)
                         .setRequired(false)
                         .setMinValue(100)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('credit')
-                .setDescription('Check credit score and credit history'))
+                .setDescription(`📈 Unlock your financial power - See what you're capable of!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('savings')
-                .setDescription('Manage savings accounts and goals')
+                .setDescription(`⬆️ Build your wealth fortress - Every goal brings you closer to financial freedom!`)
                 .addStringOption(option =>
                     option.setName('action')
-                        .setDescription('Savings action')
+                        .setDescription(`🚀 Accelerate your wealth journey`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Create Savings Goal', value: 'create' },
@@ -43,17 +43,17 @@ module.exports = {
                             { name: 'Withdraw from Goal', value: 'withdraw' }))
                 .addStringOption(option =>
                     option.setName('goal_name')
-                        .setDescription('Name of the savings goal')
+                        .setDescription(`🏆 Name your empire's next milestone`)
                         .setRequired(false))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount for the action')
+                        .setDescription(`💥 Power up your savings - Every VEX multiplies your potential!`)
                         .setRequired(false)
                         .setMinValue(1)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('financial-advisor')
-                .setDescription('Get personalized financial advice and planning')),
+                .setDescription(`🌈 Unlock millionaire strategies - Get AI-powered wealth advice!`)),
     
     cooldown: 30,
     
@@ -131,7 +131,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Required`)
-                .setDescription(`Please specify the loan amount you want to apply for.\n\n${fomoMessage}`)
+                .setDescription(`⏳ **EMPIRE EXPANSION AWAITS!**\n\nSpecify your loan amount to unlock instant capital for your Vex...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -144,7 +144,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Loan Amount Too High`)
-                .setDescription(`Based on your credit score (${creditScore}), your maximum loan amount is $${maxLoanAmount.toFixed(2)} VEX.\n\n${socialProof}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.CHART} **CREDIT POWER ANALYSIS**\n\nYour current empire strength allo...`)
                 .addFields(
                     { name: '💡 Improve Your Credit', value: '• Make timely payments\n• Maintain low debt-to-income ratio\n• Build transaction history\n• Complete achievements', inline: false }
                 )
@@ -160,7 +160,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Maximum Loans Reached`)
-                .setDescription(`You can have a maximum of 3 active loans at once.\n\nPay off existing loans to apply for new ones.\n\n${nearMiss}`)
+                .setDescription(`You can have a maximum of 3 active loans at once.\n\nPay off existing loans to apply for new ones...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -231,7 +231,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(paymentButton, loansButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Loan Progress: $${amount.toFixed(2)} VEX`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCredit(interaction) {
@@ -272,7 +284,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(loanButton, historyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Credit Score: ${creditScore}/850`,
+            creditScore / 850,
+            this.getCreditColor(creditScore)
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleFinancialAdvisor(interaction) {
@@ -316,7 +340,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(savingsButton, investButton, budgetButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Financial Health: ${analysis.healthScore}/100`,
+            analysis.healthScore / 100,
+            analysis.healthScore >= 70 ? constants.COLORS.SUCCESS : analysis.healthScore >= 40 ? constants.COLORS.WARNING : constants.COLORS.ERROR
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     calculateCreditScore(userData) {

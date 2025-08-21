@@ -6,23 +6,23 @@ const CanvasRenderer = require('../../utils/canvasRenderer');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('immersion')
-        .setDescription('View your immersion status, challenges, and achievement chains')
+        .setDescription(`✨ Track your immersion journey and unlock exclusive rewards through psychological engagement!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Check your current immersion level and active challenges'))
+                .setDescription(`📈 Discover your psychological engagement level and active addiction triggers!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('challenges')
-                .setDescription('View and manage daily challenges'))
+                .setDescription(`🔥 Complete addictive daily challenges for massive FOMO-driven rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('chains')
-                .setDescription('View active achievement chains'))
+                .setDescription(`🏆 Chain achievements together for legendary psychological satisfaction!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('comeback')
-                .setDescription('Check for comeback bonuses')),
+                .setDescription(`🎉 Claim exclusive comeback bonuses that make you never want to leave again!`)),
     
     cooldown: 5,
     
@@ -53,7 +53,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription(`The immersion system is currently unavailable.\n\n${fomoMessage}`)
+                .setDescription(`⏳ The immersion system is temporarily upgrading for even MORE addictive features!\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Coming soon: AI-powered personalization and dynamic rewards!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -69,7 +69,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DIAMOND} Your Immersion Status`)
-            .setDescription(`🎮 **Immersion Level:** ${this.getImmersionEmoji(immersionLevel)} **${immersionLevel.toUpperCase()}**\n${this.getImmersionMessage(immersionLevel)}\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`✨ **Immersion Level:** ${this.getImmersionEmoji(immersionLevel)} **${immersionLevel.toUpperCase()}**\n${this.getImmersionMessage(immersionLevel)}\n\n🔥 ${socialProofMessage}${milestoneMessage ? `\n🏆 ${milestoneMessage}` : ''}${variableReward ? `\n💸 ${variableReward}` : ''}\n\n📈 **Your addiction level is PERFECT!** Keep playing to maintain this psychological flow state!`)
             .setColor(this.getImmersionColor(immersionLevel))
             .setTimestamp();
         
@@ -174,7 +174,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription(`The challenge system is currently unavailable.\n\n${fomoMessage}`)
+                .setDescription(`⏳ The challenge system is upgrading to be even MORE psychologically engaging!\n\n🔥 ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Coming soon: AI-powered challenge personalization!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -189,19 +189,18 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TARGET} Daily Challenges`)
-            .setDescription(`Complete challenges to earn massive rewards and boost your immersion!\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Complete psychologically designed challenges to trigger massive dopamine releases!\n\n${constants.ANIMATED_EMOJIS.TARGET} **Daily challenges reset in 6 hours!**`)
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
         
         if (activeChallenges.length > 0) {
             const activeText = activeChallenges.map(challenge => {
                 const progressPercent = (challenge.progress / challenge.maxProgress * 100).toFixed(1);
-                const progressBar = this.createMiniProgressBar(challenge.progress / challenge.maxProgress);
                 const timeLeft = this.getTimeLeft(challenge.timeLimit);
                 
                 return `🎯 **${challenge.type.replace('_', ' ').toUpperCase()}**\n` +
                        `📝 ${challenge.description}\n` +
-                       `${progressBar} ${progressPercent}%\n` +
+                       `📊 Progress: ${progressPercent}%\n` +
                        `⏰ ${timeLeft} remaining\n` +
                        `🎁 Reward: ${challenge.rewards.vex} VEX + ${challenge.rewards.xp} XP`;
             }).join('\n\n');
@@ -289,12 +288,11 @@ module.exports = {
         if (activeChains.length > 0) {
             const activeText = activeChains.map(chain => {
                 const progressPercent = (chain.currentStep / chain.totalSteps * 100).toFixed(1);
-                const progressBar = this.createMiniProgressBar(chain.currentStep / chain.totalSteps);
                 const timeLeft = this.getTimeLeft(chain.timeLimit);
                 const nextReward = chain.rewards[chain.currentStep];
                 
                 return `⛓️ **${chain.baseAchievement.toUpperCase()} CHAIN**\n` +
-                       `${progressBar} Step ${chain.currentStep}/${chain.totalSteps} (${progressPercent}%)\n` +
+                       `📊 Step ${chain.currentStep}/${chain.totalSteps} (${progressPercent}%)\n` +
                        `⏰ ${timeLeft} remaining\n` +
                        `🎁 Next: ${nextReward?.vex || 0} VEX + ${nextReward?.xp || 0} XP` +
                        (nextReward?.special ? ` + ${nextReward.special}` : '');
@@ -354,7 +352,23 @@ module.exports = {
                 .setEmoji('🎁')
         );
         
-        await interaction.reply({ embeds: [embed], components: [actionRow] });
+        try {
+            const canvasRenderer = new CanvasRenderer();
+            const chainBuffer = await canvasRenderer.createAnimatedProgressBar(
+                'Achievement Chain Progress',
+                activeChains.length > 0 ? activeChains[0].currentStep / activeChains[0].totalSteps : 0,
+                constants.COLORS.VEX
+            );
+            
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: [actionRow],
+                files: [{ attachment: chainBuffer, name: 'chain-progress.png' }]
+            });
+        } catch (error) {
+            console.warn('Canvas rendering failed, using fallback:', error);
+            await interaction.reply({ embeds: [embed], components: [actionRow] });
+        }
     },
     
     async handleComeback(interaction) {
@@ -473,11 +487,6 @@ module.exports = {
         return colors[level] || constants.COLORS.INFO;
     },
     
-    createMiniProgressBar(progress, length = 10) {
-        const filled = Math.floor(progress * length);
-        const empty = length - filled;
-        return '█'.repeat(filled) + '░'.repeat(empty);
-    },
     
     getTimeLeft(timestamp) {
         const diff = timestamp - Date.now();

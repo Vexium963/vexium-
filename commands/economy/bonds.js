@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('bonds')
-        .setDescription('Purchase government bonds for guaranteed returns over time')
+        .setDescription(`💸 Secure guaranteed returns with government bonds - Build wealth while you sleep!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase a government bond')
+                .setDescription(`✨ Purchase a government bond with guaranteed returns`)
                 .addStringOption(option =>
                     option.setName('type')
-                        .setDescription('Type of bond to purchase')
+                        .setDescription(`📈 Choose your investment strategy - Higher returns for longer commitments!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Short-term (30 days, 3% return)', value: 'short' },
@@ -21,25 +21,25 @@ module.exports = {
                             { name: 'Premium (365 days, 40% return)', value: 'premium' }))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to invest in bonds')
+                        .setDescription(`🔥 Amount of VEX to invest - The more you invest, the more you earn!`)
                         .setRequired(true)
                         .setMinValue(100)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your bond portfolio and returns'))
+                .setDescription(`🎉 View your growing wealth and guaranteed returns!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('redeem')
-                .setDescription('Redeem a matured bond')
+                .setDescription(`💸 Claim your guaranteed profits from matured bonds!`)
                 .addStringOption(option =>
                     option.setName('bond_id')
-                        .setDescription('ID of the bond to redeem')
+                        .setDescription(`✨ Bond ID to redeem - Time to collect your profits!`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription('View bond market information and rates')),
+                .setDescription(`📈 Explore investment opportunities - Don't miss out on guaranteed returns!`)),
     
     cooldown: 30,
     
@@ -108,7 +108,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMessage}`)
+                .setDescription(`🔥 ${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -118,7 +118,7 @@ module.exports = {
             const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Investment amount: $${amount.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${socialProofMessage}`)
+                .setDescription(`⏳ Investment amount: $${amount.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -129,7 +129,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(`${result.reason}\n\n${nearMissMessage}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} ${result.reason}\n\n${nearMissMessage}\n\n${constants.ANIMATED_EMOJIS.CHART} Try again with different parameters!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -229,7 +229,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Bond Investment Progress: ${bond.name}`,
+            0.8,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePortfolio(interaction) {
@@ -246,7 +258,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.BONDS} ${interaction.user.displayName}'s Bond Portfolio`)
-            .setDescription('Your government bond investments and returns')
+            .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Your wealth-building empire grows stronger every day!\n\n...`)
             .addFields(
                 { name: '📊 Portfolio Summary', value: `**Active Bonds**: ${activeBonds.length}\n**Total Invested**: $${totalInvested.toFixed(2)} VEX\n**Portfolio Value**: $${totalValue.toFixed(2)} VEX`, inline: true },
                 { name: '💰 Returns', value: `**Lifetime Returns**: $${totalReturns.toFixed(2)} VEX\n**Matured Bonds**: ${maturedBonds.length}\n**Bonds Owned**: ${userData.stats.bondsOwned || 0}`, inline: true },
@@ -300,7 +312,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(redeemButton, buyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgress = activeBonds.length > 0 ? Math.min(activeBonds.length / 10, 1.0) : 0;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Growth: ${activeBonds.length} Active Bonds`,
+            portfolioProgress,
+            constants.COLORS.BONDS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRedeem(interaction) {
@@ -386,7 +411,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, buyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Bond Redeemed: ${bond.name}`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleMarket(interaction) {
@@ -426,7 +463,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton, portfolioButton, calculatorButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Bond Market Analysis',
+            0.75,
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateBondId() {

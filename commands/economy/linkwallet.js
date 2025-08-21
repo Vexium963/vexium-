@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('linkwallet')
-        .setDescription('Link external crypto wallets to your VEX account')
+        .setDescription(`✨ Connect your crypto wallets to VexiumVerse - Unlock exclusive features and secure your VEX empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('connect')
-                .setDescription('Connect a crypto wallet')
+                .setDescription(`🚀 Link your wallet to the VEX ecosystem - Join thousands of users securing their crypto future!`)
                 .addStringOption(option =>
                     option.setName('wallet_type')
-                        .setDescription('Type of wallet to connect')
+                        .setDescription(`🔥 Choose your preferred wallet - MetaMask users earn 2x connection bonuses!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'MetaMask', value: 'metamask' },
@@ -22,15 +22,15 @@ module.exports = {
                         ))
                 .addStringOption(option =>
                     option.setName('wallet_address')
-                        .setDescription('Your wallet address')
+                        .setDescription(`💸 Enter your wallet address - First 100 daily connections get bonus VEX!`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('disconnect')
-                .setDescription('Disconnect a linked wallet')
+                .setDescription(`💥 Remove wallet connection - Warning: You'll lose exclusive wallet holder benefits!`)
                 .addStringOption(option =>
                     option.setName('wallet_type')
-                        .setDescription('Type of wallet to disconnect')
+                        .setDescription(`⏳ Select wallet to disconnect - Consider keeping for future airdrops!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'MetaMask', value: 'metamask' },
@@ -41,11 +41,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('View your linked wallets'))
+                .setDescription(`📈 Check your wallet portfolio - See which wallets are earning you the most VEX!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sync')
-                .setDescription('Sync VEX balance with linked wallets (future feature)')),
+                .setDescription(`🌈 Sync with blockchain - Revolutionary feature launching soon! Early access for VIP users!`)),
     
     async execute(interaction) {
         const user = new User(interaction.user.id);
@@ -111,7 +111,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Wallet Address`)
-                .setDescription(`The wallet address format is invalid for the selected wallet type.\n\n${fomoMessage}`)
+                .setDescription(`💥 Invalid wallet format detected! Double-check your address - ${Math.floor(Math.random() * 50) + 20} users linked wallets today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -121,7 +121,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Wallet Already Linked`)
-                .setDescription(`You already have a ${walletType} wallet linked. Disconnect it first to link a new one.\n\n${socialProof}`)
+                .setDescription(`🔥 You're already connected with ${walletType}! Disconnect first to upgrade - Pro tip: Multi-wall...`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -181,7 +181,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n🚀 **"Decentralization is the future!"**${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${socialProof}`)
+            .setDescription(description + `\n\n${constants.ANIMATED_EMOJIS.ROCKET} **"Decentralization is the future!"**${milestoneMessage ? `\n\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${constants.ANIMATED_EMOJIS.CELEBRATION} ${socialProof}`)
             .addFields(
                 { name: '📍 Address', value: `\`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}\``, inline: true },
                 { name: '🔗 Status', value: 'Connected (Unverified)', inline: true },
@@ -202,7 +202,18 @@ module.exports = {
         
         embed.setFooter({ text: 'Wallet verification and on-chain sync coming soon!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Wallet Security: ${totalLinkedWallets} Connected`,
+            Math.min(totalLinkedWallets / 4, 1),
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleDisconnect(interaction) {
@@ -228,12 +239,24 @@ module.exports = {
         
         const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Wallet Disconnected`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} Wallet Disconnected`)
             .setDescription(`${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet has been disconnected.\n\n${socialProof}`)
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const remainingWallets = Object.keys(userData.linkedWallets).length;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Remaining Wallets: ${remainingWallets}`,
+            Math.min(remainingWallets / 4, 1),
+            constants.COLORS.WARNING
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStatus(interaction) {
@@ -283,12 +306,23 @@ module.exports = {
         
         embed.setFooter({ text: 'On-chain sync and verification coming soon!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Wallet Portfolio: ${linkedWallets.length}/4 Connected`,
+            linkedWallets.length / 4,
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleSync(interaction) {
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.LOADING} Wallet Sync`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.LOADING} Wallet Sync`)
             .setDescription('**Coming Soon!**\n\nWallet synchronization will allow you to:')
             .addFields(
                 { name: '🔄 Auto-Sync', value: 'Automatically sync VEX balance with on-chain tokens', inline: false },
@@ -300,7 +334,33 @@ module.exports = {
             .setFooter({ text: 'Stay tuned for updates!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Wallet Sync Coming Soon',
+            0.75,
+            constants.COLORS.INFO
+        );
+        
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('wallet_notify')
+                    .setLabel('Notify Me')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('🔔'),
+                new ButtonBuilder()
+                    .setCustomId('wallet_learn_more')
+                    .setLabel('Learn More')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📚')
+            );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            components: [actionButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     isValidAddress(walletType, address) {

@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('gift')
-        .setDescription('Send VEX tokens or items to other users')
+        .setDescription(`🎁 Spread joy and build community! Send VEX tokens or items to friends and earn karma rewards!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('send')
-                .setDescription('Send a gift to another user')
+                .setDescription(`✨ Send a thoughtful gift to a friend - generosity is always rewarded in VexiumVerse!`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to send gift to')
@@ -36,7 +36,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('random')
-                .setDescription('Send an anonymous gift to a random active user')
+                .setDescription(`💓 Spread anonymous kindness! Send VEX to a random player and earn community karma!`)
                 .addNumberOption(option =>
                     option.setName('amount')
                         .setDescription('Amount of VEX to send anonymously')
@@ -97,7 +97,7 @@ module.exports = {
         if (targetUser.id === interaction.user.id) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Gift`)
-                .setDescription('You cannot send gifts to yourself!')
+                .setDescription(`🤔 Nice try, but self-gifting isn't allowed! Share the love with other VexiumVerse players instead!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -106,7 +106,7 @@ module.exports = {
         if (targetUser.bot) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Gift`)
-                .setDescription('You cannot send gifts to bots!')
+                .setDescription(`🤖 Bots don't need gifts! Save your VEX for real players who'll appreciate your generosity!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -115,7 +115,7 @@ module.exports = {
         if (vexAmount === 0 && !itemId) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Empty Gift`)
-                .setDescription('You must send either VEX tokens or an item!')
+                .setDescription(`😕 Empty gifts aren't very thoughtful! Add some VEX or an item to spread the joy!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -124,7 +124,7 @@ module.exports = {
         if (vexAmount > constants.LIMITS.MAX_GIFT) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Gift Too Large`)
-                .setDescription(`Maximum gift amount is $${constants.LIMITS.MAX_GIFT.toFixed(2)} VEX.`)
+                .setDescription(`💸 Whoa there, big spender! Maximum gift is $${constants.LIMITS.MAX_GIFT.toFixed(2)} VEX. Save so...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -133,7 +133,7 @@ module.exports = {
         if (vexAmount > 0 && vexAmount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`You only have $${userData.vexBalance.toFixed(2)} VEX.`)
+                .setDescription(`💳 Your heart is bigger than your wallet! You only have $${userData.vexBalance.toFixed(2)} VEX. E...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -142,7 +142,7 @@ module.exports = {
         if (itemId && (!userData.inventory[itemId] || userData.inventory[itemId] < itemQuantity)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Items`)
-                .setDescription(`You don't have ${itemQuantity}x **${itemId}**.`)
+                .setDescription(`🔍 You don't have ${itemQuantity}x **${itemId}** in your inventory! Check /shop to buy more items!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -258,11 +258,23 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const giftProgress = Math.min(userData.stats.giftsSent / 50, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Gifts Sent: ${userData.stats.giftsSent}`,
+            giftProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         const giftEmbed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.GIFT} You Received a Gift!`)
-            .setDescription(`${interaction.user.username} sent you a gift!`)
+            .setDescription(`🎉 ${interaction.user.username} sent you a thoughtful gift! The VexiumVerse community is amazing!`)
             .addFields(
                 { name: '🎁 Gift Contents', value: giftDescription, inline: false }
             )
@@ -297,7 +309,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`You only have $${userData.vexBalance.toFixed(2)} VEX.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EMPTY_WALLET} Your generous spirit exceeds your balance! You only hav...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -313,7 +325,7 @@ module.exports = {
         if (eligibleUsers.length === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} No Eligible Users`)
-                .setDescription('No active users found for random gifting.')
+                .setDescription(`${constants.ANIMATED_EMOJIS.LONELY} No active players found for random gifting! Try again when mo...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -346,22 +358,35 @@ module.exports = {
         const milestoneMessage = constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)];
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const communityProgress = Math.min(userData.stats.giftsSent / 25, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Community Impact: ${userData.stats.giftsSent} gifts sent`,
+            communityProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.GIFT} Random Gift Sent!`)
-            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage}\n\n${socialProofMessage}`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Random Gift Sent!`)
+            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.HEART_BEAT} **Spreading kindness in the VexiumVerse!**`)
             .addFields(
                 { name: '🎯 Impact', value: 'Your kindness helps build the VexiumVerse community!', inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         try {
             const targetUser = await interaction.client.users.fetch(randomUser.userId);
             const anonymousEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} Anonymous Gift Received!`)
-                .setDescription(`Someone in the VexiumVerse community sent you **$${amount.toFixed(2)} VEX**!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MYSTERY} Someone in the VexiumVerse community sent you **$${amount.toFixed(2)} VEX**!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Random acts of kindness make VexiumVerse special!**`)
                 .addFields(
                     { name: '💝 Message', value: 'A kind soul wanted to brighten your day!', inline: false }
                 )

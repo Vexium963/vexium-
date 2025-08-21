@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('insurance')
-        .setDescription('Protect your VEX with insurance policies against losses')
+        .setDescription(`🛡️ Protect your VEX empire with premium insurance policies - Smart investors stay protected!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase insurance coverage')
+                .setDescription(`💸 Purchase premium insurance coverage - Protect your empire from devastating losses!`)
                 .addStringOption(option =>
                     option.setName('type')
-                        .setDescription('Type of insurance coverage')
+                        .setDescription(`✨ Choose your protection level - Elite players choose Elite coverage!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Basic - 25% coverage, 50 VEX/month', value: 'basic' },
@@ -20,22 +20,22 @@ module.exports = {
                             { name: 'Elite - 75% coverage, 200 VEX/month', value: 'elite' }))
                 .addIntegerOption(option =>
                     option.setName('months')
-                        .setDescription('Number of months to purchase')
+                        .setDescription(`🔥 Duration of protection - Longer coverage = Better peace of mind!`)
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(12)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('claim')
-                .setDescription('File an insurance claim for losses')
+                .setDescription(`💥 File an insurance claim for losses - Get your VEX back fast!`)
                 .addNumberOption(option =>
                     option.setName('loss_amount')
-                        .setDescription('Amount of VEX lost')
+                        .setDescription(`💸 Amount of VEX lost - Every VEX matters, claim what's yours!`)
                         .setRequired(true)
                         .setMinValue(1))
                 .addStringOption(option =>
                     option.setName('reason')
-                        .setDescription('Reason for the loss')
+                        .setDescription(`💬 Reason for the loss - Help us process your claim faster!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Entertainment game losses', value: 'entertainment' },
@@ -45,11 +45,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Check your insurance coverage status'))
+                .setDescription(`📈 Check your insurance coverage status - Stay informed about your protection!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('cancel')
-                .setDescription('Cancel your insurance policy')),
+                .setDescription(`💥 Cancel your insurance policy - Are you sure you want to risk it all?`)),
     
     cooldown: 30,
     
@@ -89,7 +89,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
-                .setDescription(`💰 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n⚠️ **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
+                .setDescription(`💸 **Your $${userData.networth.toFixed(2)} VEX empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
                 .addFields(
                     { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: $${userData.networth.toFixed(2)} VEX\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
                     { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **$${(Math.random() * 50000 + 10000).toFixed(0)} VEX protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
@@ -134,7 +134,7 @@ module.exports = {
         if (userData.insurance && userData.insurance.active) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Active Policy Exists`)
-                .setDescription('You already have an active insurance policy.\n\nCancel your current policy first or wait for it to expire.')
+                .setDescription(`${constants.ANIMATED_EMOJIS.SHIELD} You already have an active insurance policy protecting your e...`)
                 .addFields(
                     { name: '📋 Current Policy', value: `${userData.insurance.type.charAt(0).toUpperCase() + userData.insurance.type.slice(1)}`, inline: true },
                     { name: '📅 Expires', value: `<t:${Math.floor(new Date(userData.insurance.expiresAt).getTime() / 1000)}:R>`, inline: true }
@@ -215,7 +215,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(claimButton, statusButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Insurance Coverage: ${(policy.coverage * 100)}%`,
+            policy.coverage,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleClaim(interaction) {
@@ -257,7 +269,7 @@ module.exports = {
         if (lossAmount > maxClaimAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Claim Too Large`)
-                .setDescription(`Maximum claim amount is $${maxClaimAmount.toFixed(2)} VEX per incident.\n\nFor larger losses, file multiple claims over time.`)
+                .setDescription(`Maximum claim amount is $${maxClaimAmount.toFixed(2)} VEX per incident.\n\nFor larger losses, fil...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -318,7 +330,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(statusButton, historyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Claim Processing: 100% Complete`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStatus(interaction) {
@@ -406,7 +430,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(renewButton, claimButton, cancelButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const coverageProgress = userData.insurance ? userData.insurance.coverage : 0;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Policy Coverage Status`,
+            coverageProgress,
+            userData.insurance?.active ? constants.COLORS.SUCCESS : constants.COLORS.WARNING
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateClaimId() {

@@ -5,26 +5,26 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('challenges')
-        .setDescription('Complete daily and weekly challenges for bonus rewards')
+        .setDescription(`🔥 Complete daily and weekly challenges for massive bonus rewards! 💸`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('daily')
-                .setDescription('View and complete daily challenges'))
+                .setDescription(`✨ View and complete daily challenges for instant rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('weekly')
-                .setDescription('View and complete weekly challenges'))
+                .setDescription(`🎉 View and complete weekly challenges for HUGE rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('progress')
-                .setDescription('Check your challenge completion progress'))
+                .setDescription(`📊 Check your challenge completion progress and dominate the leaderboard!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('claim')
                 .setDescription('Claim rewards for completed challenges')
                 .addStringOption(option =>
                     option.setName('challenge_id')
-                        .setDescription('ID of the challenge to claim')
+                        .setDescription(`💸 ID of the challenge to claim your rewards!`)
                         .setRequired(true))),
     
     cooldown: 5,
@@ -100,7 +100,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${urgencyMessage}\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`🔥 ${description} ✨\n\n${urgencyMessage}\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}\n\n🚀 **Don't let others get ahead - complete challenges NOW!**`)
             .setColor(isChallengeMaster ? constants.COLORS.VEX : hasUnclaimed ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
             .setFooter({ text: 'Daily challenges = Daily rewards! Don\'t miss out!' })
             .setTimestamp();
@@ -145,7 +145,21 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(claimButton, weeklyButton, progressButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Daily Challenges: ${completedCount}/${dailyChallenges.length} completed`,
+            completedCount / dailyChallenges.length,
+            isChallengeMaster ? constants.COLORS.VEX : constants.COLORS.SUCCESS
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleWeekly(interaction) {
@@ -161,7 +175,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CHALLENGES} Weekly Challenges`)
-            .setDescription(`Bigger challenges, bigger rewards!\n\n**Progress**: ${completedCount}/${weeklyChallenges.length} completed\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
+            .setDescription(`💥 Bigger challenges, MASSIVE rewards! 💸\n\n**Progress**: ${completedCount}/${weeklyChallenges.length} completed\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n🔥 **Weekly challenges = Weekly fortunes! Don't miss out!**`)
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Weekly challenges reset every Monday • Higher difficulty, higher rewards!' })
             .setTimestamp();
@@ -169,11 +183,9 @@ module.exports = {
         for (const challenge of weeklyChallenges) {
             const status = challenge.completed ? (challenge.claimed ? '✅ Claimed' : '🎁 Ready to Claim') : `📊 ${challenge.progress}/${challenge.target}`;
             const reward = `$${challenge.reward.toFixed(2)} VEX + ${challenge.xp} XP`;
-            const progressBar = this.createProgressBar(challenge.progress, challenge.target);
-            
             embed.addFields({
                 name: `${challenge.emoji} ${challenge.name}`,
-                value: `${challenge.description}\n${progressBar}\n**Reward**: ${reward}\n**Status**: ${status}`,
+                value: `${challenge.description}\n**Progress**: ${challenge.progress}/${challenge.target}\n**Reward**: ${reward}\n**Status**: ${status}`,
                 inline: false
             });
         }
@@ -201,7 +213,21 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(claimButton, dailyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Weekly Challenges: ${completedCount}/${weeklyChallenges.length} completed`,
+            completedCount / weeklyChallenges.length,
+            constants.COLORS.SUCCESS
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleProgress(interaction) {
@@ -221,11 +247,11 @@ module.exports = {
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.PROGRESS} Challenge Progress`)
-            .setDescription(`Track your challenge completion and streaks\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}`)
+            .setTitle(`📊 Challenge Progress`)
+            .setDescription(`📈 Track your challenge domination and epic streaks! ⬆️\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}\n\n🏆 **Your progress = Your power! Keep climbing!**`)
             .addFields(
-                { name: '📅 Daily Progress', value: `${dailyCompleted}/${dailyChallenges.length} completed\n${this.createProgressBar(dailyCompleted, dailyChallenges.length)}`, inline: true },
-                { name: '📊 Weekly Progress', value: `${weeklyCompleted}/${weeklyChallenges.length} completed\n${this.createProgressBar(weeklyCompleted, weeklyChallenges.length)}`, inline: true },
+                { name: '📅 Daily Progress', value: `${dailyCompleted}/${dailyChallenges.length} completed`, inline: true },
+                { name: '📊 Weekly Progress', value: `${weeklyCompleted}/${weeklyChallenges.length} completed`, inline: true },
                 { name: '🏆 Overall Stats', value: `**Total Completed**: ${totalChallengesCompleted}\n**Current Streak**: ${challengeStreak} days\n**Best Streak**: ${userData.stats.bestChallengeStreak || 0}`, inline: true },
                 { name: '💰 Rewards Earned', value: `**This Week**: $${(userData.stats.weeklyRewards || 0).toFixed(2)}\n**All Time**: $${(userData.stats.totalChallengeRewards || 0).toFixed(2)}`, inline: true },
                 { name: '📈 Performance', value: `**Completion Rate**: ${this.getCompletionRate(userData)}%\n**Avg Daily**: ${this.getAvgDaily(userData)}\n**Rank**: ${this.getChallengeRank(userData)}`, inline: true },
@@ -250,7 +276,22 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(viewButton, leaderboardButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const overallProgress = (dailyCompleted + weeklyCompleted) / (dailyChallenges.length + weeklyChallenges.length);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Overall Challenge Progress: ${(overallProgress * 100).toFixed(1)}%`,
+            overallProgress,
+            constants.COLORS.INFO
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleClaim(interaction) {
@@ -264,7 +305,7 @@ module.exports = {
         if (!challenge) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Challenge Not Found`)
-                .setDescription(`No challenge found with ID: ${challengeId}`)
+                .setDescription(`💥 No challenge found with ID: ${challengeId}\n\n**Try again with a valid challenge ID!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -273,7 +314,7 @@ module.exports = {
         if (!challenge.completed) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Challenge Not Completed`)
-                .setDescription(`You haven't completed this challenge yet!\n\n**Progress**: ${challenge.progress}/${challenge.target}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} You haven't completed this challenge yet!\n\n**Progress**: $...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -427,12 +468,11 @@ module.exports = {
             }
         ];
     },
-    
-    createProgressBar(current, max, length = 10) {
+
+    createProgressBar(current, max) {
         const percentage = Math.min(current / max, 1);
-        const filled = Math.floor(percentage * length);
-        const empty = length - filled;
-        
+        const filled = Math.round(percentage * 20);
+        const empty = 20 - filled;
         return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${current}/${max}`;
     },
     

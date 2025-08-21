@@ -5,19 +5,19 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('notifications')
-        .setDescription('Manage your notification preferences')
+        .setDescription(`🔔 Master your empire's intelligence network - Stay ahead of every opportunity!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('settings')
-                .setDescription('Configure notification settings'))
+                .setDescription(`⚙️ Optimize your alert system for maximum profit potential`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('View recent notifications'))
+                .setDescription(`📈 Review your empire's intelligence feed and missed opportunities`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('clear')
-                .setDescription('Clear all notifications')),
+                .setDescription(`💥 Wipe your intelligence slate clean - Fresh start for new alerts`)),
     
     cooldown: 5,
     
@@ -81,7 +81,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + (variableReward ? `\n${variableReward}` : '') + `\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`🚀 ${description}${variableReward ? `\n\n💸 ${variableReward}` : ''}\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}`)
             .addFields(
                 { name: '🔔 Daily Rewards', value: settings.dailyRewards ? '✅ Enabled' : '❌ Disabled', inline: true },
                 { name: '💰 Economy Updates', value: settings.economyUpdates ? '✅ Enabled' : '❌ Disabled', inline: true },
@@ -132,7 +132,19 @@ module.exports = {
         const row1 = new ActionRowBuilder().addComponents(buttons);
         const row2 = new ActionRowBuilder().addComponents(buttons2);
         
-        await interaction.reply({ embeds: [embed], components: [row1, row2] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Notification Settings: ${Object.values(settings).filter(Boolean).length}/6 enabled`,
+            Object.values(settings).filter(Boolean).length / 6,
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row1, row2],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleList(interaction, user, userData) {
@@ -147,7 +159,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} Your Intelligence Network is Quiet`)
-                .setDescription(`🌟 **No recent notifications - you\'re all caught up!**\n💡 **Pro Tip:** Active players get more opportunities and alerts!\n\n${comebackMessage}\n${socialProofMessage}`)
+                .setDescription(`✨ **No recent notifications - you're all caught up!**\n🔥 **Pro Tip:** Active players get more op...`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -163,7 +175,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`⏳ ${description}\n\n🔥 **Stay informed, stay profitable!** 📈`)
             .addFields(
                 recentNotifications.reverse().map(notif => ({
                     name: `${this.getNotificationIcon(notif.type)} ${notif.title}`,
@@ -182,7 +194,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(clearButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Notification History: ${recentNotifications.length} recent alerts`,
+            Math.min(recentNotifications.length / 15, 1.0),
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleClear(interaction, user, userData) {
@@ -193,13 +217,25 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Notifications Cleared: ${notificationCount} removed`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Notifications Cleared`)
-            .setDescription(`🗑️ Cleared ${notificationCount} notification(s).`)
+            .setTitle(`✨ Notifications Cleared`)
+            .setDescription(`🎉 Cleared ${notificationCount} notification(s).\n\n🔥 Your intelligence network is now clean and...`)
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getDefaultSettings() {

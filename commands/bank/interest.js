@@ -5,7 +5,7 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('interest')
-        .setDescription('Calculate potential interest earnings for different deposit terms')
+        .setDescription(`📈 Calculate potential interest earnings and maximize your VEX wealth!`)
         .addNumberOption(option =>
             option.setName('amount')
                 .setDescription('Amount to calculate interest for')
@@ -13,7 +13,7 @@ module.exports = {
                 .setMinValue(0.01))
         .addIntegerOption(option =>
             option.setName('days')
-                .setDescription('Number of days to calculate (default: 30)')
+                .setDescription(`⏳ Number of days to calculate (default: 30)`)
                 .setRequired(false)
                 .setMinValue(1)
                 .setMaxValue(365)),
@@ -117,7 +117,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + psychologyText)
+            .setDescription(`💸 ${description}${psychologyText}\n\n🔥 **${Math.floor(Math.random() * 50) + 25} investors** are...`)
             .setColor(isWhale ? constants.COLORS.VEX : constants.COLORS.PRIMARY);
         
         for (const calc of calculations) {
@@ -162,7 +162,20 @@ module.exports = {
         embed.setFooter({ text: 'Use /deposit to start earning interest today!' });
         embed.setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Interest Calculator: ${days} Day Projection`,
+            Math.min(days / 365, 1),
+            constants.COLORS.PRIMARY
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         userData.stats.commandsUsed++;
         await user.save(userData);

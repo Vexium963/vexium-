@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('lottery')
-        .setDescription('Participate in the weekly VEX lottery for massive prizes!')
+        .setDescription(`💸 Participate in the weekly VEX lottery for massive prizes! 🔥`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('info')
-                .setDescription('View current lottery information and prizes'))
+                .setDescription(`✨ View current lottery information and prizes - Don't miss out!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase lottery tickets')
+                .setDescription(`🪙 Purchase lottery tickets - Your fortune awaits!`)
                 .addIntegerOption(option =>
                     option.setName('tickets')
                         .setDescription('Number of tickets to purchase (1-10)')
@@ -23,7 +23,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('tickets')
-                .setDescription('View your lottery tickets for this week')),
+                .setDescription(`🎉 View your lottery tickets for this week - Check your winning chances!`)),
     
     cooldown: 5,
     
@@ -115,7 +115,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🔥 ${description} 💸\n\n🚨 **FOMO ALERT:** Every minute you wait, someone else could claim YOUR j...`)
             .setColor(isUrgent ? constants.COLORS.ERROR : constants.COLORS.GOLD)
             .addFields(
                 { name: '🎯 Current Jackpot', value: `$${lotteryData.jackpot.toFixed(2)} VEX`, inline: true },
@@ -136,7 +136,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const jackpotProgress = Math.min(lotteryData.jackpot / 10000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Jackpot Growth: $${lotteryData.jackpot.toFixed(2)} VEX`,
+            jackpotProgress,
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -150,7 +163,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
+                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n\n⚠️ **WARNING:** While you're earning, others are buying YOUR winning tickets!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -162,7 +175,7 @@ module.exports = {
         if (userTickets.length + ticketCount > constants.LOTTERY.MAX_TICKETS_PER_USER) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Ticket Limit Exceeded`)
-                .setDescription(`You can only buy ${constants.LOTTERY.MAX_TICKETS_PER_USER} tickets per week. You currently have ${userTickets.length} tickets.`)
+                .setDescription(`💥 You can only buy ${constants.LOTTERY.MAX_TICKETS_PER_USER} tickets per week. You currently hav...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -205,9 +218,18 @@ module.exports = {
         }
         description += `\n${socialProofMessage}`;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const lotteryProgress = Math.min(userData.stats.lotteryTicketsBought / 50, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Lottery Experience: ${userData.stats.lotteryTicketsBought} tickets bought`,
+            lotteryProgress,
+            constants.COLORS.GOLD
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Lottery Tickets Purchased!`)
-            .setDescription(description)
+            .setTitle(`🎉 Lottery Tickets Purchased!`)
+            .setDescription(`🎉 ${description}\n\n🔥 **You're now in the running for LIFE-CHANGING money!** 💸\n\n📈 **Social ...`)
             .addFields(
                 { name: '🎫 Your Tickets', value: newTickets.join(', '), inline: false },
                 { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
@@ -216,10 +238,14 @@ module.exports = {
                 { name: '📊 Total Tickets This Week', value: `${userData.lotteryTickets[lotteryWeek].length}`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Good luck in the draw! Check back Sunday for results.' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleTickets(interaction) {
@@ -235,7 +261,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.LOTTERY} Your Lottery Tickets`)
-                .setDescription(`You don't have any tickets for this week's lottery. Use \`/lottery buy\` to purchase tickets!\n\n${fomoMessage}\n${socialProofMessage}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} You don't have any tickets for this week's lottery. Use \`/lottery buy\` to purchase tickets!\n\n${fomoMessage}\n${socialProofMessage}\n\n🚨 **URGENT:** The jackpot is growing every minute - don't let others claim what could be yours! ${constants.ANIMATED_EMOJIS.FIRE}`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -246,7 +272,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOTTERY} Your Lottery Tickets`)
-            .setDescription(`You have ${userTickets.length} ticket${userTickets.length > 1 ? 's' : ''} for this week's lottery!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You have ${userTickets.length} ticket${userTickets.length > 1 ? 's' : ''} for the current lottery!`)
             .addFields(
                 { name: '🎫 Your Tickets', value: userTickets.join(', '), inline: false },
                 { name: '🎯 Win Chance', value: `${winChance.toFixed(3)}%`, inline: true },
@@ -257,7 +283,19 @@ module.exports = {
             .setFooter({ text: 'May the odds be ever in your favor!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const ticketProgress = Math.min(userTickets.length / 10, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Your Tickets: ${userTickets.length} tickets`,
+            ticketProgress,
+            constants.COLORS.PRIMARY
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getCurrentLottery() {

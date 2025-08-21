@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('pets')
-        .setDescription('Adopt, care for, and train virtual pets for bonuses')
+        .setDescription(`✨ Adopt, care for, and train virtual pets for exclusive bonuses! 💓 Join 500+ pet owners earning ...`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('adopt')
-                .setDescription('Adopt a new pet companion')
+                .setDescription(`✨ Adopt your perfect companion - Limited slots available!`)
                 .addStringOption(option =>
                     option.setName('pet_type')
                         .setDescription('Type of pet to adopt')
@@ -23,7 +23,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('feed')
-                .setDescription('Feed your pet to keep it happy')
+                .setDescription(`💓 Feed your pet to maintain happiness and unlock bonuses!`)
                 .addStringOption(option =>
                     option.setName('pet_id')
                         .setDescription('ID of the pet to feed')
@@ -31,7 +31,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('play')
-                .setDescription('Play with your pet to increase bonding')
+                .setDescription(`🎉 Play with your pet to boost bonding and earn rewards!`)
                 .addStringOption(option =>
                     option.setName('pet_id')
                         .setDescription('ID of the pet to play with')
@@ -39,7 +39,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('train')
-                .setDescription('Train your pet to unlock new abilities')
+                .setDescription(`🔥 Train your pet to unlock powerful abilities and multipliers!`)
                 .addStringOption(option =>
                     option.setName('pet_id')
                         .setDescription('ID of the pet to train')
@@ -56,11 +56,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('collection')
-                .setDescription('View your pet collection'))
+                .setDescription(`🌈 View your amazing pet collection and achievements!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Check a pet\'s status and stats')
+                .setDescription(`📈 Check your pet's detailed status, stats, and progress!`)
                 .addStringOption(option =>
                     option.setName('pet_id')
                         .setDescription('ID of the pet to check')
@@ -136,7 +136,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Pet Limit Reached`)
-                .setDescription(`You can only have 5 pets at a time.\n\nConsider releasing a pet to make room for a new one.\n\n${fomoMessage}`)
+                .setDescription(`💥 You can only have 5 pets at a time!\n\n🔥 **URGENT:** Other players are adopting rare pets rig...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -148,7 +148,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Pet adoption costs $${adoptionCost.toFixed(2)} VEX.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX\n\n${socialProof}`)
+                .setDescription(`💸 Pet adoption costs $${adoptionCost.toFixed(2)} VEX.\n\n💰 **Your balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Missing:** $${(adoptionCost - userData.vexBalance).toFixed(2)} VEX\n\n🚀 **Quick earn:** Use \`/work\` or \`/daily\` to get VEX fast!\n\n${socialProof}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,7 +159,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Adoption Failed`)
-                .setDescription(`${result.reason}\n\n${nearMiss}`)
+                .setDescription(`💥 ${result.reason}\n\n🔥 **Don't give up!** Other players just adopted rare pets!\n\n${nearMiss}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -244,7 +244,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(feedButton, playButton, statusButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `${pet.name}'s Happiness Level`,
+            pet.happiness / 100,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCollection(interaction) {
@@ -311,7 +323,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(adoptButton, careButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Pet Collection Progress: ${userData.pets.length}/5 slots`,
+            userData.pets.length / 5,
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generatePetId() {

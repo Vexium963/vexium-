@@ -5,11 +5,11 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('crafting')
-        .setDescription('Craft items, tools, and equipment using materials and VEX')
+        .setDescription(`🔥 Craft legendary items, tools, and equipment using materials and VEX - Become a master artisan!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('recipes')
-                .setDescription('View available crafting recipes')
+                .setDescription(`✨ View available crafting recipes - Discover legendary blueprints!`)
                 .addStringOption(option =>
                     option.setName('category')
                         .setDescription('Recipe category to view')
@@ -23,7 +23,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('craft')
-                .setDescription('Craft an item using materials')
+                .setDescription(`💥 Craft an item using materials - Transform resources into power!`)
                 .addStringOption(option =>
                     option.setName('recipe_id')
                         .setDescription('ID of the recipe to craft')
@@ -37,15 +37,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('materials')
-                .setDescription('View your crafting materials inventory'))
+                .setDescription(`🌈 View your crafting materials inventory - Check your treasure vault!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('workshop')
-                .setDescription('Upgrade your crafting workshop for better recipes'))
+                .setDescription(`⬆️ Upgrade your crafting workshop for better recipes - Unlock legendary crafting power!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('salvage')
-                .setDescription('Salvage items for crafting materials')
+                .setDescription(`💸 Salvage items for crafting materials - Turn junk into treasure!`)
                 .addStringOption(option =>
                     option.setName('item')
                         .setDescription('Item to salvage from inventory')
@@ -146,7 +146,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🔥 ${description} ✨\n\n🚨 **${Math.floor(Math.random() * 50) + 25} players** are crafting right n...`)
             .setColor(isMaster ? constants.COLORS.VEX : isArtisan ? constants.COLORS.SUCCESS : constants.COLORS.CRAFTING)
             .setFooter({ text: flashSale ? '⚡ Flash Sale Active! Craft now for maximum savings!' : 'Upgrade your workshop to unlock legendary recipes' })
             .setTimestamp();
@@ -209,7 +209,20 @@ module.exports = {
         const row1 = new ActionRowBuilder().addComponents(categorySelect);
         const row2 = new ActionRowBuilder().addComponents(craftButton, materialsButton, workshopButton);
         
-        await interaction.reply({ embeds: [embed], components: [row1, row2] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const workshopProgress = (workshopLevel - 1) / 4; // Assuming max level 5
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Workshop Level ${workshopLevel}`,
+            workshopProgress,
+            constants.COLORS.CRAFTING
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row1, row2],
+            files: [{ attachment: progressBuffer, name: 'workshop-progress.png' }]
+        });
     },
     
     async handleCraft(interaction) {
@@ -227,7 +240,7 @@ module.exports = {
             const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Recipe Not Found`)
-                .setDescription(`No recipe found with ID: ${recipeId}\n\nUse \`/crafting recipes\` to see available recipes.\n\n${comebackMessage}`)
+                .setDescription(`💥 No recipe found with ID: ${recipeId}\n\n💡 **Pro Tip:** Use \`/crafting recipes\` to see available recipes and become a master crafter!\n\n${comebackMessage}\n\n🔥 **${Math.floor(Math.random() * 30) + 10} players** found their perfect recipe today!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -238,7 +251,7 @@ module.exports = {
         if (userData.vexBalance < totalVexCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient VEX`)
-                .setDescription(`Crafting cost: $${totalVexCost.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`💸 **Insufficient VEX for this legendary craft!**\n\n💰 **Required:** $${totalVexCost.toFixed(2)} VEX\n💳 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n⚡ **${Math.floor(Math.random() * 20) + 5} players** just earned VEX in the last hour!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -253,7 +266,7 @@ module.exports = {
             if (available < required) {
                 const embed = new EmbedBuilder()
                     .setTitle(`${constants.EMOJIS.ERROR} Insufficient Materials`)
-                    .setDescription(`You need ${required}x **${material.name}** but only have ${available}x.\n\nGather more materials or reduce the quantity.`)
+                    .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **Missing legendary materials!**\n\n🔍 **Need:** ${required}x **${material.name}**\n📦 **Have:** ${available}x\n\n💡 **Solutions:**\n• Salvage items with \`/crafting salvage\`\n• Reduce crafting quantity\n• Complete quests for materials\n\n🔥 **${Math.floor(Math.random() * 15) + 5} players** just gathered materials!`)
                     .setColor(constants.COLORS.ERROR);
                 
                 return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -332,7 +345,21 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(craftMoreButton, recipesButton, inventoryButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const craftingXP = userData.stats.craftingXP || 0;
+        const xpProgress = (craftingXP % 100) / 100;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Crafting XP: ${craftingXP}`,
+            xpProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'crafting-progress.png' }]
+        });
     },
     
     async handleMaterials(interaction) {
@@ -399,7 +426,20 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(salvageButton, recipesButton, workshopButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const materialsProgress = Math.min(totalMaterials / 100, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Materials Collected: ${totalMaterials}`,
+            materialsProgress,
+            constants.COLORS.MATERIALS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'materials-progress.png' }]
+        });
     },
     
     getAvailableRecipes(workshopLevel, category) {

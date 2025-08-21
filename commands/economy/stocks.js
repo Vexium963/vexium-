@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stocks')
-        .setDescription('Trade virtual stocks and build your investment portfolio')
+        .setDescription(`📈 Trade virtual stocks and build your investment empire! 💎 MILLIONAIRE MAKERS WELCOME!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('market')
-                .setDescription('View the stock market and available stocks'))
+                .setDescription(`🔥 View the EXPLOSIVE stock market and discover GOLDMINE opportunities!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase shares of a stock')
+                .setDescription(`💸 Purchase shares and JOIN THE WEALTH REVOLUTION! 🚀`)
                 .addStringOption(option =>
                     option.setName('symbol')
                         .setDescription('Stock symbol to purchase')
@@ -27,7 +27,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('sell')
-                .setDescription('Sell shares from your portfolio')
+                .setDescription(`💥 Sell shares and CASH IN your profits! 💰 INSTANT WEALTH!`)
                 .addStringOption(option =>
                     option.setName('symbol')
                         .setDescription('Stock symbol to sell')
@@ -40,11 +40,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your stock portfolio and performance'))
+                .setDescription(`✨ View your EMPIRE portfolio and track your LEGENDARY performance! 👑`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('watchlist')
-                .setDescription('Manage your stock watchlist')
+                .setDescription(`🌈 Manage your ELITE watchlist and never miss EXPLOSIVE opportunities! 🎯`)
                 .addStringOption(option =>
                     option.setName('action')
                         .setDescription('Action to perform')
@@ -117,7 +117,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STOCKS} 🔥 EXPLOSIVE STOCK MARKET!`)
-            .setDescription(`💎 **MILLIONAIRE MAKERS TRADING NOW!** Build your investment empire!\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`💸 **MILLIONAIRE MAKERS TRADING NOW!** Build your investment empire!\n\n🔥 **URGENT:** ${fomoMessage}\n✨ **SOCIAL PROOF:** ${socialProofMessage}${variableReward ? `\n🎉 **BONUS:** ${variableReward}` : ''}\n\n🚀 **JOIN THE LEGENDS NOW!**`)
             .addFields(
                 { name: '📊 Market Status', value: '**Status**: 🔥 **BLAZING HOT**\n**Stocks Available**: 12 **GOLDMINES**\n**Market Cap**: $2.5M VEX **GROWING**', inline: true },
                 { name: '📈 Market Performance', value: '**Daily Change**: +2.3% **BULLISH**\n**Volume**: $125K VEX **MASSIVE**\n**Active Traders**: 1,247 **LEGENDS**', inline: true },
@@ -158,7 +158,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(buyButton, portfolioButton, watchlistButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const marketProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Market Performance Today: +2.3%',
+            0.73, // 73% positive performance indicator
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: marketProgressBuffer, name: 'market-progress.png' }]
+        });
     },
     
     async handleBuy(interaction) {
@@ -175,7 +187,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Stock Symbol Not Found`)
-                .setDescription(`**${symbol}** doesn't exist in our market!\n\n${nearMissMessage}\n\nUse \`/stocks market\` to discover **REAL GOLDMINES**!`)
+                .setDescription(`💥 **${symbol}** doesn't exist in our market!\n\n🔥 **NEAR MISS:** ${nearMissMessage}\n\n✨ Use \`/stocks market\` to discover **REAL GOLDMINES** and **EXPLOSIVE OPPORTUNITIES**!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -189,7 +201,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} 💔 SO CLOSE TO WEALTH!`)
-                .setDescription(`**You need:** $${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** $${userData.vexBalance.toFixed(2)} VEX\n\n${fomoMessage}\n\n💡 **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **SO CLOSE TO WEALTH!**\n\n**You need:** $${totalWithFees.toFixed(2)} VEX (including 1% fee)\n**You have:** $${userData.vexBalance.toFixed(2)} VEX\n\n${constants.ANIMATED_EMOJIS.EXPLOSION} **FOMO ALERT:** ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Quick VEX earning:** Use \`/work\`, \`/daily\`, or \`/entertainment\`!\n\n${constants.ANIMATED_EMOJIS.ROCKET} **DON'T MISS OUT ON MILLIONS!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -261,7 +273,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(portfolioButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const purchaseProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `${symbol} Position: ${shares} shares acquired`,
+            Math.min(shares / 100, 1.0), // Progress based on shares (max 100 for full bar)
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: purchaseProgressBuffer, name: 'purchase-progress.png' }]
+        });
     },
     
     async handlePortfolio(interaction) {
@@ -359,7 +383,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(sellButton, buyButton, marketButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Performance: ${totalGainLossPercent >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(1)}%`,
+            Math.max(0, Math.min((totalGainLossPercent + 50) / 100, 1)), // Normalize -50% to +50% range
+            totalGainLoss >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: portfolioProgressBuffer, name: 'portfolio-progress.png' }]
+        });
     },
     
     getStockData() {

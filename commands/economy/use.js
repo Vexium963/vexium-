@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('use')
-        .setDescription('Use consumable items from your inventory')
+        .setDescription(`✨ Activate powerful consumables to boost your VexiumVerse performance!`)
         .addStringOption(option =>
             option.setName('item')
-                .setDescription('Item to use')
+                .setDescription(`🔥 Choose your power-up item to activate`)
                 .setRequired(true))
         .addIntegerOption(option =>
             option.setName('quantity')
-                .setDescription('Quantity to use')
+                .setDescription(`💥 Stack multiple items for MAXIMUM POWER!`)
                 .setRequired(false)
                 .setMinValue(1)
                 .setMaxValue(10)),
@@ -46,7 +46,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Available`)
-                .setDescription(`You don't have ${quantity}x **${itemId}** in your inventory.\n\n${fomoMessage}\n🛍️ **Visit /shop to get more items!**`)
+                .setDescription(`⏳ You don't have ${quantity}x **${itemId}** in your inventory!\n\n${fomoMessage}\n\n💸 **URGENT:*...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -57,7 +57,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 50) + 20);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Unknown Item`)
-                .setDescription(`The item **${itemId}** is not recognized.\n\n${socialProof}\n🔍 **Check /shop for available items!**`)
+                .setDescription(`⏳ The item **${itemId}** is not recognized!\n\n${socialProof}\n\n🔥 **HOT TIP:** Players are disc...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -68,7 +68,7 @@ module.exports = {
             const variableReward = constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', '5.00');
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Cannot Use Item`)
-                .setDescription(`Failed to use the item.\n\n💡 **Try again soon!** ${variableReward}`)
+                .setDescription(`💥 Failed to use the item - but don't give up!\n\n✨ **PERSISTENCE PAYS OFF!** ${variableReward}\n...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -122,15 +122,25 @@ module.exports = {
             description += `\n${bonusMessage}`;
         }
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const masteryProgress = Math.min(itemsUsed / 100, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Item Mastery: ${itemsUsed}/100`,
+            masteryProgress,
+            constants.COLORS.VEX
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(description)
+            .setTitle(`✨ ${title.replace(constants.EMOJIS.SUCCESS, '')}`)
+            .setDescription(description.replace(/💫/g, '✨').replace(/⚡/g, '🔥'))
             .addFields(
                 { name: '⚡ Power Effect', value: item.description, inline: false },
                 { name: '📊 Usage Stats', value: `🧪 **${itemsUsed}** items mastered\n🏅 **${isItemExpert ? 'Expert' : isItemNovice ? 'Novice' : 'Experienced'}** alchemist`, inline: true },
-                { name: '🎯 Efficiency', value: `${streakBonus > 1.0 ? '🔥 **Enhanced**' : '⚡ **Standard**'}\n${surpriseBonus > 0 ? '✨ **Bonus Active**' : '💫 **Normal Power**'}`, inline: true }
+                { name: '🎯 Efficiency', value: `${streakBonus > 1.0 ? `🔥 **Enhanced**` : '⚡ **Standard**'}\n${surpriseBonus > 0 ? `🎉 **Bonus Active**` : '💫 **Normal Power**'}`, inline: true }
             )
             .setColor(isItemExpert ? constants.COLORS.VEX : surpriseBonus > 0 ? constants.COLORS.SUCCESS : constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setFooter({ text: '💡 Pro Tip: Daily streaks enhance ALL item effects!' })
             .setTimestamp();
         
@@ -142,7 +152,10 @@ module.exports = {
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async applyItemEffect(user, userData, item, quantity) {

@@ -5,27 +5,27 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('referral')
-        .setDescription('Invite friends and earn VEX rewards through the referral program')
+        .setDescription(`✨ Invite friends and earn massive VEX rewards! Build your empire together!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('info')
-                .setDescription('View your referral information and stats'))
+                .setDescription(`📈 View your referral empire stats and earnings potential`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('code')
-                .setDescription('Get your unique referral code'))
+                .setDescription(`🔥 Get your viral referral code and start earning now!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('claim')
-                .setDescription('Claim your referral rewards'))
+                .setDescription(`💸 Claim your massive referral rewards instantly!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View the top referrers'))
+                .setDescription(`🏆 See the legendary referral champions and their earnings!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('redeem')
-                .setDescription('Redeem a referral code (new users only)')
+                .setDescription(`🎉 Redeem a code and get instant VEX bonus! (New users only)`)
                 .addStringOption(option =>
                     option.setName('code')
                         .setDescription('Referral code to redeem')
@@ -173,7 +173,20 @@ module.exports = {
         
         embed.setFooter({ text: 'Share your code and start earning!' });
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const referralProgress = Math.min(referralStats.referrals.length / 10, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Referral Progress: ${referralStats.referrals.length}/10 for bonus`,
+            referralProgress,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCode(interaction) {
@@ -194,18 +207,31 @@ module.exports = {
         const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 15);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const referralProgress = Math.min(userData.referral.referrals.length / 10, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Referral Progress: ${userData.referral.referrals.length}/10 for bonus`,
+            referralProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.REFERRAL} Your Referral Code`)
-            .setDescription(`Share this code with friends to earn rewards!\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setTitle(`✨ Your Referral Code`)
+            .setDescription(`🚀 Share this code with friends to earn massive rewards!\n\n🔥 **VIRAL OPPORTUNITY:** Each friend...`)
             .addFields(
                 { name: '🔗 Referral Code', value: `\`${userData.referral.code}\``, inline: false },
                 { name: '💰 Reward per Referral', value: `$${constants.REFERRAL.REFERRER_REWARD.toFixed(2)} VEX`, inline: true },
                 { name: '🎁 Friend Bonus', value: `$${constants.REFERRAL.REFEREE_BONUS.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Your friends get a bonus too when they use your code!' });
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleClaim(interaction) {
@@ -219,7 +245,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Rewards`)
-                .setDescription(`You need at least $${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pending: $${referralStats.pendingRewards.toFixed(2)} VEX\n\n${nearMissMessage}`)
+                .setDescription(`⏳ You need at least $${constants.REFERRAL.MIN_CLAIM_AMOUNT.toFixed(2)} VEX to claim. Current pend...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -246,7 +272,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Referral Rewards Claimed!`)
-            .setDescription(`Successfully claimed your referral rewards!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully claimed your referral rewards!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} **MASSIVE PAYOUT!** Your network is generating serious wealth!\n\n${milestoneMessage}${variableReward ? `\n${variableReward}` : ''}\n\n${constants.ANIMATED_EMOJIS.ROCKET} Keep building your empire - the sky's the limit!`)
             .addFields(
                 { name: '💎 Gross Rewards', value: `$${claimAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax (5%)', value: `$${taxAmount.toFixed(2)} VEX`, inline: true },
@@ -266,7 +292,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Referral Leaderboard`)
-            .setDescription('Top referrers in VexiumVerse!')
+            .setDescription(`${constants.ANIMATED_EMOJIS.TROPHY} **LEGENDARY REFERRAL CHAMPIONS!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Top referrers this month!`)
             .setColor(constants.COLORS.GOLD);
         
         if (topReferrers.length === 0) {
@@ -286,7 +312,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Start referring friends to climb the leaderboard!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const leaderboardProgress = Math.min(topReferrers.length / 20, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Leaderboard Activity: ${topReferrers.length} active referrers`,
+            leaderboardProgress,
+            constants.COLORS.GOLD
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRedeem(interaction) {

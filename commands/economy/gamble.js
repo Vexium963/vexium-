@@ -6,23 +6,23 @@ const Economics = require('../../utils/economics');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('entertainment')
-        .setDescription('Play skill-based entertainment games for VEX rewards (21+ verification required)')
+        .setDescription(`✨ Play skill-based entertainment games for VEX rewards (21+ verification required)`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('slots')
-                .setDescription('Play skill-based VEX slot entertainment game')
+                .setDescription(`🎰 Play skill-based VEX slot entertainment game with massive rewards!`)
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to play with')
+                        .setDescription(`💸 Amount of VEX to play with - higher stakes, bigger rewards!`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('coinflip')
-                .setDescription('Skill-based coin prediction entertainment game')
+                .setDescription(`🪙 Skill-based coin prediction entertainment game - test your intuition!`)
                 .addStringOption(option =>
                     option.setName('choice')
-                        .setDescription('Predict heads or tails')
+                        .setDescription(`✨ Predict heads or tails - trust your instincts!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Heads', value: 'heads' },
@@ -30,28 +30,28 @@ module.exports = {
                         ))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to play with')
+                        .setDescription(`💸 Amount of VEX to play with - higher stakes, bigger rewards!`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('dice')
-                .setDescription('Skill-based dice prediction entertainment game')
+                .setDescription(`🎲 Skill-based dice prediction entertainment game - fortune favors the bold!`)
                 .addIntegerOption(option =>
                     option.setName('prediction')
-                        .setDescription('Predict the dice roll (1-6)')
+                        .setDescription(`🔥 Predict the dice roll (1-6) - feel the rush of victory!`)
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(6))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to play with')
+                        .setDescription(`💸 Amount of VEX to play with - higher stakes, bigger rewards!`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stats')
-                .setDescription('View your entertainment game statistics')),
+                .setDescription(`📈 View your entertainment game statistics - track your legendary wins!`)),
     
     cooldown: 3,
     
@@ -112,30 +112,36 @@ module.exports = {
         
         // Mandatory age verification for legal compliance
         if (!userData.ageVerified) {
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Entertainment Level: ${userData.level}`,
+                Math.min(userData.level / 50, 1),
+                constants.COLORS.VEX
+            );
+
             const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .setTitle(`✨ Skill-Based Entertainment`)
+                .setDescription(`**${interaction.user.username}**, welcome to VexiumVerse Entertainment!\n\n` +
+                    `🔥 **Skill-Based Games** (Not Gambling)\n` +
+                    `⚖️ **Age Verification Required** (21+)\n` +
+                    `🎉 **Entertainment Value Focus**\n\n` +
+                    `**Available Games:**`)
                 .addFields(
-                    {
-                        name: '🔞 Age Requirement',
-                        value: 'Must be 21 years or older to participate',
-                        inline: true
-                    },
-                    {
-                        name: '⚖️ Legal Notice',
-                        value: 'These are skill-based entertainment games, not gambling',
-                        inline: true
-                    },
-                    {
-                        name: '✅ How to Verify',
-                        value: 'Use `/verify-age` command to confirm eligibility',
-                        inline: false
-                    }
+                    { name: '🎰 Slots', value: 'Pattern recognition game', inline: true },
+                    { name: '🪙 Coin Flip', value: 'Probability challenge', inline: true },
+                    { name: '🎲 Dice Roll', value: 'Number prediction', inline: true }
                 )
-                .setColor(constants.COLORS.WARNING)
-                .setFooter({ text: 'Age verification required by cryptocurrency gaming regulations' });
+                .setColor(constants.COLORS.VEX)
+                .setImage('attachment://progress.png')
+                .setFooter({ text: '🔞 Must be 21+ to participate | Entertainment purposes only' })
+                .setTimestamp();
             
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ 
+                embeds: [embed], 
+                ephemeral: true,
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
         }
         
         const amount = interaction.options.getNumber('amount');
@@ -144,7 +150,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`Maximum play amount for slots is $${maxAmount.toFixed(2)} VEX.`)
+                .setDescription(`💥 Maximum play amount for slots is $${maxAmount.toFixed(2)} VEX. Start smaller and build your em...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -154,7 +160,7 @@ module.exports = {
         if (!userData.ageVerified) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription('**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.')
+                .setDescription(`🔥 **UNLOCK PREMIUM ENTERTAINMENT**: Verify you are 21+ to access exclusive VEX entertainment gam...`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -169,7 +175,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`💸 You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}. Earn more...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -185,7 +191,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Entertainment Game Cooldown`)
-                .setDescription(`Please wait ${secondsLeft} seconds before playing again.`)
+                .setDescription(`⏳ Please wait ${secondsLeft} seconds before playing again. Use this time to plan your next winnin...`)
                 .setColor(constants.COLORS.WARNING);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -242,19 +248,31 @@ module.exports = {
         description += `\n\n${socialProofMessage}`;
         if (Math.random() < 0.4) description += `\n${fomoMessage}`;
 
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Entertainment Level: ${userData.level}`,
+            Math.min(userData.level / 50, 1),
+            color
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SLOT} VEX Skill-Based Slots`)
-            .setDescription(description)
+            .setTitle(`🎰 VEX Skill-Based Slots`)
+            .setDescription(`✨ ${description} 🔥`)
             .addFields(
                 { name: '💰 Play Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '🎰 Payout', value: `$${payout.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)
+            .setImage('attachment://progress.png')
             .setFooter({ text: '⚖️ Skill-based entertainment game. Play responsibly with cryptocurrency.' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCoinflip(interaction) {
@@ -268,7 +286,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`Maximum play amount for coinflip is $${maxAmount.toFixed(2)} VEX.`)
+                .setDescription(`💥 Maximum play amount for coinflip is $${maxAmount.toFixed(2)} VEX. Start smaller and build your...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -277,7 +295,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`💸 You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}. Earn more...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -322,9 +340,17 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Win Streak: ${userData.stats?.recentWinStreak || 0}`,
+            Math.min((userData.stats?.recentWinStreak || 0) / 10, 1),
+            color
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.COIN} Coinflip`)
-            .setDescription(`${coinEmoji} **The coin landed on ${coinResult.toUpperCase()}!**\n\n${resultText}`)
+            .setTitle(`🪙 Coinflip`)
+            .setDescription(`✨ ${coinEmoji} **The coin landed on ${coinResult.toUpperCase()}!**\n\n${resultText} 🔥`)
             .addFields(
                 { name: '🎯 Your Choice', value: choice.charAt(0).toUpperCase() + choice.slice(1), inline: true },
                 { name: '🪙 Result', value: coinResult.charAt(0).toUpperCase() + coinResult.slice(1), inline: true },
@@ -333,9 +359,13 @@ module.exports = {
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleDice(interaction) {
@@ -349,7 +379,7 @@ module.exports = {
         if (amount > maxAmount) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Amount Too High`)
-                .setDescription(`Maximum play amount for dice is $${maxAmount.toFixed(2)} VEX.`)
+                .setDescription(`💥 Maximum play amount for dice is $${maxAmount.toFixed(2)} VEX. Start smaller and build your emp...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -358,7 +388,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`💸 You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}. Earn more...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -404,7 +434,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DICE} Dice Roll`)
-            .setDescription(`🎲 **The dice rolled ${diceRoll}!**\n\n${resultText}`)
+            .setDescription(`✨ 🎲 **The dice rolled ${diceRoll}!**\n\n${resultText} 🔥`)
             .addFields(
                 { name: '🎯 Your Prediction', value: prediction.toString(), inline: true },
                 { name: '🎲 Actual Roll', value: diceRoll.toString(), inline: true },
@@ -413,9 +443,21 @@ module.exports = {
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(color)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Dice Prediction Accuracy: ${userData.level}`,
+            Math.min(userData.level / 50, 1),
+            color
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStats(interaction) {
@@ -425,7 +467,7 @@ module.exports = {
         if (userData.stats.gamesPlayed === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.DICE} Entertainment Game Statistics`)
-                .setDescription('You haven\'t played any entertainment games yet!')
+                .setDescription(`✨ You haven't played any entertainment games yet! Start your legendary journey now!`)
                 .addFields(
                     { name: '🎰 Available Games', value: 'Slots, Coinflip, Dice', inline: false }
                 )
@@ -440,7 +482,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.DICE} Your Entertainment Game Statistics`)
-            .setDescription('Your complete skill-based entertainment game performance')
+            .setDescription(`${constants.ANIMATED_EMOJIS.CHART} Your complete skill-based entertainment game performance - wit...`)
             .addFields(
                 { name: '🎮 Games Played', value: userData.stats.gamesPlayed.toString(), inline: true },
                 { name: '💰 Total Entertainment Played', value: `$${userData.stats.totalEntertainmentPlayed.toFixed(2)}`, inline: true },
@@ -451,8 +493,20 @@ module.exports = {
             )
             .setColor(totalProfit >= 0 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
             .setFooter({ text: '⚖️ Skill-based entertainment games. Play responsibly with cryptocurrency.' })
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Entertainment Stats Level: ${userData.level}`,
+            Math.min(userData.level / 50, 1),
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     }
 };

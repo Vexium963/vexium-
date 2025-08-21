@@ -4,8 +4,8 @@ const constants = require('../../utils/constants');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('achievements')
-        .setDescription('View your achievements and progress')
+        .setName('milestones')
+        .setDescription(`🏆 View your achievements and unlock exclusive rewards!`)
         .addUserOption(option =>
             option.setName('user')
                 .setDescription('View another user\'s achievements')
@@ -41,7 +41,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Private Profile`)
-                .setDescription(`${targetUser.username}'s achievements are private.\n\n${fomoMessage}\n💡 **Unlock your own achievements to inspire others!**`)
+                .setDescription(`🔒 ${targetUser.username}'s achievements are private.\n\n${fomoMessage}\n✨ **Unlock your own achi...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -54,8 +54,8 @@ module.exports = {
         const isCompletionist = completionRate >= 90;
         const recentUnlocks = unlockedAchievements.slice(-3);
         
-        let title = `${constants.EMOJIS.TROPHY} ${isOwnAchievements ? 'Your' : targetUser.username + "'s"} Achievement Collection`;
-        let description = `🏆 **${unlockedAchievements.length}** out of **${totalAchievements}** achievements unlocked!`;
+        let title = `🏆 ${isOwnAchievements ? 'Your' : targetUser.username + "'s"} Achievement Collection`;
+        let description = `🎉 **${unlockedAchievements.length}** out of **${totalAchievements}** achievements unlocked!`;
         
         if (isOwnAchievements) {
             if (isCompletionist) {
@@ -72,8 +72,7 @@ module.exports = {
             }
         }
         
-        const progressBar = '█'.repeat(Math.floor(completionRate / 5)) + '░'.repeat(20 - Math.floor(completionRate / 5));
-        description += `\n\n📊 ${progressBar} **${completionRate.toFixed(1)}%**`;
+        description += `\n\n📊 **${completionRate.toFixed(1)}%** completion rate`;
         
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 75) + 25);
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
@@ -87,7 +86,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`${description}\n\n📈 **Achievement hunters earn 2x more VEX!**\n🔥 **${Math.floor(Math.random() * 50) + 25} players** are hunting achievements right now!`)
             .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
             .setThumbnail(targetUser.displayAvatarURL())
             .setTimestamp();
@@ -165,7 +164,20 @@ module.exports = {
                 `Achievements viewed by ${interaction.user.username}` 
         });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Achievement Progress: ${unlockedAchievements.length}/${totalAchievements}`,
+            completionRate / 100,
+            constants.COLORS.GOLD
+        );
+
+        embed.setImage('attachment://progress.png');
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         if (isOwnAchievements) {
             userData.stats.commandsUsed++;

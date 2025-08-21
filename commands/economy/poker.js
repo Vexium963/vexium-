@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('poker')
-        .setDescription('Play skill-based Texas Hold\'em poker tournaments for VEX prizes (21+ verification required)')
+        .setDescription(`🃏 Play skill-based Texas Hold'em poker tournaments for VEX prizes! 🔥 High-stakes competition aw...`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('join')
-                .setDescription('Join a poker tournament')
+                .setDescription(`🚀 Join a high-stakes poker tournament and compete for massive VEX prizes!`)
                 .addStringOption(option =>
                     option.setName('tournament')
-                        .setDescription('Tournament type')
+                        .setDescription(`✨ Choose your tournament level - bigger risks, bigger rewards!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Micro Stakes ($10 buy-in)', value: 'micro' },
@@ -23,15 +23,15 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('tournaments')
-                .setDescription('View active poker tournaments'))
+                .setDescription(`📈 View active tournaments with live prize pools and player counts!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stats')
-                .setDescription('View your poker statistics'))
+                .setDescription(`🏆 View your poker performance stats and track your rise to the top!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View poker tournament leaderboard')),
+                .setDescription(`👑 See who dominates the poker tables - will you be next?`)),
     
     cooldown: 5,
     
@@ -80,7 +80,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Age Verification Required`)
-                .setDescription(`**LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`⚠️ **LEGAL COMPLIANCE**: You must verify you are 21+ to play cryptocurrency entertainment games.\...`)
                 .addFields({
                     name: '🔞 Verification Required',
                     value: 'Use `/verify-age` to confirm you are 21 or older for legal compliance.',
@@ -118,7 +118,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Tournament`)
-                .setDescription(`Please select a valid tournament type.\n\n${nearMiss}`)
+                .setDescription(`❌ Please select a valid tournament type.\n\n🤔 **ALMOST THERE**: ${nearMiss}\n\n🚀 Try again - yo...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -137,7 +137,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${tournament.buyIn.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${nearMiss}\n${socialProof}`)
+                .setDescription(`💰 You need $${tournament.buyIn.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}....`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -147,7 +147,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Registration Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${constants.ANIMATED_EMOJIS.ERROR} ${result.reason}\n\n${constants.ANIMATED_EMOJIS.THINKING} Don'...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -171,8 +171,16 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Tournament Performance: ${placement}/${tournament.maxPlayers}`,
+            Math.max(0, 1 - (placement / tournament.maxPlayers)),
+            placement <= 3 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CARDS} Poker Tournament Result`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Poker Tournament Result`)
             .setDescription(`**${tournament.name}** tournament completed!`)
             .addFields(
                 { name: '🏆 Final Placement', value: `${placement}/${tournament.maxPlayers}`, inline: true },
@@ -183,10 +191,14 @@ module.exports = {
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(placement <= 3 ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
+            .setImage('attachment://progress.png')
             .setFooter({ text: this.getPlacementMessage(placement) })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleTournaments(interaction) {
@@ -212,7 +224,29 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /poker join <tournament> to enter!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('poker_join_micro')
+                    .setLabel('Join Micro Stakes')
+                    .setStyle(ButtonStyle.Success)
+                    .setEmoji('🎯'),
+                new ButtonBuilder()
+                    .setCustomId('poker_join_low')
+                    .setLabel('Join Low Stakes')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('🚀'),
+                new ButtonBuilder()
+                    .setCustomId('poker_join_high')
+                    .setLabel('Join High Stakes')
+                    .setStyle(ButtonStyle.Danger)
+                    .setEmoji('💎')
+            );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [actionButtons] 
+        });
     },
     
     async handleStats(interaction) {
@@ -243,7 +277,33 @@ module.exports = {
             embed.setDescription('You haven\'t played any poker tournaments yet. Use `/poker join` to get started!');
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Poker Performance: ${winRate}% Win Rate`,
+            Math.min(parseFloat(winRate) / 100, 1),
+            constants.COLORS.VEX
+        );
+        
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('poker_tournaments')
+                    .setLabel('View Tournaments')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('🎯'),
+                new ButtonBuilder()
+                    .setCustomId('poker_leaderboard')
+                    .setLabel('Leaderboard')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('🏆')
+            );
+        
+        await interaction.reply({ 
+            embeds: [embed.setImage('attachment://progress.png')], 
+            components: [actionButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleLeaderboard(interaction) {
@@ -271,7 +331,24 @@ module.exports = {
         
         embed.setFooter({ text: 'Rankings based on tournament wins and win rate' });
         
-        await interaction.reply({ embeds: [embed] });
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('poker_tournaments')
+                    .setLabel('View Tournaments')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('🎯'),
+                new ButtonBuilder()
+                    .setCustomId('poker_stats')
+                    .setLabel('My Stats')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setEmoji('📊')
+            );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [actionButtons] 
+        });
     },
     
     simulateTournament(tournament) {

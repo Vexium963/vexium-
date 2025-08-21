@@ -7,7 +7,7 @@ const CanvasRenderer = require('../../utils/canvasRenderer');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('progression')
-        .setDescription('View your level progression and unlock information'),
+        .setDescription(`⬆️ Track your epic journey and unlock exclusive rewards! See how you rank against other players a...`),
     
     async execute(interaction) {
         const user = new User(interaction.user.id);
@@ -31,8 +31,8 @@ module.exports = {
         const milestoneMessage = progressPercentage >= 90 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
         
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.LEVEL_UP} ${interaction.user.username}'s Epic Journey`)
-            .setDescription(`🌟 **You're ${progressPercentage.toFixed(1)}% to your next breakthrough!**\n${this.getMotivationalMessage(progressPercentage)}\n\n${socialProofMessage}${milestoneMessage ? `\n${milestoneMessage}` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n${fomoMessage}`)
+            .setTitle(`⬆️ ${interaction.user.username}'s Epic Journey`)
+            .setDescription(`✨ **You're ${progressPercentage.toFixed(1)}% to your next breakthrough!**\n${this.getMotivationalMessage(progressPercentage)}\n\n🔥 ${socialProofMessage}${milestoneMessage ? `\n🏆 ${milestoneMessage}` : ''}${variableReward ? `\n💸 ${variableReward}` : ''}\n\n⏳ ${fomoMessage}`)
             .addFields(
                 { name: '🎯 Current Level', value: `**${currentLevel}** ${this.getLevelEmoji(currentLevel)}`, inline: true },
                 { name: '⭐ Current XP', value: `**${currentXP.toLocaleString()}** XP`, inline: true },

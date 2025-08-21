@@ -5,47 +5,47 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('auction')
-        .setDescription('Participate in player-to-player auctions for rare items and VEX')
+        .setDescription(`🔥 Dominate the auction house! Bid on rare items and create auctions for VEX profits!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('View current auctions'))
+                .setDescription(`📈 Browse live auctions and find incredible deals before others do!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')
-                .setDescription('Create a new auction')
+                .setDescription(`💸 List your items and watch bidding wars drive up your profits!`)
                 .addStringOption(option =>
                     option.setName('item')
-                        .setDescription('Item ID to auction')
+                        .setDescription(`✨ Choose your most valuable item to auction`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('starting_bid')
-                        .setDescription('Starting bid amount in VEX')
+                        .setDescription(`🪙 Set your starting price - higher prices attract serious bidders!`)
                         .setRequired(true)
                         .setMinValue(0.01))
                 .addIntegerOption(option =>
                     option.setName('duration')
-                        .setDescription('Auction duration in hours (1-72)')
+                        .setDescription(`⏳ Longer auctions = more exposure = higher final bids!`)
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(72)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('bid')
-                .setDescription('Place a bid on an auction')
+                .setDescription(`💥 Strike fast! Outbid competitors and claim rare items!`)
                 .addStringOption(option =>
                     option.setName('auction_id')
-                        .setDescription('Auction ID to bid on')
+                        .setDescription(`🎯 Enter the auction ID you want to dominate`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Bid amount in VEX')
+                        .setDescription(`💸 Your bid amount - go big to secure the win!`)
                         .setRequired(true)
                         .setMinValue(0.01)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('my_auctions')
-                .setDescription('View your active auctions and bids')),
+                .setDescription(`👑 Track your auction empire and see your winning bids!`)),
     
     cooldown: 3,
     
@@ -101,7 +101,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.AUCTION} 🔥 AUCTION HOUSE - EMPTY!`)
-                .setDescription(`💎 **GOLDEN OPPORTUNITY!** No active auctions right now!\n🚀 **BE THE FIRST** to create one and dominate the market!\n\n${fomoMessage}\n${socialProof}`)
+                .setDescription(`✨ **GOLDEN OPPORTUNITY!** No active auctions right now!\n🚀 **BE THE FIRST** to create one and do...`)
                 .addFields({
                     name: '💡 Pro Tip',
                     value: '🎯 **First movers get the most attention!** Create an auction now and watch the bidding wars begin!',
@@ -138,7 +138,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description)
+            .setDescription(`🔥 ${description}\n\n⏳ **Live bidding happening NOW!** Don't let others steal your deals!`)
             .setColor(hotAuctions.length > 0 ? constants.COLORS.VEX : constants.COLORS.PRIMARY);
         
         for (const auction of auctions.slice(0, 5)) {
@@ -187,7 +187,7 @@ module.exports = {
         if (!userData.inventory || !userData.inventory[itemId] || userData.inventory[itemId] < 1) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Found`)
-                .setDescription(`You don't have any **${itemId}** in your inventory.`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} You don't have any **${itemId}** in your inventory!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Pro tip:** Use \`/shop\` to buy items you can auction for profit!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -208,7 +208,7 @@ module.exports = {
         if (listingFee > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${listingFee.toFixed(2)} VEX for the listing fee but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`You need $${listingFee.toFixed(2)} VEX for the listing fee but only have $${userData.vexBalance.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -250,9 +250,17 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Auction Duration: ${duration} hours`,
+            0.1,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Auction Created!`)
-            .setDescription(`Your auction for **${item.name}** is now live!`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Auction Created!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your auction for **${item.name}** is now live!`)
             .addFields(
                 { name: '🆔 Auction ID', value: auctionId, inline: true },
                 { name: '💰 Starting Bid', value: `$${startingBid.toFixed(2)} VEX`, inline: true },
@@ -261,10 +269,14 @@ module.exports = {
                 { name: '📅 End Time', value: `<t:${Math.floor(endTime / 1000)}:F>`, inline: false }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: 'Good luck with your auction!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleBid(interaction) {
@@ -369,7 +381,18 @@ module.exports = {
             .setFooter({ text: 'You\'ll be refunded if someone outbids you.' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Auction Progress: ${auction.bids.length} bids`,
+            Math.min(auction.bids.length / 10, 1.0),
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleMyAuctions(interaction) {
@@ -412,7 +435,18 @@ module.exports = {
             embed.setDescription('You haven\'t created any auctions or placed any bids yet. Use `/auction list` to get started!');
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Your Auction Activity: ${userAuctions.length + userBids.length} total`,
+            Math.min((userAuctions.length + userBids.length) / 20, 1.0),
+            constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getActiveAuctions() {

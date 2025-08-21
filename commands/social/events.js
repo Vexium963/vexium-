@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('events')
-        .setDescription('Participate in community events and seasonal activities')
+        .setDescription(`🔥 Join epic community events with massive rewards! Compete with thousands of players!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('active')
-                .setDescription('View currently active events'))
+                .setDescription(`✨ See live events with limited-time rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('join')
-                .setDescription('Join an active event')
+                .setDescription(`🚀 Jump into the action and start earning exclusive rewards!`)
                 .addStringOption(option =>
                     option.setName('event_id')
                         .setDescription('Event ID to join')
@@ -21,11 +21,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('progress')
-                .setDescription('View your event progress'))
+                .setDescription(`📈 Track your domination across all active events!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('leaderboard')
-                .setDescription('View event leaderboards')
+                .setDescription(`🏆 See who's crushing the competition and claim your spot!`)
                 .addStringOption(option =>
                     option.setName('event_id')
                         .setDescription('Event ID to view leaderboard for')
@@ -33,7 +33,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('rewards')
-                .setDescription('Claim your event rewards')),
+                .setDescription(`💸 Cash in your hard-earned event victories!`)),
     
     cooldown: 5,
     
@@ -118,11 +118,11 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(description + `\n\n${fomoMessage}\n${socialProofMessage}${variableReward ? `\n${variableReward}` : ''}`)
+            .setDescription(`🔥 ${description}\n\n⏳ ${fomoMessage}\n🎉 ${socialProofMessage}${variableReward ? `\n💸 ${variableReward}` : ''}`)
             .setColor(urgentEvents.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX);
         
         if (activeEvents.length === 0) {
-            embed.setDescription('No active events right now. Check back soon for new events!');
+            embed.setDescription(`⏳ No active events right now. ✨ Check back soon for new events with massive rewards!`);
         } else {
             for (const event of activeEvents) {
                 const timeLeft = event.endTime - Date.now();
@@ -156,7 +156,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /events join <event_id> to participate!' });
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Active Events: ${activeEvents.length} Live`,
+            activeEvents.length > 0 ? 0.8 : 0.2,
+            urgentEvents.length > 0 ? constants.COLORS.ERROR : constants.COLORS.VEX
+        );
+
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleJoin(interaction) {
@@ -171,7 +183,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Event Not Found`)
-                .setDescription(`Event **${eventId}** doesn't exist or has ended.\n\n${nearMissMessage}`)
+                .setDescription(`💥 Event **${eventId}** doesn't exist or has ended.\n\n🔥 ${nearMissMessage}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -182,7 +194,7 @@ module.exports = {
         if (userData.events[eventId]) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already Participating`)
-                .setDescription(`You're already participating in **${event.name}**.`)
+                .setDescription(`🎉 You're already dominating **${event.name}**! Keep pushing for those rewards!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -191,7 +203,7 @@ module.exports = {
         if (event.requirements && !this.meetsRequirements(userData, event.requirements)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Requirements Not Met`)
-                .setDescription(`You don't meet the requirements for **${event.name}**.`)
+                .setDescription(`🔥 You don't meet the requirements for **${event.name}** yet. 🚀 Level up and come back stronger!`)
                 .addFields({
                     name: '📋 Requirements',
                     value: this.formatRequirements(event.requirements),
@@ -219,7 +231,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Event Joined!`)
-            .setDescription(`Successfully joined **${event.name}**!\n\n${milestoneMessage}\n${socialProofMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined **${event.name}**!\n\n${constants.ANIMATED_EMOJIS.FIRE} **You're now competing with ${event.participants} other players!**\n\n${socialProofMessage}`)
             .addFields(
                 { name: '🎯 Event', value: event.name, inline: true },
                 { name: '📝 Objective', value: event.objective, inline: true },
@@ -230,7 +242,18 @@ module.exports = {
             .setFooter({ text: 'Good luck! Check your progress with /events progress' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Event Progress: ${event.name}`,
+            0.8,
+            constants.COLORS.SUCCESS
+        );
+
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleProgress(interaction) {
@@ -256,7 +279,6 @@ module.exports = {
             if (!event) continue;
             
             const progressPercent = Math.min((eventData.progress / event.target) * 100, 100);
-            const progressBar = this.createProgressBar(progressPercent / 100);
             
             const status = eventData.completed ? '✅ Completed' : 
                           eventData.rewardsClaimed ? '🎁 Rewards Claimed' : 
@@ -265,7 +287,7 @@ module.exports = {
             embed.addFields({
                 name: `${event.icon} ${event.name}`,
                 value: `**Progress**: ${eventData.progress}/${event.target}\n` +
-                       `${progressBar} ${progressPercent.toFixed(1)}%\n` +
+                       `**Completion**: ${progressPercent.toFixed(1)}%\n` +
                        `**Status**: ${status}\n` +
                        `**Time Left**: ${this.formatTimeLeft(event.endTime - Date.now())}`,
                 inline: false
@@ -274,7 +296,20 @@ module.exports = {
         
         embed.setFooter({ text: 'Keep participating to complete events and earn rewards!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const totalEvents = Object.keys(userData.events).length;
+        const completedEvents = Object.values(userData.events).filter(e => e.completed).length;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Events Completed: ${completedEvents}/${totalEvents}`,
+            totalEvents > 0 ? completedEvents / totalEvents : 0,
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleLeaderboard(interaction) {
@@ -335,7 +370,18 @@ module.exports = {
             }
         }
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Event Leaderboard Rankings`,
+            0.9,
+            constants.COLORS.GOLD
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRewards(interaction) {
@@ -398,7 +444,18 @@ module.exports = {
             .setFooter({ text: 'Keep participating in events for more rewards!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Rewards Claimed: $${totalRewards.toFixed(2)} VEX`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     getActiveEvents() {

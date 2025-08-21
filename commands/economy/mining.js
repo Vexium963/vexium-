@@ -6,14 +6,14 @@ const Economics = require('../../utils/economics');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('mining')
-        .setDescription('Mine VEX tokens using computational power and energy')
+        .setDescription(`🔥 Mine VEX tokens using computational power and energy - Passive income awaits!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('start')
-                .setDescription('Start mining VEX tokens')
+                .setDescription(`🚀 Start mining VEX tokens - Begin your passive income empire!`)
                 .addStringOption(option =>
                     option.setName('rig')
-                        .setDescription('Mining rig to use')
+                        .setDescription(`✨ Mining rig to use - Higher tier = EXPONENTIAL rewards!`)
                         .setRequired(false)
                         .addChoices(
                             { name: 'Basic CPU', value: 'cpu_basic' },
@@ -25,19 +25,19 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('status')
-                .setDescription('Check your mining status and earnings'))
+                .setDescription(`📈 Check your mining status and earnings - See your empire grow!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('claim')
-                .setDescription('Claim your mined VEX tokens'))
+                .setDescription(`💸 Claim your mined VEX tokens - Cash out your profits!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('upgrade')
-                .setDescription('Upgrade your mining equipment'))
+                .setDescription(`⬆️ Upgrade your mining equipment - Unlock MASSIVE earning potential!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('pool')
-                .setDescription('View mining pool information')),
+                .setDescription(`🌈 View mining pool information - Real-time network stats!`)),
     
     cooldown: 5,
     
@@ -95,7 +95,7 @@ module.exports = {
         if (!rig) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Mining Rig`)
-                .setDescription('Please select a valid mining rig.')
+                .setDescription(`💥 Invalid mining rig selection! Choose from our premium collection to start earning.`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -104,7 +104,7 @@ module.exports = {
         if (!userData.inventory || !userData.inventory[rigType] || userData.inventory[rigType] < 1) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Mining Rig Required`)
-                .setDescription(`You need a **${rig.name}** to start mining. Purchase one from the shop first.`)
+                .setDescription(`🔥 You need a **${rig.name}** to unlock this earning potential! Don't miss out - get yours now an...`)
                 .addFields({
                     name: '🛒 Purchase Info',
                     value: `Use \`/shop buy ${rigType}\` to get this mining rig`,
@@ -118,7 +118,7 @@ module.exports = {
         if (userData.mining && userData.mining.isActive) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Already Mining`)
-                .setDescription('You\'re already mining! Use `/mining status` to check your progress.')
+                .setDescription(`🎉 Your mining empire is already running! Check your earnings with \`/mining status\` - you might be surprised how much you've earned!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -128,7 +128,7 @@ module.exports = {
         if (energyCost > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Energy`)
-                .setDescription(`You need $${energyCost.toFixed(2)} VEX for energy costs but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`⏳ You need $${energyCost.toFixed(2)} VEX for energy costs but only have $${userData.vexBalance.toFixed(2)}. Earn more VEX with \`/daily\` or \`/work\` - then come back to start your mining empire!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -165,9 +165,18 @@ module.exports = {
         const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 500) + 100);
         const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 2 + 0.5).toFixed(3)) : null;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const miningProgress = Math.min(rig.hashRate / 1000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Mining Power: ${rig.hashRate.toFixed(2)} TH/s`,
+            miningProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.MINING} ⚡ MINING EMPIRE ACTIVATED!`)
-            .setDescription(`🚀 **Your ${rig.name} is now DOMINATING the blockchain!**\n\n${variableReward ? `${variableReward}\n` : ''}💎 **PASSIVE INCOME ACTIVATED** - Earn while you sleep!\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.FIRE} ⚡ MINING EMPIRE ACTIVATED!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} **Your ${rig.name} is now DOMINATING the blockchain!**\n\n${variableReward ? `${variableReward}\n` : ''}${constants.ANIMATED_EMOJIS.MONEY_RAIN} **PASSIVE INCOME ACTIVATED** - Earn while you sleep!\n\n${fomoMessage}\n${socialProofMessage}`)
             .addFields(
                 { name: '⚡ Hash Rate', value: `${rig.hashRate.toFixed(2)} TH/s`, inline: true },
                 { name: '🔋 Energy Cost', value: `$${energyCost.toFixed(2)} VEX`, inline: true },
@@ -177,10 +186,14 @@ module.exports = {
                 { name: '🔥 Energy Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setFooter({ text: '💡 Pro Tip: Higher tier rigs = EXPONENTIAL rewards!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleStatus(interaction) {
@@ -190,7 +203,7 @@ module.exports = {
         if (!userData.mining || !userData.mining.isActive) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.MINING} Mining Status`)
-                .setDescription('You\'re not currently mining. Use `/mining start` to begin!')
+                .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} You're missing out on passive income! Start mining now with \`/mining start\` and watch your VEX grow while you sleep!`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
@@ -207,7 +220,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.MINING} Mining Status`)
-            .setDescription(`Your **${rig.name}** has been mining for ${this.formatDuration(miningTime)}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Your **${rig.name}** has been DOMINATING the blockchain f...`)
             .addFields(
                 { name: '💎 VEX Mined', value: `${minedAmount.toFixed(6)} VEX`, inline: true },
                 { name: '⚡ Hash Rate', value: `${mining.hashRate.toFixed(2)} TH/s`, inline: true },
@@ -234,7 +247,22 @@ module.exports = {
             
             const row = new ActionRowBuilder().addComponents(claimButton);
             
-            await interaction.reply({ embeds: [embed], components: [row] });
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const claimProgress = Math.min(minedAmount / constants.MINING.MIN_CLAIM_AMOUNT, 1);
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Ready to Claim: ${minedAmount.toFixed(6)} VEX`,
+                claimProgress,
+                constants.COLORS.SUCCESS
+            );
+
+            embed.setImage('attachment://progress.png');
+            
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: [row],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
         } else {
             embed.addFields({
                 name: '⏳ Keep Mining',
@@ -242,7 +270,21 @@ module.exports = {
                 inline: false
             });
             
-            await interaction.reply({ embeds: [embed] });
+            const CanvasRenderer = require('../../utils/canvasRenderer');
+            const canvasRenderer = new CanvasRenderer();
+            const miningProgress = Math.min(minedAmount / constants.MINING.MIN_CLAIM_AMOUNT, 1);
+            const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+                `Mining Progress: ${minedAmount.toFixed(6)} VEX`,
+                miningProgress,
+                constants.COLORS.PRIMARY
+            );
+
+            embed.setImage('attachment://progress.png');
+            
+            await interaction.reply({ 
+                embeds: [embed],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
         }
     },
     
@@ -269,7 +311,7 @@ module.exports = {
         if (minedAmount < constants.MINING.MIN_CLAIM_AMOUNT) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Amount`)
-                .setDescription(`You need at least ${constants.MINING.MIN_CLAIM_AMOUNT} VEX to claim. Currently mined: ${minedAmount.toFixed(6)} VEX`)
+                .setDescription(`You need at least ${constants.MINING.MIN_CLAIM_AMOUNT} VEX to claim. Currently mined: ${minedAmount.toFixed(2)} VEX`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -331,7 +373,21 @@ module.exports = {
         
         embed.setFooter({ text: 'Purchase mining rigs from /shop browse tools' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const upgradeProgress = 0.5; // Static progress for upgrade display
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Mining Rig Upgrade Options',
+            upgradeProgress,
+            constants.COLORS.PRIMARY
+        );
+
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePool(interaction) {

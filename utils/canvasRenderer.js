@@ -183,6 +183,135 @@ class CanvasRenderer {
         
         return `rgb(${Math.floor(r * (1 - factor))}, ${Math.floor(g * (1 - factor))}, ${Math.floor(b * (1 - factor))})`;
     }
+    
+    lightenColor(color, factor) {
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        return `rgb(${Math.min(255, Math.floor(r * (1 + factor)))}, ${Math.min(255, Math.floor(g * (1 + factor)))}, ${Math.min(255, Math.floor(b * (1 + factor)))})`;
+    }
+    
+    async createAnimatedProgressBar(title, progress, color = '#10B981', width = 600, height = 120) {
+        if (!this.initialized) await this.initialize();
+
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+
+        const bgGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/2);
+        bgGradient.addColorStop(0, '#2D1B69');
+        bgGradient.addColorStop(0.4, '#1a1a2e');
+        bgGradient.addColorStop(0.7, '#16213e');
+        bgGradient.addColorStop(1, '#0f1419');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(5, 5, width - 10, height - 10);
+        ctx.shadowBlur = 0;
+
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const size = Math.random() * 3 + 1;
+            ctx.globalAlpha = Math.random() * 0.5 + 0.3;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        const progressWidth = width * 0.8;
+        const progressHeight = 35;
+        const progressX = (width - progressWidth) / 2;
+        const progressY = (height - progressHeight) / 2 + 15;
+
+        const bgBarGradient = ctx.createLinearGradient(0, progressY, 0, progressY + progressHeight);
+        bgBarGradient.addColorStop(0, '#1a1a1a');
+        bgBarGradient.addColorStop(0.5, '#333333');
+        bgBarGradient.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = bgBarGradient;
+        ctx.fillRect(progressX, progressY, progressWidth, progressHeight);
+
+        if (progress > 0) {
+            const fillWidth = progressWidth * progress;
+            
+            const progressGradient = ctx.createLinearGradient(0, progressY, 0, progressY + progressHeight);
+            progressGradient.addColorStop(0, color);
+            progressGradient.addColorStop(0.3, '#FFFFFF');
+            progressGradient.addColorStop(0.7, color);
+            progressGradient.addColorStop(1, color);
+            ctx.fillStyle = progressGradient;
+            ctx.fillRect(progressX, progressY, fillWidth, progressHeight);
+
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 25;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillRect(progressX, progressY, fillWidth, progressHeight);
+            ctx.shadowBlur = 0;
+
+            const glowGradient = ctx.createRadialGradient(progressX + fillWidth, progressY + progressHeight/2, 0, progressX + fillWidth, progressY + progressHeight/2, 20);
+            glowGradient.addColorStop(0, color);
+            glowGradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = glowGradient;
+            ctx.fillRect(progressX + fillWidth - 20, progressY - 10, 40, progressHeight + 20);
+
+            for (let i = 0; i < 8; i++) {
+                const particleX = progressX + fillWidth - 30 + Math.random() * 25;
+                const particleY = progressY + 5 + Math.random() * (progressHeight - 10);
+                const particleSize = Math.random() * 3 + 1;
+                ctx.globalAlpha = Math.random() * 0.8 + 0.2;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(progressX, progressY, progressWidth, progressHeight);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(progressX + 1, progressY + 1, progressWidth - 2, progressHeight - 2);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 22px Arial';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.fillText(title, width / 2, 35);
+        ctx.shadowBlur = 0;
+
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = '#FFD700';
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.fillText(`${Math.round(progress * 100)}%`, width / 2, height - 20);
+        
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#CCCCCC';
+        ctx.shadowBlur = 2;
+        ctx.fillText('PROGRESS', width / 2, height - 5);
+        
+        ctx.shadowBlur = 0;
+
+        return canvas.toBuffer('image/png');
+    }
+
+    async createProgressBar(title, progress, color = '#10B981') {
+        return this.createAnimatedProgressBar(title, progress, color);
+    }
 }
 
 module.exports = CanvasRenderer;

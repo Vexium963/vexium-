@@ -51,6 +51,36 @@ module.exports = {
         REFERRAL: '🤝'
     },
 
+    ANIMATED_EMOJIS: {
+        LOADING: '⏳',
+        MONEY_RAIN: '💸',
+        FIRE: '🔥',
+        SPARKLES: '✨',
+        PROGRESS: '📊',
+        CELEBRATION: '🎉',
+        COIN_FLIP: '🪙',
+        DICE_ROLL: '🎲',
+        SLOT_MACHINE: '🎰',
+        LEVEL_UP: '⬆️',
+        ACHIEVEMENT: '🏆',
+        TYPING: '💬',
+        HEART_BEAT: '💓',
+        RAINBOW: '🌈',
+        EXPLOSION: '💥',
+        GLOW: '🌟',
+        PULSE: '📈',
+        SHINE: '✨',
+        WAVE: '🌊',
+        BOOST: '🚀',
+        ROCKET: '🚀',
+        CHART: '📊',
+        GIFT: '🎁',
+        WORK: '⚒️',
+        VEX: '💜',
+        DIAMOND: '💎',
+        STAR: '⭐'
+    },
+
     VEX_TOKEN: {
         SYMBOL: 'VEX',
         USD_PEGGED: true,

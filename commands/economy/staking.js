@@ -5,19 +5,19 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('staking')
-        .setDescription('Stake your VEX tokens to earn passive rewards')
+        .setDescription(`💸 Stake VEX tokens and build your passive wealth empire!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stake')
-                .setDescription('Stake VEX tokens for rewards')
+                .setDescription(`🔥 Lock in VEX tokens and watch your wealth multiply!`)
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Amount of VEX to stake')
+                        .setDescription(`✨ How much VEX will you invest in your future?`)
                         .setRequired(true)
                         .setMinValue(0.01))
                 .addStringOption(option =>
                     option.setName('pool')
-                        .setDescription('Staking pool to join')
+                        .setDescription(`🚀 Choose your wealth-building strategy!`)
                         .setRequired(false)
                         .addChoices(
                             { name: 'Flexible (3% APY)', value: 'flexible' },
@@ -28,23 +28,23 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('unstake')
-                .setDescription('Unstake your VEX tokens')
+                .setDescription(`💥 Withdraw your staked VEX and claim rewards!`)
                 .addStringOption(option =>
                     option.setName('stake_id')
-                        .setDescription('Stake ID to unstake')
+                        .setDescription(`⏳ Which stake are you ready to cash out?`)
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('rewards')
-                .setDescription('Claim your staking rewards'))
+                .setDescription(`🎉 Harvest your passive income rewards!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('portfolio')
-                .setDescription('View your staking portfolio'))
+                .setDescription(`📈 Monitor your wealth empire's performance!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('pools')
-                .setDescription('View available staking pools')),
+                .setDescription(`🌈 Explore all passive income opportunities!`)),
     
     cooldown: 3,
     
@@ -109,7 +109,7 @@ module.exports = {
         if (!pool) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Invalid Pool`)
-                .setDescription('Please select a valid staking pool.')
+                .setDescription(`⏳ Oops! Please choose from our premium staking pools. Your wealth empire awaits!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -118,7 +118,7 @@ module.exports = {
         if (amount < pool.minStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Stake Required`)
-                .setDescription(`The minimum stake for **${pool.name}** is $${pool.minStake.toFixed(2)} VEX.`)
+                .setDescription(`🔥 **${pool.name}** requires a minimum of $${pool.minStake.toFixed(2)} VEX to join the wealth bui...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -127,7 +127,7 @@ module.exports = {
         if (amount > userData.vexBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.`)
+                .setDescription(`⏳ You need $${amount.toFixed(2)} VEX but have $${userData.vexBalance.toFixed(2)}. Earn more with ...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -137,7 +137,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Staking Failed`)
-                .setDescription(result.reason)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} ${result.reason} Don't worry - every successful investor f...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -192,7 +192,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /staking rewards to claim your earnings!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const stakingProgress = Math.min(userData.stats.totalStaked / 10000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Staking Power: $${userData.stats.totalStaked.toFixed(2)} VEX`,
+            stakingProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleUnstake(interaction) {
@@ -264,7 +276,20 @@ module.exports = {
             .setColor(constants.COLORS.SUCCESS)
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const unstakeProgress = stake.endTime ? 
+            Math.min((Date.now() - stake.startTime) / (stake.endTime - stake.startTime), 1) : 1;
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Unstaking Complete: ${this.formatDuration(Date.now() - stake.startTime)}`,
+            unstakeProgress,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleRewards(interaction) {
@@ -332,7 +357,19 @@ module.exports = {
             .setFooter({ text: 'Keep staking to earn more rewards!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const rewardProgress = Math.min(totalRewards / 100, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Rewards Claimed: $${totalRewards.toFixed(4)} VEX`,
+            rewardProgress,
+            constants.COLORS.GOLD
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePortfolio(interaction) {
@@ -376,7 +413,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STAKING} Your Staking Portfolio`)
-            .setDescription(`Managing ${Object.keys(userData.stakes).length} active stake${Object.keys(userData.stakes).length > 1 ? 's' : ''}`)
+            .setDescription(`Managing ${Object.keys(userData.stakes).length} active stake${Object.keys(userData.stakes).length}`)
             .addFields(
                 { name: '💰 Total Staked', value: `$${totalStaked.toFixed(2)} VEX`, inline: true },
                 { name: '💎 Pending Rewards', value: `$${totalPendingRewards.toFixed(4)} VEX`, inline: true },
@@ -387,7 +424,19 @@ module.exports = {
             .setFooter({ text: 'Use /staking rewards to claim pending rewards' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const portfolioProgress = Math.min(totalStaked / 50000, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Portfolio Value: $${(totalStaked + totalPendingRewards).toFixed(2)} VEX`,
+            portfolioProgress,
+            constants.COLORS.PRIMARY
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handlePools(interaction) {
@@ -396,7 +445,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STAKING} 💎 PASSIVE WEALTH EMPIRE`)
-            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMessage}\n${socialProofMessage}`)
+            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMessage}`)
             .setColor(constants.COLORS.PRIMARY);
         
         for (const [poolId, pool] of Object.entries(constants.STAKING_POOLS)) {
@@ -415,7 +464,19 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /staking stake <amount> <pool> to start earning!' });
         
-        await interaction.reply({ embeds: [embed] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const poolProgress = 0.8; // Static progress for pool availability
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            'Staking Pools Available: 4 Active Pools',
+            poolProgress,
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     calculatePendingRewards(stake, pool) {

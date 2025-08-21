@@ -5,15 +5,15 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('dao')
-        .setDescription('Participate in VexiumVerse DAO governance and voting')
+        .setDescription(`✨ Shape VexiumVerse's future! Join the governance elite and earn exclusive democracy rewards!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('proposals')
-                .setDescription('View active governance proposals'))
+                .setDescription(`🔥 View urgent proposals that need YOUR voice! Democracy rewards await!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('vote')
-                .setDescription('Vote on a governance proposal')
+                .setDescription(`🚀 Cast your vote and shape the future! Elite voters get bonus rewards!`)
                 .addStringOption(option =>
                     option.setName('proposal_id')
                         .setDescription('ID of the proposal to vote on')
@@ -29,7 +29,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')
-                .setDescription('Create a new governance proposal (requires 1000 VEX stake)')
+                .setDescription(`🎉 Create proposals and lead the community! Early creators get 3x rewards!`)
                 .addStringOption(option =>
                     option.setName('title')
                         .setDescription('Proposal title')
@@ -52,7 +52,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('delegate')
-                .setDescription('Delegate your voting power to another user')
+                .setDescription(`💓 Delegate your power to trusted leaders! Earn passive governance rewards!`)
                 .addUserOption(option =>
                     option.setName('user')
                         .setDescription('User to delegate your voting power to')
@@ -60,7 +60,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('stats')
-                .setDescription('View DAO participation statistics')),
+                .setDescription(`📈 See your democracy impact! Track your governance achievements and rewards!`)),
     
     cooldown: 10,
     
@@ -96,7 +96,7 @@ module.exports = {
         if (isGovernanceNewbie && subcommand === 'proposals') {
             const welcomeEmbed = new EmbedBuilder()
                 .setTitle(`🎉 WELCOME TO DEMOCRACY!`)
-                .setDescription(`👑 **${interaction.user.username}, you're about to shape VexiumVerse's future!**\n\n🗳️ **Your voice matters!** Join the governance elite and earn exclusive rewards!\n⚡ **First-time voters get 2x influence** on their first proposal!`)
+                .setDescription(`🎉 **${interaction.user.username}, you're about to shape VexiumVerse's future!**\n\n🔥 **Your voi...`)
                 .addFields(
                     { name: '💎 Governance Benefits', value: '🏆 **Exclusive voter badges**\n💰 **Proposal rewards**\n👑 **Elite status recognition**\n🎁 **Democracy bonuses**', inline: true },
                     { name: '🔥 Active Now', value: `📊 **${Math.floor(Math.random() * 50) + 20} voters** participating\n⏰ **${Math.floor(Math.random() * 5) + 2} proposals** closing soon\n🚨 **Your input needed urgently!**`, inline: true }
@@ -111,7 +111,7 @@ module.exports = {
             await user.addVEX(surpriseBonus, 'governance_participation_bonus');
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`✨ DEMOCRACY BONUS!`)
-                .setDescription(`🎁 **Surprise reward for governance participation!**\n💰 **+$${surpriseBonus} VEX** for being an active citizen!`)
+                .setDescription(`🎉 **Surprise reward for governance participation!**\n💸 **+$${surpriseBonus} VEX** for being an ...`)
                 .setColor(constants.COLORS.SUCCESS);
             
             setTimeout(() => interaction.followUp({ embeds: [bonusEmbed], ephemeral: true }), 2000);
@@ -142,7 +142,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.DAO} 🚨 DEMOCRACY AWAITS YOUR VOICE!`)
-                .setDescription(`🏛️ **BE THE FIRST TO SHAPE THE FUTURE!**\n\n${fomoMessage}\n${socialProof}\n\n💎 **EARLY GOVERNANCE REWARDS** for first-time proposal creators!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.ROCKET} **BE THE FIRST TO SHAPE THE FUTURE!** Join the DAO...`)
                 .addFields(
                     { name: '🗳️ How to Participate', value: 'Use `/dao create` to submit proposals\nRequires 1000 VEX stake', inline: false },
                     { name: '💡 Proposal Ideas', value: '• Economy adjustments\n• New features\n• Community rules\n• Technical improvements', inline: false }
@@ -202,7 +202,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(voteButton, createButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Active Proposals: ${activeProposals.length}`,
+            Math.min(activeProposals.length / 10, 1.0),
+            constants.COLORS.VEX
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleVote(interaction) {
@@ -294,7 +306,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(viewButton, proposalsButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Vote Results: ${yesPercent}% Yes`,
+            yesPercent / 100,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleCreate(interaction) {
@@ -384,7 +408,19 @@ module.exports = {
         
         const row = new ActionRowBuilder().addComponents(shareButton, viewButton);
         
-        await interaction.reply({ embeds: [embed], components: [row] });
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Proposal Created Successfully`,
+            1.0,
+            constants.COLORS.SUCCESS
+        );
+        
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [row],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     calculateVotingPower(userData) {

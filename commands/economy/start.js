@@ -1,97 +1,202 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('start')
-        .setDescription('Begin your VexiumVerse journey and create your VEX wallet'),
+        .setDescription(`🚀 Begin your VexiumVerse empire journey - Earn real VEX tokens! 💸 Join 50,000+ players building...`),
     
     async execute(interaction) {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        if (userData.stats.commandsUsed > 0) {
-            const comebackMessage = constants.COMEBACK_MESSAGES[Math.floor(Math.random() * constants.COMEBACK_MESSAGES.length)];
-            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 100) + 25);
-            const milestoneBonus = userData.networth >= 100 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
-            
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.VEX} ${comebackMessage.split('!')[0]}!`)
-                .setDescription(`${comebackMessage}\n\n💎 **Your Empire Status:** $${userData.vexBalance.toFixed(2)} VEX${milestoneBonus ? `\n\n${milestoneBonus}` : ''}\n\n${socialProof}`)
-                .addFields(
-                    { name: '💰 VEX Balance', value: `$${userData.vexBalance.toFixed(2)}`, inline: true },
-                    { name: '🏦 Bank Balance', value: `$${userData.bankBalance.toFixed(2)}`, inline: true },
-                    { name: '📊 Net Worth', value: `$${userData.networth.toFixed(2)}`, inline: true },
-                    { name: '🎯 Level', value: userData.level.toString(), inline: true },
-                    { name: '🔥 Daily Streak', value: userData.dailyStreak.toString(), inline: true },
-                    { name: '⚒️ Job', value: userData.job || 'None', inline: true }
-                )
-                .setColor(constants.COLORS.VEX)
-                .setFooter({ text: 'Use /help to see all available commands' })
-                .setTimestamp();
-            
-            return interaction.reply({ embeds: [embed] });
+        if (interaction.client.immersionEngine) {
+            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'start', true);
         }
         
-        userData.stats.commandsUsed++;
-        await user.save(userData);
+        if (userData.onboardingCompleted) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.SUCCESS} Welcome Back, VEX Legend!`)
+                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.level} Entrepreneur\n• $${userData.vexBalance.toFixed(2)} VEX in your vault\n• Ready to expand your wealth!\n\n🚀 **Continue building your financial empire with these power moves:**`)
+                .addFields(
+                    { name: '💰 Daily Empire Growth', value: '`/daily` - Claim streak bonuses', inline: true },
+                    { name: '⚒️ Wealth Generation', value: '`/work` - Earn premium VEX', inline: true },
+                    { name: '🏪 Strategic Investments', value: '`/shop` - Power up your earnings', inline: true },
+                    { name: '📊 Empire Analytics', value: '`/wallet` - Track your dominance', inline: true },
+                    { name: '🏆 Social Proof', value: '`/leaderboard` - See your ranking', inline: true },
+                    { name: '💼 Advanced Trading', value: '`/trade` - Multiply your wealth', inline: true }
+                )
+                .setColor(constants.COLORS.VEX)
+                .setFooter({ text: 'The /start command is only for new empire builders!' })
+                .setTimestamp();
+
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
         
-        const welcomeBonus = Math.random() < 0.3 ? Math.floor(constants.VEX_TOKEN.STARTING_BALANCE * 0.5) : 0;
+        if (userData.stats.commandsUsed > 0 && !userData.onboardingCompleted) {
+            const comebackBonus = Math.random() < 0.4 ? Math.floor(Math.random() * 25) + 10 : 0;
+            if (comebackBonus > 0) {
+                await user.addVEX(comebackBonus, 'comeback_bonus');
+            }
+            
+            const progressBuffer = await this.createProgressBar(userData.level, userData.xp);
+            const netWorthTier = this.getWealthTier(userData.networth);
+            
+            const welcomeBackEmbed = new EmbedBuilder()
+                .setTitle(`🎉 ${netWorthTier.icon} WELCOME BACK, ${netWorthTier.title}!`)
+                .setDescription(`**${interaction.user.username}**, your empire awaits your return! 🎉\n\n` +
+                    `${comebackBonus > 0 ? `💸 **COMEBACK BONUS:** +$${comebackBonus} VEX!\n` : ''}` +
+                    `✨ **Empire Status:** $${userData.networth.toFixed(2)} VEX\n` +
+                    `🔥 **Daily Streak:** ${userData.dailyStreak} days ${userData.dailyStreak >= 7 ? '🏆' : ''}\n\n` +
+                    `⬆️ **Level ${userData.level}**\n\n` +
+                    `⚡ **Quick Actions:** ${Math.floor(Math.random() * 200) + 100} players online now!`)
+                .addFields(
+                    { name: '💰 Current Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true },
+                    { name: '🏦 Bank Savings', value: `$${userData.bankBalance.toFixed(2)} VEX`, inline: true },
+                    { name: '📈 Net Worth', value: `$${userData.networth.toFixed(2)} VEX`, inline: true }
+                )
+                .setColor(netWorthTier.color)
+                .setThumbnail(interaction.user.displayAvatarURL())
+                .setFooter({ text: 'Your empire grows stronger every day!' })
+                .setImage('attachment://progress.png')
+                .setTimestamp();
+            
+            const quickActions = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('quick_daily')
+                        .setLabel('Claim Daily')
+                        .setStyle(ButtonStyle.Success)
+                        .setEmoji('💰'),
+                    new ButtonBuilder()
+                        .setCustomId('quick_work')
+                        .setLabel('Work Now')
+                        .setStyle(ButtonStyle.Primary)
+                        .setEmoji('⚒️'),
+                    new ButtonBuilder()
+                        .setCustomId('quick_shop')
+                        .setLabel('Shop')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setEmoji('🛍️'),
+                    new ButtonBuilder()
+                        .setCustomId('quick_profile')
+                        .setLabel('Profile')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setEmoji('👤')
+                );
+            
+            return interaction.reply({ 
+                embeds: [welcomeBackEmbed], 
+                components: [quickActions],
+                files: [{ attachment: progressBuffer, name: 'progress.png' }]
+            });
+        }
+        
+        
+        userData.stats.commandsUsed++;
+        userData.onboardingStep = 1;
+        
+        const welcomeBonus = Math.random() < 0.4 ? Math.floor(constants.VEX_TOKEN.STARTING_BALANCE * 0.3) : 0;
         const totalStarting = constants.VEX_TOKEN.STARTING_BALANCE + welcomeBonus;
         
-        const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
-        const socialProofMessage = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 150) + 50);
-        const variableReward = Math.random() < 0.25 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 5 + 1).toFixed(2)) : null;
+        await user.addVEX(totalStarting, 'starting_bonus');
+        await user.save(userData);
         
-        const welcomeEmbed = new EmbedBuilder()
-            .setTitle(`🎉 WELCOME TO YOUR EMPIRE!`)
-            .setDescription(`👑 **${interaction.user.username}, you're about to become LEGENDARY!**\n\n💎 **Starting Fortune:** $${totalStarting.toFixed(2)} VEX${welcomeBonus > 0 ? `\n✨ **LUCKY BONUS:** +$${welcomeBonus} VEX!` : ''}${variableReward ? `\n${variableReward}` : ''}\n\n🚀 **Your journey to wealth and power starts NOW!**\n\n` +
-                `${constants.EMOJIS.VEX} **VEX Token**: 1 VEX = $1 USD (REAL VALUE!)\n` +
-                `${constants.EMOJIS.MONEY} **Unlimited Earning**: Work, invest, dominate skill-based games\n` +
-                `${constants.EMOJIS.BANK} **Compound Interest**: 5% daily on savings!\n` +
-                `${constants.EMOJIS.CHART} **Investment Empire**: Crypto, stocks, real estate\n` +
-                `${constants.EMOJIS.TROPHY} **Achievement Rewards**: Hidden bonuses worth 1000s!\n` +
-                `${constants.EMOJIS.PREMIUM} **VIP Status**: Reduce taxes, unlock exclusive features\n\n` +
-                `${fomoMessage}\n${socialProofMessage}`)
+        const progressBuffer = await this.createProgressBar(1, 0, 5);
+        
+        const onboardingEmbed = new EmbedBuilder()
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Welcome to VexiumVerse Empire! ${constants.ANIMATED_EMOJIS.ROCKET}`)
+            .setDescription(`
+**🎯 CONGRATULATIONS!** You've just joined the most exclusive financial empire on Discord!
+
+${constants.ANIMATED_EMOJIS.FIRE} **BREAKING:** You're among the first 1,000 empire builders to receive **DOUBLE STARTING VEX!**
+
+${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Empire Status:**
+• **Starting Capital:** $${totalStarting.toFixed(2)} VEX (+ bonus pending!)
+• **Entrepreneur Level:** ${userData.level}
+• **Empire ID:** #${userData.level.toString().padStart(4, '0')}
+
+${constants.ANIMATED_EMOJIS.SPARKLES} **LIVE STATS:** ${Math.floor(Math.random() * 500) + 200} active builders earning **real money** right now!
+
+${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom wallet to unlock premium earning potential!`)
             .addFields(
                 { 
-                    name: '🎯 YOUR FIRST MISSIONS (Complete for MASSIVE rewards!)', 
-                    value: '🔥 **URGENT:** `/daily` - Claim FREE VEX (expires in 24h!)\n💪 **POWER UP:** `/work` - Start earning immediately!\n🛍️ **SHOP:** `/shop` - Buy tools to multiply earnings!\n📊 **COMPETE:** `/leaderboard` - See who you need to beat!', 
+                    name: `${constants.ANIMATED_EMOJIS.ROCKET} Your Empire Blueprint`, 
+                    value: `**Phase 1:** ${constants.ANIMATED_EMOJIS.VEX} Link Phantom Wallet (PRIORITY)\n**Phase 2:** ${constants.ANIMATED_EMOJIS.GIFT} Claim Daily Empire Rewards\n**Phase 3:** ${constants.ANIMATED_EMOJIS.WORK} Start Your First Job\n**Phase 4:** ${constants.ANIMATED_EMOJIS.CHART} Explore Advanced Features`, 
                     inline: false 
                 },
                 { 
-                    name: '💎 INSIDER SECRETS (Most players don\'t know this!)', 
-                    value: '🏦 **COMPOUND:** Bank VEX for 5% daily interest!\n🏆 **ACHIEVEMENTS:** Hidden bonuses worth 1000s of VEX!\n🤝 **NETWORK:** Trade with whales for exclusive deals!\n⚡ **TIMING:** Some rewards are 10x higher at certain times!', 
-                    inline: false 
-                },
-                { 
-                    name: '🚨 LIMITED TIME OFFERS', 
-                    value: '⏰ **NEWBIE PROTECTION:** 2x earnings for first 7 days!\n🎁 **REFERRAL BONUS:** Invite friends for 500 VEX each!\n🔥 **STREAK MULTIPLIER:** Daily rewards grow exponentially!\n👑 **VIP STATUS:** Early access to exclusive features!', 
+                    name: `${constants.ANIMATED_EMOJIS.FIRE} Why VexiumVerse Dominates`, 
+                    value: `• **Real USD-Pegged VEX Tokens** ${constants.ANIMATED_EMOJIS.MONEY_RAIN}\n• **Multiple Income Streams** ${constants.ANIMATED_EMOJIS.PROGRESS}\n• **Social Trading Empire** ${constants.ANIMATED_EMOJIS.HEART_BEAT}\n• **Premium Wallet Integration** ${constants.ANIMATED_EMOJIS.DIAMOND}`, 
                     inline: false 
                 }
             )
             .setColor(constants.COLORS.VEX)
             .setThumbnail(interaction.user.displayAvatarURL())
-            .setFooter({ text: 'VexiumVerse - Where Legends Are Born' })
+            .setImage('attachment://progress.png')
+            .setFooter({ text: '⚡ Your empire awaits! Click below to begin your wealth journey!' })
             .setTimestamp();
         
-        await interaction.reply({ embeds: [welcomeEmbed] });
+        const onboardingButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('onboarding_phantom')
+                    .setLabel(`${constants.ANIMATED_EMOJIS.VEX} Link Phantom Wallet`)
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('quick_daily')
+                    .setLabel(`${constants.ANIMATED_EMOJIS.GIFT} Daily Rewards`)
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('quick_work')
+                    .setLabel(`${constants.ANIMATED_EMOJIS.WORK} Start Working`)
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('onboarding_skip')
+                    .setLabel('⏭️ Skip Tutorial')
+                    .setStyle(ButtonStyle.Danger)
+            );
+        
+        await interaction.reply({ 
+            embeds: [onboardingEmbed], 
+            components: [onboardingButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
         
         setTimeout(async () => {
-            const helpEmbed = new EmbedBuilder()
-                .setTitle(`🚀 MISSION CONTROL - Your Path to Wealth!`)
-                .setDescription('🎯 **COMPLETE THESE NOW FOR INSTANT REWARDS:**\n\n⚡ **Priority Actions** (Do these first!)')
-                .addFields(
-                    { name: '🔥 IMMEDIATE ACTIONS (Next 5 minutes!)', value: '`/daily` - **FREE $100+ VEX!**\n`/work` - **Start earning NOW!**\n`/profile` - **Customize your legend!**\n`/shop` - **Buy power multipliers!**', inline: false },
-                    { name: '💎 WEALTH BUILDING (Next 30 minutes!)', value: '`/deposit` - **5% daily interest!**\n`/invest` - **Multiply your VEX!**\n`/achievements` - **Hidden bonuses!**\n`/leaderboard` - **Beat the competition!**', inline: false },
-                    { name: '🏆 DOMINATION MODE (Ongoing!)', value: '`/entertainment` - **Skill-based wins!**\n`/trade` - **Player marketplace!**\n`/guild` - **Join elite teams!**\n`/tournaments` - **Compete for glory!**', inline: false },
-                    { name: '⚠️ CRITICAL REMINDERS', value: '🔥 **Daily streak = EXPONENTIAL rewards!**\n💰 **Banking = Compound interest magic!**\n🎯 **Achievements = Secret wealth unlocks!**\n👑 **Consistency = Legendary status!**', inline: false }
-                )
-                .setColor(constants.COLORS.VEX)
-                .setFooter({ text: '⏰ Your empire awaits! Every second counts!' });
+            const motivationEmbed = new EmbedBuilder()
+                .setTitle(`✨ PRO TIP: The First 24 Hours`)
+                .setDescription(`**${interaction.user.username}**, players who complete the tutorial in their first session earn **3x more VEX** in their first week!\n\n` +
+                    `🔥 **Current online:** ${Math.floor(Math.random() * 200) + 150} players\n` +
+                    `📈 **Today's top earner:** $${(Math.random() * 500 + 200).toFixed(2)} VEX\n` +
+                    `🚀 **Your potential:** Unlimited\n\n` +
+                    `**Ready to connect your wallet and secure your fortune?**`)
+                .setColor(constants.COLORS.GOLD)
+                .setFooter({ text: `⏰ Tutorial bonus expires in 23 hours!` });
             
-            await interaction.followUp({ embeds: [helpEmbed], ephemeral: true });
-        }, 2000);
+            await interaction.followUp({ embeds: [motivationEmbed], ephemeral: true });
+        }, 3000);
     },
+    
+    async createProgressBar(currentStep, currentProgress, totalSteps) {
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progress = (currentStep - 1 + currentProgress) / totalSteps;
+        
+        return await canvasRenderer.createAnimatedProgressBar(
+            `Tutorial Progress: Step ${currentStep} of ${totalSteps}`,
+            progress,
+            '#8B5CF6'
+        );
+    },
+    
+    getWealthTier(networth) {
+        if (networth >= 10000) return { title: 'LEGEND', icon: '👑', color: '#FFD700' };
+        if (networth >= 5000) return { title: 'MOGUL', icon: '💎', color: '#9932CC' };
+        if (networth >= 1000) return { title: 'ENTREPRENEUR', icon: '🚀', color: '#FF6347' };
+        if (networth >= 500) return { title: 'INVESTOR', icon: '📈', color: '#32CD32' };
+        if (networth >= 100) return { title: 'TRADER', icon: '💰', color: '#1E90FF' };
+        return { title: 'NEWCOMER', icon: '🌟', color: '#FFA500' };
+    }
 };

@@ -5,14 +5,14 @@ const constants = require('../../utils/constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('contracts')
-        .setDescription('Manage smart contracts and agreements')
+        .setDescription(`✨ Create elite smart contracts and secure high-value deals! 🔥 Join the VEX trading elite!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('create')
-                .setDescription('Create a new smart contract')
+                .setDescription(`🚀 Create a new smart contract and join the elite traders!`)
                 .addStringOption(option =>
                     option.setName('type')
-                        .setDescription('Type of contract')
+                        .setDescription(`📈 Choose your contract type - each unlocks different rewards!`)
                         .setRequired(true)
                         .addChoices(
                             { name: 'Escrow', value: 'escrow' },
@@ -21,24 +21,24 @@ module.exports = {
                         ))
                 .addUserOption(option =>
                     option.setName('counterparty')
-                        .setDescription('Other party in the contract')
+                        .setDescription(`🤝 Select your trading partner - build your network!`)
                         .setRequired(true))
                 .addNumberOption(option =>
                     option.setName('amount')
-                        .setDescription('Contract amount in VEX')
+                        .setDescription(`💸 Contract value in VEX - higher amounts = bigger rewards!`)
                         .setRequired(true)
                         .setMinValue(1)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('View your active contracts'))
+                .setDescription(`📈 View your contract empire and track your deals!`))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('execute')
-                .setDescription('Execute a contract')
+                .setDescription(`🎉 Execute and complete your contracts for instant rewards!`)
                 .addStringOption(option =>
                     option.setName('contract_id')
-                        .setDescription('Contract ID to execute')
+                        .setDescription(`⏳ Enter contract ID to claim your rewards instantly!`)
                         .setRequired(true))),
     
     cooldown: 30,
@@ -95,7 +95,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${fomoMessage}\n💡 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!`)
+                .setDescription(`🔥 **URGENT:** You need $${amount.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}!\n\n${fomoMessage}\n\n🚀 **Quick Fix:** Use \`/work\` or \`/daily\` to earn more VEX!\n📈 **${Math.floor(Math.random() * 50) + 25} players** are creating contracts right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -145,8 +145,17 @@ module.exports = {
         
         description += `\n\n${socialProofMessage}`;
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const contractProgress = Math.min(contractsCreated / 50, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Contract Mastery: ${contractsCreated} contracts created`,
+            contractProgress,
+            constants.COLORS.VEX
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(title)
+            .setTitle(`✨ ${title.replace(/🎉|👑|💎|📋/, '')}`)
             .setDescription(description)
             .addFields(
                 { name: '🆔 Contract ID', value: contractId, inline: true },
@@ -157,9 +166,13 @@ module.exports = {
                 { name: '📜 Terms', value: contract.terms, inline: false }
             )
             .setColor(isContractExpert ? constants.COLORS.VEX : isHighValueDeal ? constants.COLORS.GOLD : constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleList(interaction, user, userData) {
@@ -169,15 +182,24 @@ module.exports = {
         if (activeContracts.length === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.INFO} No Active Contracts`)
-                .setDescription('You have no active contracts.')
+                .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} **Ready to start your contract empire?**\n\n${constants.ANIMATED_EMOJIS.ROCKET} Create your first contract with \`/contracts create\`!\n${constants.ANIMATED_EMOJIS.FIRE} **${Math.floor(Math.random() * 100) + 50} players** have active contracts earning passive income!`)
                 .setColor(constants.COLORS.INFO);
             
             return interaction.reply({ embeds: [embed] });
         }
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const totalValue = activeContracts.reduce((sum, c) => sum + c.amount, 0);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Active Contracts Value: $${totalValue.toFixed(2)} VEX`,
+            Math.min(totalValue / 10000, 1),
+            constants.COLORS.PRIMARY
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.CONTRACT} Your Contracts`)
-            .setDescription(`You have ${activeContracts.length} active contract(s)`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} Your Contracts`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} **CONTRACT EMPIRE:** ${activeContracts.length} active deal(s) w...`)
             .addFields(
                 activeContracts.slice(0, 10).map(contract => ({
                     name: `📋 ${contract.id}`,
@@ -186,9 +208,13 @@ module.exports = {
                 }))
             )
             .setColor(constants.COLORS.PRIMARY)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleExecute(interaction, user, userData) {
@@ -224,18 +250,46 @@ module.exports = {
         
         await user.save(userData);
         
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const completionProgress = Math.min((userData.stats.contractsCompleted || 0) / 25, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Contracts Completed: ${userData.stats.contractsCompleted || 0}`,
+            completionProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Contract Executed`)
-            .setDescription(`✅ Contract ${contractId} has been successfully executed!`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Contract Executed Successfully!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} **DEAL COMPLETED!** Contract ${contractId} executed flawl...`)
             .addFields(
                 { name: '💰 Amount Released', value: `$${contract.amount.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Status', value: 'Completed', inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
+
+        const actionButtons = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('quick_daily')
+                    .setLabel('Claim Daily')
+                    .setStyle(ButtonStyle.Success)
+                    .setEmoji('💰'),
+                new ButtonBuilder()
+                    .setCustomId('quick_work')
+                    .setLabel('Work Now')
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji('⚒️')
+            );
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed], 
+            components: [actionButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     generateContractId() {

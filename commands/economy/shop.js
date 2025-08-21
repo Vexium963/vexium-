@@ -6,11 +6,11 @@ const CanvasRenderer = require('../../utils/canvasRenderer');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('shop')
-        .setDescription('Browse and purchase items, tools, and cosmetics')
+        .setDescription(`✨ Browse the ultimate VexiumVerse marketplace - Limited deals expire soon!`)
         .addSubcommand(subcommand =>
             subcommand
                 .setName('browse')
-                .setDescription('Browse shop categories')
+                .setDescription(`🔥 Browse exclusive shop categories with flash sales!`)
                 .addStringOption(option =>
                     option.setName('category')
                         .setDescription('Shop category to browse')
@@ -24,7 +24,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Purchase an item from the shop')
+                .setDescription(`💸 Purchase items before they sell out - Limited stock!`)
                 .addStringOption(option =>
                     option.setName('item')
                         .setDescription('Item ID to purchase')
@@ -38,7 +38,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('inventory')
-                .setDescription('View your inventory')),
+                .setDescription(`🎉 View your valuable collection and rare items!`)),
     
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -59,7 +59,7 @@ module.exports = {
         const category = interaction.options.getString('category');
         
         if (!category) {
-            return this.showCategories(interaction);
+            return this.showCategories(interaction, userData);
         }
         
         const items = constants.SHOP_ITEMS[category.toUpperCase()];
@@ -67,7 +67,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Category Not Found`)
-                .setDescription(`Invalid shop category.\n\n${fomoMessage}\n📊 **${Math.floor(Math.random() * 50) + 20} players** are browsing the shop right now!`)
+                .setDescription(`⏳ Invalid shop category.\n\n${fomoMessage}\n🔥 **${Math.floor(Math.random() * 50) + 20} players**...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -108,7 +108,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 10);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Item Not Found`)
-                .setDescription(`The item **${itemId}** doesn't exist in the shop.\n\n${socialProof}`)
+                .setDescription(`⏳ The item **${itemId}** doesn't exist in the shop.\n\n${socialProof}\n\n✨ **Browse trending item...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -120,7 +120,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${nearMiss}\n💡 **Try /work or /daily to earn more VEX!**`)
+                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -130,7 +130,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Supply`)
-                .setDescription(`Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n🔥 **${Math.floor(Math.random() * 15) + 5} players** are trying to buy this item!`)
+                .setDescription(`🔥 Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n⏳ **${Math.floor(Math.random() * 15) + 5} people** are viewing this item right now!`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -141,7 +141,7 @@ module.exports = {
             const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 10);
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(`${result.reason}\n\n${socialProof}`)
+                .setDescription(`⏳ ${result.reason}\n\n${socialProof}\n\n✨ **Don't give up - try again!**`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -159,26 +159,38 @@ module.exports = {
         userData.stats.commandsUsed++;
         await user.save(userData);
         
+        const canvasRenderer = new CanvasRenderer();
+        const purchaseProgress = Math.min((userData.stats.itemsPurchased || 0) / 50, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Shopping Spree: ${userData.stats.itemsPurchased || 0}/50 items`,
+            purchaseProgress,
+            constants.COLORS.SUCCESS
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Purchase Successful!`)
-            .setDescription(`You bought **${quantity}x ${item.name}**!`)
+            .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Purchase Successful!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} Purchase successful!`)
             .addFields(
                 { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
                 { name: '🔥 Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💼 New Balance', value: `$${userData.vexBalance.toFixed(2)} VEX`, inline: true }
             )
             .setColor(constants.COLORS.SUCCESS)
+            .setImage('attachment://progress.png')
             .setTimestamp();
         
         if (item.effect) {
             embed.addFields({
-                name: '✨ Item Effect',
+                name: `${constants.ANIMATED_EMOJIS.GLOW} Item Effect`,
                 value: item.description,
                 inline: false
             });
         }
         
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
     async handleInventory(interaction) {
@@ -188,10 +200,27 @@ module.exports = {
         if (!userData.inventory || Object.keys(userData.inventory).length === 0) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SHOP} Your Inventory`)
-                .setDescription('Your inventory is empty. Visit `/shop browse` to purchase items!')
+                .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} Your inventory is empty. Visit \`/shop browse\` to discover amazing items!\n\n${constants.ANIMATED_EMOJIS.FIRE} **Flash sales happening now!**`)
                 .setColor(constants.COLORS.INFO);
             
-            return interaction.reply({ embeds: [embed] });
+            const quickActions = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('shop_browse')
+                        .setLabel('Browse Shop')
+                        .setStyle(ButtonStyle.Primary)
+                        .setEmoji('🛍️'),
+                    new ButtonBuilder()
+                        .setCustomId('quick_daily')
+                        .setLabel('Earn VEX')
+                        .setStyle(ButtonStyle.Success)
+                        .setEmoji('💰')
+                );
+
+            return interaction.reply({ 
+                embeds: [embed], 
+                components: [quickActions] 
+            });
         }
         
         const embed = new EmbedBuilder()
@@ -228,21 +257,46 @@ module.exports = {
         
         embed.setFooter({ text: 'Use /use <item> to consume items' });
         
-        await interaction.reply({ embeds: [embed] });
+        const canvasRenderer = new CanvasRenderer();
+        const inventoryProgress = Math.min(Object.keys(userData.inventory).length / 20, 1);
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Inventory: ${Object.keys(userData.inventory).length}/20 items`,
+            inventoryProgress,
+            constants.COLORS.PRIMARY
+        );
+        
+        embed.setImage('attachment://progress.png');
+        
+        await interaction.reply({ 
+            embeds: [embed],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
+        });
     },
     
-    async showCategories(interaction) {
+    async showCategories(interaction, userData) {
+        const CanvasRenderer = require('../../utils/canvasRenderer');
+        const canvasRenderer = new CanvasRenderer();
+        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
+            `Shopping Power: ${userData.vexBalance.toFixed(0)} VEX Available`,
+            Math.min(userData.vexBalance / 1000, 1),
+            constants.COLORS.VEX
+        );
+
         const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SHOP} VexiumVerse Shop`)
-            .setDescription('Welcome to the VexiumVerse marketplace! Choose a category to browse.')
+            .setTitle(`${constants.ANIMATED_EMOJIS.SPARKLES} VexiumVerse Marketplace`)
+            .setDescription(`**${interaction.user.username}**, welcome to the ultimate shopping experience!\n\n` +
+                `${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n` +
+                `${constants.ANIMATED_EMOJIS.CELEBRATION} **Items Available:** ${Object.keys(constants.SHOP_ITEMS).length}\n` +
+                `${constants.ANIMATED_EMOJIS.PULSE} **${Math.floor(Math.random() * 50) + 20} players** shopping now!\n\n` +
+                `**Categories:**`)
             .addFields(
                 {
-                    name: '🔧 Tools',
+                    name: '🔧 Tools & Equipment',
                     value: 'Permanent upgrades that improve your earning potential',
                     inline: true
                 },
                 {
-                    name: '⚡ Consumables',
+                    name: '⚡ Energy & Boosts',
                     value: 'Temporary boosts and instant effects',
                     inline: true
                 },
@@ -257,8 +311,9 @@ module.exports = {
                     inline: true
                 }
             )
-            .setColor(constants.COLORS.PRIMARY)
-            .setFooter({ text: 'Select a category below to browse items' })
+            .setColor(constants.COLORS.VEX)
+            .setImage('attachment://progress.png')
+            .setFooter({ text: 'Use the dropdown below to browse categories!' })
             .setTimestamp();
 
         const categorySelect = new StringSelectMenuBuilder()
@@ -314,7 +369,8 @@ module.exports = {
         
         await interaction.reply({ 
             embeds: [embed], 
-            components: [selectRow, quickActionButtons] 
+            components: [selectRow, quickActionButtons],
+            files: [{ attachment: progressBuffer, name: 'progress.png' }]
         });
     },
     
@@ -346,7 +402,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SHOP} VexiumVerse Marketplace - ${category.charAt(0).toUpperCase() + category.slice(1)}`)
-            .setDescription(`💰 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** Don't miss out!`)
+            .setDescription(`💰 **Your Balance:** $${userData.vexBalance.toFixed(2)} VEX\n🔥 **Limited Time Offers Active!** D...`)
             .setColor(constants.COLORS.VEX)
             .setTimestamp();
 
