@@ -257,9 +257,9 @@ module.exports = {
         const netAmount = claimAmount - taxAmount;
         
         await user.addVEX(netAmount, 'referral_rewards');
-        Economics.updateVEXMarket('reward', netAmount);
+        Economics.apply({ event: 'reward', amountVEX: netAmount, userId: interaction.user.id, meta: { command: 'referral' } });
         await user.burnVEX(taxAmount, 'referral_tax');
-        Economics.updateVEXMarket('burn', taxAmount);
+        Economics.apply({ event: 'burn', amountVEX: taxAmount, userId: interaction.user.id, meta: { command: 'referral' } });
         
         referralStats.totalEarned += claimAmount;
         referralStats.pendingRewards = 0;
@@ -368,7 +368,7 @@ module.exports = {
         const referrerData = await referrer.load();
         
         await user.addVEX(constants.REFERRAL.REFEREE_BONUS, 'referral_bonus');
-        Economics.updateVEXMarket('reward', constants.REFERRAL.REFEREE_BONUS);
+        Economics.apply({ event: 'reward', amountVEX: constants.REFERRAL.REFEREE_BONUS, userId: interaction.user.id, meta: { command: 'referral' } });
         
         if (!userData.referral) {
             userData.referral = {

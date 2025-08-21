@@ -37,16 +37,25 @@ module.exports = {
         if (!hasLinkedWallet) {
             const embed = new EmbedBuilder()
                 .setTitle('🚀 Welcome to VexiumVerse!')
-                .setDescription('**Get started by linking your crypto wallet to unlock all features!**\n\n🔗 Click the button below to create a private ticket for secure wallet linking.')
+                .setDescription('**Start your 3-step journey to VEX wealth!**\n\n**Step 1:** Link your crypto wallet (secure & private)\n**Step 2:** Claim your starter bonus (100 VEX)\n**Step 3:** Complete your first work session\n\n🔗 Click below to begin your empire!')
+                .addFields(
+                    { name: '💰 Starter Rewards', value: '• 100 VEX welcome bonus\n• Premium trial (7 days)\n• Exclusive beginner achievements', inline: true },
+                    { name: '🎯 Quick Start Guide', value: '• Link wallet → Get bonus → Work → Bank deposit\n• Takes less than 2 minutes!', inline: true }
+                )
                 .setColor(constants.COLORS.PRIMARY)
+                .setFooter({ text: 'VEX is a simulated token inside Discord. No real-world value.' })
                 .setTimestamp();
 
             const linkWalletButton = new ActionRowBuilder()
                 .addComponents(
                     new ButtonBuilder()
+                        .setCustomId('start_tutorial_step1')
+                        .setLabel('🚀 Start 3-Step Tutorial')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
                         .setCustomId('linkwallet_start')
-                        .setLabel('🔗 Link Wallet')
-                        .setStyle(ButtonStyle.Primary)
+                        .setLabel('🔗 Skip to Wallet Link')
+                        .setStyle(ButtonStyle.Secondary)
                 );
 
             return interaction.reply({ embeds: [embed], components: [linkWalletButton] });
@@ -75,7 +84,7 @@ module.exports = {
             const comebackBonus = Math.random() < 0.4 ? Math.floor(Math.random() * 25) + 10 : 0;
             if (comebackBonus > 0) {
                 await user.addVEX(comebackBonus, 'comeback_bonus');
-                Economics.updateVEXMarket('reward', comebackBonus);
+                Economics.apply({ event: 'reward', amountVEX: comebackBonus, userId: interaction.user.id, meta: { command: 'start' } });
             }
             
             const progressBuffer = await this.createProgressBar(userData.level, userData.xp);
@@ -139,7 +148,7 @@ module.exports = {
         const totalStarting = constants.VEX_TOKEN.STARTING_BALANCE + welcomeBonus;
         
         await user.addVEX(totalStarting, 'starting_bonus');
-        Economics.updateVEXMarket('reward', totalStarting);
+        Economics.apply({ event: 'reward', amountVEX: totalStarting, userId: interaction.user.id, meta: { command: 'start' } });
         await user.save(userData);
         
         const progressBuffer = await this.createProgressBar(1, 0, 5);
@@ -272,7 +281,7 @@ ${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom w
             userData.onboardingCompleted = true;
             const completionReward = Economics.getPeggedVEXPrice(50);
             await user.addVEX(completionReward, 'onboarding_completion');
-            Economics.updateVEXMarket('reward', completionReward);
+            Economics.apply({ event: 'reward', amountVEX: completionReward, userId: interaction.user.id, meta: { command: 'onboarding' } });
             await user.save(userData);
 
             const completionEmbed = new EmbedBuilder()

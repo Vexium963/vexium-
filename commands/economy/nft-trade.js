@@ -87,7 +87,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.15 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'nft_trading_bonus');
-            Economics.updateVEXMarket('buy', surpriseBonus);
+            Economics.apply({ event: 'buy', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'nft-trade' } });
             userData.stats.surpriseBonuses = (userData.stats.surpriseBonuses || 0) + 1;
         }
         
@@ -98,7 +98,7 @@ module.exports = {
         if (milestoneRewards.length > 0) {
             for (const reward of milestoneRewards) {
                 await user.addVEX(reward.amount, 'nft_milestone_reward');
-                Economics.updateVEXMarket('buy', reward.amount);
+                Economics.apply({ event: 'buy', amountVEX: reward.amount, userId: interaction.user.id, meta: { command: 'nft-trade' } });
                 userData.achievements = userData.achievements || [];
                 if (!userData.achievements.includes(reward.achievementId)) {
                     userData.achievements.push(reward.achievementId);
@@ -298,9 +298,9 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', totalCost, interaction.user.id);
+        Economics.apply({ event: 'buy', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'nft-trade' } });
         await seller.addVEX(listing.price, 'nft_sale');
-        Economics.updateVEXMarket('buy', listing.price);
+        Economics.apply({ event: 'buy', amountVEX: listing.price, userId: listing.sellerId, meta: { command: 'nft-trade' } });
         await user.burnVEX(tradingFee, 'nft_trading_fee');
         
         sellerData.nfts = sellerData.nfts.filter(n => n.id !== listing.nftId);

@@ -71,7 +71,7 @@ module.exports = {
         const roundedReward = Math.round(totalReward * 100) / 100;
         
         await user.addVEX(roundedReward, 'daily_reward');
-        Economics.updateVEXMarket('daily', roundedReward);
+        Economics.apply({ event: 'daily', amountVEX: roundedReward, userId: interaction.user.id, meta: { command: 'daily' } });
         
         const xpGained = 25 + (userData.dailyStreak * 2);
         const xpResult = await user.addXP(xpGained, 'daily');
@@ -189,7 +189,7 @@ module.exports = {
         if (userData.dailyStreak % 7 === 0) {
             const weeklyBonus = userData.dailyStreak * 0.50;
             await user.addVEX(weeklyBonus, 'weekly_bonus');
-            Economics.updateVEXMarket('daily', weeklyBonus);
+            Economics.apply({ event: 'daily', amountVEX: weeklyBonus, userId: interaction.user.id, meta: { command: 'daily' } });
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.STAR} Weekly Streak Bonus!`)

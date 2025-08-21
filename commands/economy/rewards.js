@@ -89,7 +89,7 @@ module.exports = {
         const totalValue = availableRewards.reduce((sum, reward) => sum + reward.value, 0);
         
         await user.addVEX(totalValue, 'rewards_claim');
-        Economics.updateVEXMarket('reward', totalValue);
+        Economics.apply({ event: 'reward', amountVEX: totalValue, userId: interaction.user.id, meta: { command: 'rewards' } });
         
         userData.stats.rewardsClaimed = (userData.stats.rewardsClaimed || 0) + availableRewards.length;
         userData.stats.totalRewardsValue = (userData.stats.totalRewardsValue || 0) + totalValue;

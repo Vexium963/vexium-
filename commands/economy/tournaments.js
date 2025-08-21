@@ -92,7 +92,7 @@ module.exports = {
         const engagementBonus = Math.random() < 0.2 ? Math.floor(Math.random() * 50) + 25 : 0;
         if (engagementBonus > 0) {
             await user.addVEX(engagementBonus, 'tournament_engagement_bonus');
-            Economics.updateVEXMarket('reward', engagementBonus);
+            Economics.apply({ event: 'reward', amountVEX: engagementBonus, userId: interaction.user.id, meta: { command: 'tournaments' } });
             userData.stats.surpriseBonusesReceived = (userData.stats.surpriseBonusesReceived || 0) + 1;
         }
         
@@ -279,7 +279,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', tournament.entryFee);
+        Economics.apply({ event: 'buy', amountVEX: tournament.entryFee, userId: interaction.user.id, meta: { command: 'tournaments' } });
         
         tournament.participants.push(interaction.user.id);
         tournament.playerData[interaction.user.id] = {

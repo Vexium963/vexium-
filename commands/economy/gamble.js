@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRow
 const User = require('../../database/models/User');
 const constants = require('../../utils/constants');
 const Economics = require('../../utils/economics');
+const DailyCapsManager = require('../../utils/DailyCapsManager');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -197,6 +198,17 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        const capCheck = await DailyCapsManager.checkDailyCap(interaction.user.id, 'ENTERTAINMENT_GAMES', 1);
+        if (!capCheck.allowed) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Daily Limit Reached`)
+                .setDescription(`You've reached your daily entertainment game limit (${capCheck.cap} games).\n\n⏰ Resets: <t:${Math.floor(capCheck.resetTime.getTime() / 1000)}:R>\n💡 This helps promote responsible gaming habits.`)
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'VEX is a simulated token inside Discord. No real-world value.' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
         const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
@@ -207,7 +219,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const symbols = Economics.generateSlotsResult();
         const payout = Economics.calculateEntertainmentPayout('slots', amount, symbols);
@@ -217,7 +229,7 @@ module.exports = {
         
         if (payout > 0) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
@@ -304,6 +316,17 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        const capCheck = await DailyCapsManager.checkDailyCap(interaction.user.id, 'ENTERTAINMENT_GAMES', 1);
+        if (!capCheck.allowed) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Daily Limit Reached`)
+                .setDescription(`You've reached your daily entertainment game limit (${capCheck.cap} games).\n\n⏰ Resets: <t:${Math.floor(capCheck.resetTime.getTime() / 1000)}:R>\n💡 This helps promote responsible gaming habits.`)
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'VEX is a simulated token inside Discord. No real-world value.' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
         const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
@@ -314,7 +337,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const coinResult = Economics.flipCoin();
         const won = choice === coinResult;
@@ -326,7 +349,7 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;
@@ -400,6 +423,17 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
+        const capCheck = await DailyCapsManager.checkDailyCap(interaction.user.id, 'ENTERTAINMENT_GAMES', 1);
+        if (!capCheck.allowed) {
+            const embed = new EmbedBuilder()
+                .setTitle(`${constants.EMOJIS.WARNING} Daily Limit Reached`)
+                .setDescription(`You've reached your daily entertainment game limit (${capCheck.cap} games).\n\n⏰ Resets: <t:${Math.floor(capCheck.resetTime.getTime() / 1000)}:R>\n💡 This helps promote responsible gaming habits.`)
+                .setColor(constants.COLORS.WARNING)
+                .setFooter({ text: 'VEX is a simulated token inside Discord. No real-world value.' });
+            
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
         const result = await user.removeVEX(amount, 'entertainment_game', false);
         if (!result.success) {
             const embed = new EmbedBuilder()
@@ -410,7 +444,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('sell', amount);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'entertainment' } });
         
         const diceRoll = Economics.rollDice();
         const won = prediction === diceRoll;
@@ -421,7 +455,7 @@ module.exports = {
         
         if (won) {
             await user.addVEX(payout, 'entertainment_win');
-            Economics.updateVEXMarket('reward', payout);
+            Economics.apply({ event: 'reward', amountVEX: payout, userId: interaction.user.id, meta: { command: 'entertainment' } });
             const profit = payout - amount;
             resultText = `🎉 **SKILL REWARDED!** 🎉\nProfit: ${profit.toFixed(2)} VEX (~$${(profit * Economics.getCurrentVEXPrice()).toFixed(2)})`;
             color = constants.COLORS.SUCCESS;

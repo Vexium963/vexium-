@@ -150,9 +150,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', cost, interaction.user.id);
-        
-        Economics.updateVEXMarket('buy', cost);
+        Economics.apply({ event: 'buy', amountVEX: cost, userId: interaction.user.id, meta: { command: 'nft_mint' } });
         
         const nftId = this.generateNFTId();
         const nft = {
@@ -174,7 +172,7 @@ module.exports = {
         
         const burnAmount = cost * constants.TAX_SYSTEM.NFT.MINT_BURN_RATE;
         await user.burnVEX(burnAmount, 'nft_mint_burn');
-        Economics.updateVEXMarket('burn', burnAmount);
+        Economics.apply({ event: 'burn', amountVEX: burnAmount, userId: interaction.user.id, meta: { command: 'nft_mint' } });
         
         await user.save(userData);
         

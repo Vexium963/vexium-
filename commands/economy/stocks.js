@@ -218,9 +218,9 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('buy', totalWithFees, interaction.user.id);
+        Economics.apply({ event: 'buy', amountVEX: totalWithFees, userId: interaction.user.id, meta: { command: 'stocks' } });
         await user.burnVEX(transactionFee, 'stock_transaction_fee');
-        Economics.updateVEXMarket('burn', transactionFee);
+        Economics.apply({ event: 'burn', amountVEX: transactionFee, userId: interaction.user.id, meta: { command: 'stocks' } });
         
         if (!userData.stocks) userData.stocks = {};
         if (!userData.stocks[symbol]) {

@@ -279,6 +279,23 @@ class Economics {
         }
         return null;
     }
+
+    static apply(eventData) {
+        const { event, amountVEX, userId, meta = {} } = eventData;
+        
+        this.updateVEXMarket(event, amountVEX, userId);
+        
+        if (meta.command) {
+            console.log(`Economics.apply: ${event} ${amountVEX} VEX by ${userId} via ${meta.command}`);
+        }
+        
+        return { 
+            success: true, 
+            priceImpact: simulatedVEX.getCurrentPrice(),
+            event,
+            amount: amountVEX
+        };
+    }
 }
 
 module.exports = Economics;

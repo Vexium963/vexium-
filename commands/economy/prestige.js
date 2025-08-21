@@ -215,7 +215,7 @@ module.exports = {
         userData.jobLevel = {};
         
         await user.addVEX(prestigeData.vexBonus, 'prestige_bonus');
-        Economics.updateVEXMarket('reward', prestigeData.vexBonus);
+        Economics.apply({ event: 'reward', amountVEX: prestigeData.vexBonus, userId: interaction.user.id, meta: { command: 'prestige' } });
         
         userData.stats.totalPrestige = (userData.stats.totalPrestige || 0) + 1;
         userData.stats.commandsUsed++;

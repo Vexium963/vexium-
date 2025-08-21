@@ -165,14 +165,14 @@ module.exports = {
                 
                 return interaction.reply({ embeds: [embed], ephemeral: true });
             }
-            Economics.updateVEXMarket('sell', vexAmount + giftTax, interaction.user.id);
+            Economics.apply({ event: 'sell', amountVEX: vexAmount + giftTax, userId: interaction.user.id, meta: { command: 'gift' } });
             
             await targetUserData.addVEX(vexAmount, 'gift_received');
-            Economics.updateVEXMarket('buy', vexAmount);
+            Economics.apply({ event: 'buy', amountVEX: vexAmount, userId: targetUser.id, meta: { command: 'gift' } });
             
             if (giftTax > 0) {
                 await user.burnVEX(giftTax, 'gift_tax');
-                Economics.updateVEXMarket('burn', giftTax);
+                Economics.apply({ event: 'burn', amountVEX: giftTax, userId: interaction.user.id, meta: { command: 'gift' } });
             }
         }
         
@@ -198,7 +198,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(vexAmount * 0.2) : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'generosity_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'gift' } });
         }
         
         await user.save(userData);
@@ -348,10 +348,10 @@ module.exports = {
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
-        Economics.updateVEXMarket('sell', amount, interaction.user.id);
+        Economics.apply({ event: 'sell', amountVEX: amount, userId: interaction.user.id, meta: { command: 'gift' } });
         
         await targetUserData.addVEX(amount, 'random_gift_received');
-        Economics.updateVEXMarket('buy', amount);
+        Economics.apply({ event: 'buy', amountVEX: amount, userId: randomUser.userId, meta: { command: 'gift' } });
         
         userData.stats.giftsSent++;
         userData.stats.commandsUsed++;

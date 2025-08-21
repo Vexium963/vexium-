@@ -25,7 +25,7 @@ const commandFolders = fs.readdirSync('./commands');
 for (const folder of commandFolders) {
     const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
-        const filePath = path.join(__dirname, 'commands', folder, file);
+        const filePath = `./commands/${folder}/${file}`;
         const command = require(filePath);
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command);

@@ -144,7 +144,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('stake', amount);
+        Economics.apply({ event: 'stake', amountVEX: amount, userId: interaction.user.id, meta: { command: 'staking' } });
         
         const stakeId = this.generateStakeId();
         const startTime = Date.now();
@@ -252,12 +252,12 @@ module.exports = {
         const totalReturn = stake.amount + pendingRewards - earlyWithdrawalPenalty;
         
         await user.addVEX(totalReturn, 'unstaking');
-        Economics.updateVEXMarket('unstake', totalReturn);
+        Economics.apply({ event: 'unstake', amountVEX: totalReturn, userId: interaction.user.id, meta: { command: 'staking' } });
         
         if (pendingRewards > 0) {
             const rewardTax = pendingRewards * constants.TAX_SYSTEM.STAKING.REWARD_TAX_RATE;
             await user.burnVEX(rewardTax, 'staking_reward_tax');
-            Economics.updateVEXMarket('burn', rewardTax);
+            Economics.apply({ event: 'burn', amountVEX: rewardTax, userId: interaction.user.id, meta: { command: 'staking' } });
         }
         
         delete userData.stakes[stakeId];
@@ -339,9 +339,9 @@ module.exports = {
         const netRewards = totalRewards - taxAmount;
         
         await user.addVEX(netRewards, 'staking_rewards');
-        Economics.updateVEXMarket('reward', netRewards);
+        Economics.apply({ event: 'reward', amountVEX: netRewards, userId: interaction.user.id, meta: { command: 'staking' } });
         await user.burnVEX(taxAmount, 'staking_reward_tax');
-        Economics.updateVEXMarket('burn', taxAmount);
+        Economics.apply({ event: 'burn', amountVEX: taxAmount, userId: interaction.user.id, meta: { command: 'staking' } });
         
         userData.stats.stakingRewardsClaimed = (userData.stats.stakingRewardsClaimed || 0) + totalRewards;
         userData.stats.commandsUsed++;

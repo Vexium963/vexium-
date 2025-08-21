@@ -138,7 +138,7 @@ module.exports = {
             
             await user.removeVEX(migrationFee, 'late_wallet_link', false);
             await user.burnVEX(treasuryAmount, 'wallet_link_penalty');
-            Economics.updateVEXMarket('sell', migrationFee);
+            Economics.apply({ event: 'sell', amountVEX: migrationFee, userId: interaction.user.id, meta: { command: 'linkwallet' } });
         }
         
         userData.linkedWallets[walletType] = {

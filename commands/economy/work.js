@@ -87,7 +87,7 @@ module.exports = {
         const vexEarned = Math.round(workPay * constants.VEX_TOKEN.WORK_MULTIPLIER * 100) / 100;
         
         await user.addVEX(vexEarned, `work_${userData.job}`);
-        Economics.updateVEXMarket('work', vexEarned);
+        Economics.apply({ event: 'work', amountVEX: vexEarned, userId: interaction.user.id, meta: { command: 'work' } });
         
         const xpGained = jobData.xpReward + Math.floor(Math.random() * 10);
         const jobXpGained = Math.floor(xpGained * 0.5);
@@ -146,13 +146,13 @@ module.exports = {
             title = `🎉 EXCEPTIONAL PERFORMANCE!`;
             description += `\n✨ **PERFORMANCE BONUS: +${bonusAmount} VEX!**`;
             await user.addVEX(bonusAmount, 'performance_bonus');
-            Economics.updateVEXMarket('work', bonusAmount);
+            Economics.apply({ event: 'work', amountVEX: bonusAmount, userId: interaction.user.id, meta: { command: 'work', type: 'performance_bonus' } });
         }
         
         if (urgencyBonus > 0) {
             description += `\n⚡ **PRODUCTIVITY SURGE: +${urgencyBonus} VEX!** You're on fire!`;
             await user.addVEX(urgencyBonus, 'productivity_surge');
-            Economics.updateVEXMarket('work', urgencyBonus);
+            Economics.apply({ event: 'work', amountVEX: urgencyBonus, userId: interaction.user.id, meta: { command: 'work', type: 'productivity_surge' } });
         }
         
         if (workStreak >= 10) {
@@ -236,7 +236,7 @@ module.exports = {
         if (jobLevelUp) {
             const jobBonus = userData.jobLevel * 1.00;
             await user.addVEX(jobBonus, 'job_level_bonus');
-            Economics.updateVEXMarket('work', jobBonus);
+            Economics.apply({ event: 'work', amountVEX: jobBonus, userId: interaction.user.id, meta: { command: 'work', type: 'job_level_bonus' } });
             
             const jobLevelEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.TROPHY} Job Level Up!`)

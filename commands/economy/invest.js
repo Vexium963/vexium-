@@ -106,7 +106,7 @@ module.exports = {
         if (isInvestmentNovice && Math.random() < 0.3) {
             const bonusAmount = Math.floor(Math.random() * 50) + 25;
             await user.addVEX(bonusAmount, 'investment_newbie_bonus');
-            Economics.updateVEXMarket('reward', bonusAmount);
+            Economics.apply({ event: 'reward', amountVEX: bonusAmount, userId: interaction.user.id, meta: { command: 'investment' } });
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`🎉 INVESTMENT NEWBIE BONUS!`)
@@ -184,7 +184,7 @@ module.exports = {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
         
-        Economics.updateVEXMarket('invest', amount);
+        Economics.apply({ event: 'invest', amountVEX: amount, userId: interaction.user.id, meta: { command: 'investment' } });
         
         if (!userData.investments[type]) {
             userData.investments[type] = {};
@@ -290,9 +290,9 @@ module.exports = {
         const netAmount = sellAmount - taxAmount;
         
         await user.addVEX(netAmount, 'investment_sale');
-        Economics.updateVEXMarket('sell', netAmount);
+        Economics.apply({ event: 'sell', amountVEX: netAmount, userId: interaction.user.id, meta: { command: 'investment' } });
         await user.burnVEX(taxAmount, 'investment_tax');
-        Economics.updateVEXMarket('burn', taxAmount);
+        Economics.apply({ event: 'burn', amountVEX: taxAmount, userId: interaction.user.id, meta: { command: 'investment' } });
         
         investment.totalInvested *= (1 - sellPortion);
         investment.currentValue *= (1 - sellPortion);

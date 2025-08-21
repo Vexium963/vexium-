@@ -125,8 +125,8 @@ module.exports = {
             else if (owned) status = '✅ Owned';
             else {
                 const Economics = require('../../utils/economics');
-                const vexPrice = Economics.getPeggedVEXPrice(frame.usdPrice || 25);
-                status = `💰 ${vexPrice} VEX (~$${(frame.usdPrice || 25).toFixed(2)})`;
+                const vexPrice = Economics.getPeggedVEXPrice(frame.price || 25);
+                status = `💰 ${vexPrice.toFixed(2)} VEX (~$${(frame.price || 25).toFixed(2)})`;
             }
             
             embed.addFields({

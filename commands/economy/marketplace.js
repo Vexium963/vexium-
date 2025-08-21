@@ -97,7 +97,7 @@ module.exports = {
         const surpriseBonus = Math.random() < 0.1 ? Math.floor(Math.random() * 50) + 10 : 0;
         if (surpriseBonus > 0) {
             await user.addVEX(surpriseBonus, 'marketplace_surprise_bonus');
-            Economics.updateVEXMarket('reward', surpriseBonus);
+            Economics.apply({ event: 'reward', amountVEX: surpriseBonus, userId: interaction.user.id, meta: { command: 'marketplace' } });
             
             const bonusEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} SURPRISE MARKETPLACE BONUS!`)
@@ -122,7 +122,7 @@ module.exports = {
             
             const milestoneReward = Economics.getPeggedVEXPrice(totalTransactions * 0.02);
             await user.addVEX(milestoneReward, 'marketplace_milestone');
-            Economics.updateVEXMarket('reward', milestoneReward);
+            Economics.apply({ event: 'reward', amountVEX: milestoneReward, userId: interaction.user.id, meta: { command: 'marketplace' } });
             await interaction.followUp({ embeds: [achievementEmbed] });
         }
         
@@ -297,7 +297,7 @@ module.exports = {
         
         const result = await user.removeVEX(listingFee, 'marketplace_listing_fee');
         if (result.success) {
-            Economics.updateVEXMarket('sell', listingFee);
+            Economics.apply({ event: 'sell', amountVEX: listingFee, userId: interaction.user.id, meta: { command: 'marketplace' } });
         }
         if (!result.success) {
             const embed = new EmbedBuilder()

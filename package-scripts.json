@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "test": "jest tests/unit/ --verbose",
+    "test:integration": "jest tests/integration/ --verbose",
+    "test:all": "jest tests/ --verbose",
+    "load:simulate": "node tests/loadTest.js",
+    "lint": "eslint commands/ utils/ events/ handlers/ --fix",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy": "node deploy-commands.js",
+    "backup": "node scripts/backup.js",
+    "setup": "node scripts/setup.js"
+  }
+}
