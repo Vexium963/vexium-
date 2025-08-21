@@ -226,7 +226,7 @@ module.exports = {
         if (userData.vexBalance < property.price) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: $${property.price.toFixed(2)} VEX\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MONEY_RAIN} Property price: $${property.price.toFixed(2)} VEX\n${cons...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

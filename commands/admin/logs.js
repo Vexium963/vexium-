@@ -92,7 +92,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TREASURY} Treasury Transaction Logs`)
-            .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${socialProofMessage}`)
+            .setDescription(`💸 Recent ${limit} treasury transactions - Watch the VEX flow!\n\n🔥 ${milestoneMessage}\n📈 ${so...`)
             .addFields(
                 { name: '💰 Current Balance', value: `$${treasuryData.balance.toFixed(2)} VEX`, inline: true },
                 { name: '📊 Total Transactions', value: treasuryData.transactions.length.toString(), inline: true }

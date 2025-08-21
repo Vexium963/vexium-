@@ -159,7 +159,7 @@ module.exports = {
         if (amount < assetData.minInvestment) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is $${assetData.minAmount.toFixed(2)} VEX`)
+                .setDescription(`📈 **Minimum investment required!** The minimum investment for **${assetData.name}** is $${assetD...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

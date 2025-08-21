@@ -423,7 +423,7 @@ module.exports = {
         if (!data) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Category Not Found`)
-                .setDescription(`💥 Invalid help category! Don't miss out on valuable knowledge!\n\n${constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)]}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Use a valid category to unlock exclusive tips!**`)
+                .setDescription(`💥 Invalid help category! Don't miss out on valuable knowledge!\n\n${constants.FOMO_MESSAGES[Math...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

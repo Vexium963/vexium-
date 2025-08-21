@@ -53,7 +53,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription(`⏳ The immersion system is temporarily upgrading for even MORE addictive features!\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Coming soon: AI-powered personalization and dynamic rewards!**`)
+                .setDescription(`⏳ The immersion system is temporarily upgrading for even MORE addictive features!\n\n${fomoMessag...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -174,7 +174,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Immersion Engine Unavailable`)
-                .setDescription(`⏳ The challenge system is upgrading to be even MORE psychologically engaging!\n\n🔥 ${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Coming soon: AI-powered challenge personalization!**`)
+                .setDescription(`⏳ The challenge system is upgrading to be even MORE psychologically engaging!\n\n🔥 ${fomoMessage...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -189,7 +189,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TARGET} Daily Challenges`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Complete psychologically designed challenges to trigger massive dopamine releases!\n\n${constants.ANIMATED_EMOJIS.TARGET} **Daily challenges reset in 6 hours!**`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Complete psychologically designed challenges to trigger massive...`)
             .setColor(constants.COLORS.PRIMARY)
             .setTimestamp();
         

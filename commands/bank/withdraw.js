@@ -92,7 +92,7 @@ module.exports = {
         if (amount > availableAmount && !force) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.WARNING} Funds Locked`)
-                .setDescription(`⏳ Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n🔥 $${lockedAmount.toFixed(2)} VEX is locked in deposits.`)
+                .setDescription(`⏳ Only $${availableAmount.toFixed(2)} VEX is available for withdrawal.\n🔥 $${lockedAmount.toFixe...`)
                 .addFields(
                     { name: '💡 Options', value: 'Use `force: true` to withdraw locked funds with 10% penalty', inline: false }
                 )
@@ -116,7 +116,7 @@ module.exports = {
         if (totalCost > userData.bankBalance) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds for Fees`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Total cost including taxes and penalties: $${totalCost.toFixed(2)} VEX`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.LOADING} Total cost including taxes and penalties: $${totalCost.toFix...`)
                 .addFields(
                     { name: '💰 Withdrawal', value: `$${amount.toFixed(2)}`, inline: true },
                     { name: '💸 Tax', value: `$${taxResult.taxAmount.toFixed(2)}`, inline: true },
@@ -193,7 +193,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${description}\n\n${constants.ANIMATED_EMOJIS.CHART} **Wealth Management Success!**`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} ${description}\n\n${constants.ANIMATED_EMOJIS.CHART} **W...`)
             .addFields(
                 { name: '💰 Withdrawn Amount', value: `$${amount.toFixed(2)} VEX`, inline: true },
                 { name: '💸 Tax Paid', value: `$${taxResult.taxAmount.toFixed(2)} VEX`, inline: true },

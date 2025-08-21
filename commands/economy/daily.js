@@ -34,7 +34,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.COOLDOWN} Daily Reward Charging Up!`)
-                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(2)} VEX** reward!`)
+                .setDescription(`⏳ ${urgencyMessage}\n⏰ **${hoursLeft}h ${minutesLeft}m** until your next **$${nextReward.toFixed(...`)
                 .addFields(
                     { name: '🔥 Epic Streak', value: `${userData.dailyStreak} days ${userData.dailyStreak >= 30 ? '👑 LEGENDARY' : userData.dailyStreak >= 7 ? '🏆 AMAZING' : ''}`, inline: true },
                     { name: '💰 Reward Building', value: `$${nextReward.toFixed(2)} VEX`, inline: true },

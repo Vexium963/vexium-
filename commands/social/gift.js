@@ -369,7 +369,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Random Gift Sent!`)
-            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.HEART_BEAT} **Spreading kindness in the VexiumVerse!**`)
+            .setDescription(`You anonymously sent **$${amount.toFixed(2)} VEX** to a random active user!\n\n${milestoneMessage...`)
             .addFields(
                 { name: '🎯 Impact', value: 'Your kindness helps build the VexiumVerse community!', inline: false }
             )
@@ -386,7 +386,7 @@ module.exports = {
             const targetUser = await interaction.client.users.fetch(randomUser.userId);
             const anonymousEmbed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.GIFT} Anonymous Gift Received!`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.MYSTERY} Someone in the VexiumVerse community sent you **$${amount.toFixed(2)} VEX**!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Random acts of kindness make VexiumVerse special!**`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.MYSTERY} Someone in the VexiumVerse community sent you **$${amount.to...`)
                 .addFields(
                     { name: '💝 Message', value: 'A kind soul wanted to brighten your day!', inline: false }
                 )

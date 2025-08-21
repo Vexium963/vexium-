@@ -266,7 +266,7 @@ module.exports = {
         if (userData.vexBalance < totalCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`You need $${totalCost.toFixed(2)} VEX (including 2% trading fee).\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`You need $${totalCost.toFixed(2)} VEX (including 2% trading fee).\nYour balance: $${userData.vexB...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

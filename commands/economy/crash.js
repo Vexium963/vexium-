@@ -271,7 +271,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ERROR} Crashed!`)
-            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!\n\n🔄 **So close!** You were ${(game.crashPoint - targetMultiplier).toFixed(2)}x away from winning!`)
+            .setDescription(`💥 The rocket crashed at ${game.crashPoint.toFixed(2)}x!\n\n🔄 **So close!** You were ${(game.cra...`)
             .addFields(
                 { name: '💰 Play Amount', value: `$${game.playAmount.toFixed(2)} VEX`, inline: true },
                 { name: '💥 Crash Point', value: `${game.crashPoint.toFixed(2)}x`, inline: true },

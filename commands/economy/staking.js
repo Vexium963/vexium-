@@ -445,7 +445,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.STAKING} 💎 PASSIVE WEALTH EMPIRE`)
-            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMessage}`)
+            .setDescription(`🚀 **BUILD YOUR FORTUNE WHILE YOU SLEEP!** Choose from our variety of staking pools!\n\n${fomoMes...`)
             .setColor(constants.COLORS.PRIMARY);
         
         for (const [poolId, pool] of Object.entries(constants.STAKING_POOLS)) {

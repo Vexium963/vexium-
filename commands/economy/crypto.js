@@ -223,7 +223,7 @@ module.exports = {
         if (!result.success) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **PURCHASE FAILED!** ${result.reason}\n\n${constants.ANIMATED_EMOJIS.CHART} Try again with different parameters!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} **PURCHASE FAILED!** ${result.reason}\n\n${constants.ANIMA...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

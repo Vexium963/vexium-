@@ -292,7 +292,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.TROPHY} Referral Leaderboard`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.TROPHY} **LEGENDARY REFERRAL CHAMPIONS!**\n\n${constants.ANIMATED_EMOJIS.SPARKLES} Top referrers this month!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.TROPHY} **LEGENDARY REFERRAL CHAMPIONS!**\n\n${constants.ANIMATED_EMO...`)
             .setColor(constants.COLORS.GOLD);
         
         if (topReferrers.length === 0) {

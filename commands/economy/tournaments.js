@@ -368,7 +368,7 @@ module.exports = {
         if (userData.vexBalance < creationCost) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Tournament creation fee: $${creationCost.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`Tournament creation fee: $${creationCost.toFixed(2)} VEX\nYour balance: $${userData.vexBalance.to...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

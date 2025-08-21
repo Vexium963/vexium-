@@ -120,7 +120,7 @@ module.exports = {
             const nearMiss = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)]}`)
+                .setDescription(`⏳ You need $${totalCost.toFixed(2)} VEX but only have $${userData.vexBalance.toFixed(2)}.\n\n${co...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -130,7 +130,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Supply`)
-                .setDescription(`🔥 Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n⏳ **${Math.floor(Math.random() * 15) + 5} people** are viewing this item right now!`)
+                .setDescription(`🔥 Only ${item.supply} ${item.name}(s) available.\n\n${fomoMessage}\n⏳ **${Math.floor(Math.random...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -169,7 +169,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Purchase Successful!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.ANIMATED_EMOJIS.MONEY_RAIN} Purchase successful!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You bought **${quantity}x ${item.name}**!\n\n${constants.AN...`)
             .addFields(
                 { name: '💰 Total Cost', value: `$${totalCost.toFixed(2)} VEX`, inline: true },
                 { name: '🔥 Burned', value: `$${burnAmount.toFixed(2)} VEX`, inline: true },

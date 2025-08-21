@@ -227,7 +227,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.CROWN} Prestige Complete!`)
-            .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ ${milestoneMessage}`)
+            .setDescription(`🎉 **LEGENDARY ACHIEVEMENT!** You've prestiged to level ${userData.prestige}!\n\n✨ ${milestoneMes...`)
             .addFields(
                 { name: '💰 VEX Bonus Received', value: `$${prestigeData.vexBonus.toFixed(2)} VEX`, inline: true },
                 { name: '⭐ New Prestige Level', value: `${userData.prestige}`, inline: true },

@@ -166,7 +166,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOCK} Privacy Settings`)
-            .setDescription(`🔒 Control who can see your information and interact with you\n\n🔥 ${fomoMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Customize your privacy settings for maximum security!**`)
+            .setDescription(`🔒 Control who can see your information and interact with you\n\n🔥 ${fomoMessage}\n✨ ${socialPro...`)
             .addFields(
                 { name: '👁️ Profile Visibility', value: privacy.profilePublic ? '🌐 Public' : '🔒 Private', inline: true },
                 { name: '💰 Balance Visibility', value: privacy.balancePublic ? '🌐 Public' : '🔒 Private', inline: true },
@@ -235,7 +235,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.PALETTE} Display Settings`)
-            .setDescription(`🌈 Customize how information is displayed to you\n\n⬆️ ${milestoneMessage}\n✨ ${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Personalize your VexiumVerse experience!**`)
+            .setDescription(`🌈 Customize how information is displayed to you\n\n⬆️ ${milestoneMessage}\n✨ ${socialProofMessag...`)
             .addFields(
                 { name: '🎨 Theme', value: display.theme || 'Default', inline: true },
                 { name: '🌍 Timezone', value: display.timezone || 'UTC', inline: true },

@@ -334,7 +334,7 @@ module.exports = {
         if (userData.vexBalance < requiredStake) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Stake`)
-                .setDescription(`You need ${requiredStake} VEX to create a proposal.\nYour balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`You need ${requiredStake} VEX to create a proposal.\nYour balance: $${userData.vexBalance.toFixed...`)
                 .addFields(
                     { name: '💡 Why Staking?', value: 'Staking prevents spam and ensures serious proposals', inline: false },
                     { name: '💰 Stake Return', value: 'Your stake is returned when voting ends', inline: false }

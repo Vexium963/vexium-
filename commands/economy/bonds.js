@@ -108,7 +108,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Minimum Investment Required`)
-                .setDescription(`🔥 ${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMessage}`)
+                .setDescription(`🔥 ${bond.name} requires a minimum investment of $${bond.minAmount.toFixed(2)} VEX.\n\n${fomoMess...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -129,7 +129,7 @@ module.exports = {
             const nearMissMessage = constants.NEAR_MISS_MESSAGES[Math.floor(Math.random() * constants.NEAR_MISS_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} ${result.reason}\n\n${nearMissMessage}\n\n${constants.ANIMATED_EMOJIS.CHART} Try again with different parameters!`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.EXPLOSION} ${result.reason}\n\n${nearMissMessage}\n\n${constants.ANIM...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -357,7 +357,7 @@ module.exports = {
         if (new Date() < new Date(bond.maturityDate)) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bond Not Matured`)
-                .setDescription(`This bond hasn't matured yet!\n\n**Matures**: <t:${Math.floor(new Date(bond.maturityDate).getTime() / 1000)}:R>`)
+                .setDescription(`This bond hasn't matured yet!\n\n**Matures**: <t:${Math.floor(new Date(bond.maturityDate).getTime...`)
                 .addFields(
                     { name: '⚠️ Early Redemption', value: 'Government bonds cannot be redeemed before maturity.\nThis ensures guaranteed returns for all investors.', inline: false }
                 )

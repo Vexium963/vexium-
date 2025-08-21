@@ -100,7 +100,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ANALYTICS} ${interaction.user.displayName}'s Analytics Dashboard`)
-            .setDescription(`🚀 **Your Empire at a Glance** - Comprehensive overview of your VexiumVerse domination!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Track your progress and optimize your strategy!**`)
+            .setDescription(`🚀 **Your Empire at a Glance** - Comprehensive overview of your VexiumVerse domination!\n\n${mile...`)
             .addFields(
                 { name: '💰 Wealth Overview', value: this.formatWealthStats(userData), inline: true },
                 { name: '📊 Activity Summary', value: this.formatActivityStats(stats), inline: true },
@@ -158,7 +158,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.ECONOMY} Economic Analytics`)
-            .setDescription(`💸 **Master Your Wealth Strategy** - Detailed analysis of your economic domination!\n\n${variableReward || ''}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Optimize your earnings and maximize profits!**`)
+            .setDescription(`💸 **Master Your Wealth Strategy** - Detailed analysis of your economic domination!\n\n${variable...`)
             .addFields(
                 { name: '💵 Income Sources', value: this.formatIncomeBreakdown(stats), inline: true },
                 { name: '💸 Spending Categories', value: this.formatSpendingBreakdown(stats), inline: true },

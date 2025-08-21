@@ -144,7 +144,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`💰 WEALTH EMPIRE LEADERBOARD - THE ELITE!`)
-            .setDescription(`💸 **THESE ARE THE LEGENDS!** Top VEX accumulation masters!\n\n${milestoneMessage}\n${socialProofMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Climb the ranks and join the elite!**`)
+            .setDescription(`💸 **THESE ARE THE LEGENDS!** Top VEX accumulation masters!\n\n${milestoneMessage}\n${socialProof...`)
             .setColor(constants.COLORS.SUCCESS)
             .setFooter({ text: 'Rankings based on total net worth (wallet + bank + investments)' })
             .setTimestamp();
@@ -261,7 +261,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`👥 SOCIAL CHAMPIONS - COMMUNITY LEGENDS!`)
-            .setDescription(`🤝 **THESE PLAYERS BUILD THE COMMUNITY!** Most active traders and social contributors!\n\n${milestoneMessage}\n\n${constants.ANIMATED_EMOJIS.FIRE} **Build connections and climb the social ranks!**`)
+            .setDescription(`🤝 **THESE PLAYERS BUILD THE COMMUNITY!** Most active traders and social contributors!\n\n${miles...`)
             .setColor(constants.COLORS.SOCIAL)
             .addFields(
                 { name: '🤝 Social Activities', value: '• Successful trades\n• Gifts sent/received\n• Community participation\n• Guild contributions', inline: true },

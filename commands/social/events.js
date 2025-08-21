@@ -231,7 +231,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.SUCCESS} Event Joined!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined **${event.name}**!\n\n${constants.ANIMATED_EMOJIS.FIRE} **You're now competing with ${event.participants} other players!**\n\n${socialProofMessage}`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.CELEBRATION} Successfully joined **${event.name}**!\n\n${constants.AN...`)
             .addFields(
                 { name: '🎯 Event', value: event.name, inline: true },
                 { name: '📝 Objective', value: event.objective, inline: true },

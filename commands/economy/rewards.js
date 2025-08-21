@@ -132,7 +132,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.GIFT} Reward Status`)
-            .setDescription(`📈 Your current reward status and upcoming opportunities\n\n🔥 **${Math.floor(Math.random() * 50) + 20} players** claimed rewards in the last hour!`)
+            .setDescription(`📈 Your current reward status and upcoming opportunities\n\n🔥 **${Math.floor(Math.random() * 50)...`)
             .addFields(
                 { 
                     name: '🎁 Available Now', 
@@ -185,7 +185,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.HISTORY} Reward History`)
-            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** $${(userData.stats.totalRewardsValue || 0).toFixed(2)} VEX`)
+            .setDescription(`📜 Your recent reward claims and achievements\n\n🏆 **Total earned:** $${(userData.stats.totalRew...`)
             .addFields(
                 { 
                     name: '📜 Recent Claims', 

@@ -18,7 +18,7 @@ module.exports = {
         if (userData.onboardingCompleted) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.SUCCESS} Welcome Back, VEX Legend!`)
-                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.level} Entrepreneur\n• $${userData.vexBalance.toFixed(2)} VEX in your vault\n• Ready to expand your wealth!\n\n🚀 **Continue building your financial empire with these power moves:**`)
+                .setDescription(`🎉 **You're already dominating VexiumVerse!**\n\n💎 **Your Empire Status:**\n• Level ${userData.l...`)
                 .addFields(
                     { name: '💰 Daily Empire Growth', value: '`/daily` - Claim streak bonuses', inline: true },
                     { name: '⚒️ Wealth Generation', value: '`/work` - Earn premium VEX', inline: true },
@@ -110,16 +110,7 @@ module.exports = {
             .setDescription(`
 **🎯 CONGRATULATIONS!** You've just joined the most exclusive financial empire on Discord!
 
-${constants.ANIMATED_EMOJIS.FIRE} **BREAKING:** You're among the first 1,000 empire builders to receive **DOUBLE STARTING VEX!**
-
-${constants.ANIMATED_EMOJIS.MONEY_RAIN} **Your Empire Status:**
-• **Starting Capital:** $${totalStarting.toFixed(2)} VEX (+ bonus pending!)
-• **Entrepreneur Level:** ${userData.level}
-• **Empire ID:** #${userData.level.toString().padStart(4, '0')}
-
-${constants.ANIMATED_EMOJIS.SPARKLES} **LIVE STATS:** ${Math.floor(Math.random() * 500) + 200} active builders earning **real money** right now!
-
-${constants.ANIMATED_EMOJIS.DIAMOND} **NEXT CRITICAL STEP:** Link your Phantom wallet to unlock premium earning potential!`)
+${co...`)
             .addFields(
                 { 
                     name: `${constants.ANIMATED_EMOJIS.ROCKET} Your Empire Blueprint`, 

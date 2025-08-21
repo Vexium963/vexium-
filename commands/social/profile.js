@@ -303,7 +303,7 @@ module.exports = {
             const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Bio Too Long`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Bio must be 200 characters or less.\n\n${fomoMessage}\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Keep it concise and memorable!**`)
+                .setDescription(`${constants.ANIMATED_EMOJIS.FIRE} Bio must be 200 characters or less.\n\n${fomoMessage}\n\n${cons...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
@@ -415,7 +415,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${constants.ANIMATED_EMOJIS.CELEBRATION} Status Updated!`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} Your status is now: ${statusEmojis[status] || '⚪'} **${status.charAt(0).toUpperCase() + status.slice(1)}**!\n\n${constants.ANIMATED_EMOJIS.SPARKLES} **Show the world your current vibe!**`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.HEART_BEAT} Your status is now: ${statusEmojis[status] || '⚪'} **${st...`)
             .setColor(constants.COLORS.SUCCESS)
             .setImage('attachment://progress.png')
             .setTimestamp();

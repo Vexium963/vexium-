@@ -272,7 +272,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(`${constants.EMOJIS.LOTTERY} Your Lottery Tickets`)
-            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You have ${userTickets.length} ticket${userTickets.length > 1 ? 's' : ''} for the current lottery!`)
+            .setDescription(`${constants.ANIMATED_EMOJIS.SPARKLES} You have ${userTickets.length} ticket${userTickets.length >...`)
             .addFields(
                 { name: '🎫 Your Tickets', value: userTickets.join(', '), inline: false },
                 { name: '🎯 Win Chance', value: `${winChance.toFixed(3)}%`, inline: true },

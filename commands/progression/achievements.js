@@ -86,7 +86,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(`${description}\n\n📈 **Achievement hunters earn 2x more VEX!**\n🔥 **${Math.floor(Math.random() * 50) + 25} players** are hunting achievements right now!`)
+            .setDescription(`${description}\n\n📈 **Achievement hunters earn 2x more VEX!**\n🔥 **${Math.floor(Math.random() *...`)
             .setColor(isCompletionist ? constants.COLORS.VEX : isAchievementHunter ? constants.COLORS.SUCCESS : constants.COLORS.GOLD)
             .setThumbnail(targetUser.displayAvatarURL())
             .setTimestamp();

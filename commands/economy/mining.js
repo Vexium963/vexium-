@@ -311,7 +311,7 @@ module.exports = {
         if (minedAmount < constants.MINING.MIN_CLAIM_AMOUNT) {
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Amount`)
-                .setDescription(`You need at least ${constants.MINING.MIN_CLAIM_AMOUNT} VEX to claim. Currently mined: ${minedAmount.toFixed(2)} VEX`)
+                .setDescription(`You need at least ${constants.MINING.MIN_CLAIM_AMOUNT} VEX to claim. Currently mined: ${minedAmou...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });

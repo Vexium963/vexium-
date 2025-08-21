@@ -131,7 +131,7 @@ module.exports = {
             
             const embed = new EmbedBuilder()
                 .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`⏳ You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: $${userData.vexBalance.toFixed(2)} VEX`)
+                .setDescription(`⏳ You need $${cost.toFixed(2)} VEX to mint a ${rarity} NFT.\n💰 Your balance: $${userData.vexBala...`)
                 .setColor(constants.COLORS.ERROR);
             
             return interaction.reply({ embeds: [embed], ephemeral: true });
