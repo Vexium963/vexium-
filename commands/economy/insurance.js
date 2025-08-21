@@ -1,459 +1,188 @@
-const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
+const { route } = require('../../utils/router');
+const ui = require('../../utils/ui');
 const User = require('../../database/models/User');
-const constants = require('../../utils/constants');
-const Economics = require('../../utils/economics');
+const TransactionManager = require('../../utils/TransactionManager');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('insurance')
-        .setDescription(`🛡️ Protect your VEX empire with premium insurance policies - Smart investors stay protected!`)
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('buy')
-                .setDescription(`💸 Purchase premium insurance coverage - Protect your empire from devastating losses!`)
-                .addStringOption(option =>
-                    option.setName('type')
-                        .setDescription(`✨ Choose your protection level - Elite players choose Elite coverage!`)
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Basic - 25% coverage, ~50 VEX/month', value: 'basic' },
-                            { name: 'Premium - 50% coverage, ~100 VEX/month', value: 'premium' },
-                            { name: 'Elite - 75% coverage, ~200 VEX/month', value: 'elite' }))
-                .addIntegerOption(option =>
-                    option.setName('months')
-                        .setDescription(`🔥 Duration of protection - Longer coverage = Better peace of mind!`)
-                        .setRequired(true)
-                        .setMinValue(1)
-                        .setMaxValue(12)))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('claim')
-                .setDescription(`💥 File an insurance claim for losses - Get your VEX back fast!`)
-                .addNumberOption(option =>
-                    option.setName('loss_amount')
-                        .setDescription(`💸 Amount of VEX lost - Every VEX matters, claim what's yours!`)
-                        .setRequired(true)
-                        .setMinValue(1))
-                .addStringOption(option =>
-                    option.setName('reason')
-                        .setDescription(`💬 Reason for the loss - Help us process your claim faster!`)
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Entertainment game losses', value: 'entertainment' },
-                            { name: 'Investment losses', value: 'investment' },
-                            { name: 'Trading losses', value: 'trading' },
-                            { name: 'System error', value: 'system' })))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('status')
-                .setDescription(`📈 Check your insurance coverage status - Stay informed about your protection!`))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('cancel')
-                .setDescription(`💥 Cancel your insurance policy - Are you sure you want to risk it all?`)),
-    
-    cooldown: 30,
-    
+        .setName('safety')
+        .setDescription('Safety Fund operations')
+        .addSubcommand(s => s.setName('purchase').setDescription('Purchase coverage').addNumberOption(o => o.setName('amount').setRequired(true)))
+        .addSubcommand(s => s.setName('claim').setDescription('Claim verified loss').addStringOption(o => o.setName('ref_tx_id').setRequired(true)))
+        .addSubcommand(s => s.setName('status').setDescription('View fund status')),
+
     async execute(interaction) {
+        await interaction.deferReply({ ephemeral: true });
+        
+        return route(interaction, {
+            purchase: this.handlePurchase,
+            claim: this.handleClaim,
+            status: this.handleStatus,
+            _fallback: (i) => i.editReply({ embeds: [ui.err('Unknown subcommand', 'Please use a valid Safety Fund operation.')] })
+        });
+    },
+
+    async handlePurchase(interaction) {
+        const amount = interaction.options.getNumber('amount');
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        if (interaction.client.immersionEngine) {
-            interaction.client.immersionEngine.trackCommand(interaction.user.id, 'insurance', true);
+        if (amount <= 0) {
+            return interaction.editReply({ embeds: [ui.err('Invalid amount', 'Amount must be positive.')] });
         }
         
-        if (interaction.client.psychologyEngine) {
-            const behaviorContext = {
-                consecutiveUse: false,
-                quickReturn: false,
-                timeSinceLastUse: Date.now(),
-                riskManagement: true,
-                wealthProtection: true
+        const premium = amount * 0.02;
+        
+        if (userData.vexBalance < premium) {
+            return interaction.editReply({ embeds: [ui.err('Insufficient funds', `Premium: ${ui.formatCurrency(premium)}`)] });
+        }
+        
+        let txId;
+        try {
+            txId = await TransactionManager.begin(interaction.user.id, 'safety_premium', premium);
+            
+            if (!userData.safetyFund) userData.safetyFund = [];
+            
+            const coverage = {
+                id: `SF_${Date.now()}`,
+                amount: amount,
+                premium: premium,
+                coverageRate: 0.5,
+                purchasedAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             };
-            interaction.client.psychologyEngine.analyzeUserBehavior(
-                interaction.user.id,
-                'insurance',
-                behaviorContext
+            
+            userData.safetyFund.push(coverage);
+            userData.vexBalance -= premium;
+            await user.save(userData);
+            
+            await TransactionManager.commit(txId);
+            
+            const embed = ui.ok('Coverage purchased', 
+                `Amount: ${ui.formatCurrency(amount)}\n` +
+                `Premium: ${ui.formatCurrency(premium)} (2%)\n` +
+                `Coverage: 50% of verified losses\n` +
+                `Expires: 30 days`
             );
-        }
-        
-        const insuranceUsage = userData.stats.insurancePurchases || 0;
-        const isInsuranceExpert = insuranceUsage >= 5;
-        const isInsuranceNovice = insuranceUsage === 0;
-        const hasActiveClaims = userData.insurance?.claimsUsed > 0;
-        const urgencyBonus = Math.random() < 0.15 ? Math.floor(userData.networth * 0.02) : 0;
-        
-        if (isInsuranceNovice && Math.random() < 0.3) {
-            const fomoMessage = constants.FOMO_MESSAGES[Math.floor(Math.random() * constants.FOMO_MESSAGES.length)];
-            const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 25) + 15);
-            const variableReward = Math.random() < 0.2 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (Math.random() * 10 + 5).toFixed(2)) : null;
             
-            const embed = new EmbedBuilder()
-                .setTitle(`🚨 WEALTH PROTECTION ALERT!`)
-                .setDescription(`💸 **Your ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)}) empire is UNPROTECTED!**\n\n💥 **${Math.floor(Math.random() * 20) + 10} players lost VEX today** without insurance!\n🛡️ **Smart investors protect their wealth** - don't be the next victim!\n\n${fomoMessage}\n${socialProof}${variableReward ? `\n${variableReward}` : ''}`)
-                .addFields(
-                    { name: '🔥 URGENT PROTECTION NEEDED', value: `💎 **Net Worth**: ${userData.networth.toFixed(2)} VEX (~$${(userData.networth * Economics.getCurrentVEXPrice()).toFixed(2)})\n⚡ **Risk Level**: ${userData.networth >= 1000 ? 'HIGH' : 'MODERATE'}\n🎯 **Recommended**: ${userData.networth >= 5000 ? 'Elite' : userData.networth >= 1000 ? 'Premium' : 'Basic'} Coverage`, inline: false },
-                    { name: '📊 LIVE STATS', value: `🔥 **${Math.floor(Math.random() * 50) + 30} claims processed today**\n💰 **${(Math.random() * 50000 + 10000).toFixed(0)} VEX (~$${((Math.random() * 50000 + 10000) * Economics.getCurrentVEXPrice()).toFixed(0)}) protected this week**\n⚡ **${Math.floor(Math.random() * 15) + 5} players buying insurance now!**`, inline: false }
-                )
-                .setColor(constants.COLORS.ERROR)
-                .setFooter({ text: '⏰ Don\'t wait until it\'s too late! Protect your empire NOW!' })
-                .setTimestamp();
-            
-            await interaction.followUp({ embeds: [embed], ephemeral: true });
-        }
-        
-        const subcommand = interaction.options.getSubcommand();
-        
-        switch (subcommand) {
-            case 'buy':
-                return this.handleBuy(interaction);
-            case 'claim':
-                return this.handleClaim(interaction);
-            case 'status':
-                return this.handleStatus(interaction);
-            case 'cancel':
-                return this.handleCancel(interaction);
+            await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+            if (txId) await TransactionManager.rollback(txId);
+            await interaction.editReply({ embeds: [ui.err('Purchase failed', error.message)] });
         }
     },
-    
-    async handleBuy(interaction) {
-        const user = new User(interaction.user.id);
-        const userData = await user.load();
-        
-        const type = interaction.options.getString('type');
-        const months = interaction.options.getInteger('months');
-        
-        const policies = {
-            basic: { coverage: 0.25, monthlyCost: Economics.getPeggedVEXPrice(0.5), name: 'Basic Protection' },
-            premium: { coverage: 0.50, monthlyCost: Economics.getPeggedVEXPrice(1), name: 'Premium Shield' },
-            elite: { coverage: 0.75, monthlyCost: Economics.getPeggedVEXPrice(2), name: 'Elite Guardian' }
-        };
-        
-        const policy = policies[type];
-        const totalCost = policy.monthlyCost * months;
-        
-        if (userData.insurance && userData.insurance.active) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Active Policy Exists`)
-                .setDescription(`${constants.ANIMATED_EMOJIS.SHIELD} You already have an active insurance policy protecting your e...`)
-                .addFields(
-                    { name: '📋 Current Policy', value: `${userData.insurance.type.charAt(0).toUpperCase() + userData.insurance.type.slice(1)}`, inline: true },
-                    { name: '📅 Expires', value: `<t:${Math.floor(new Date(userData.insurance.expiresAt).getTime() / 1000)}:R>`, inline: true }
-                )
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
-        }
-        
-        if (userData.vexBalance < totalCost) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Insufficient Funds`)
-                .setDescription(`Insurance cost: ${totalCost.toFixed(2)} VEX\nYour balance: ${userData.vexBalance.toFixed(2)} VEX`)
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
-        }
-        
-        const result = await user.removeVEX(totalCost, 'insurance_purchase');
-        Economics.apply({ event: 'sell', amountVEX: totalCost, userId: interaction.user.id, meta: { command: 'insurance' } });
-        if (!result.success) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Purchase Failed`)
-                .setDescription(result.reason)
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
-        }
-        
-        const expiresAt = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000);
-        
-        userData.insurance = {
-            type: type,
-            coverage: policy.coverage,
-            active: true,
-            purchasedAt: new Date().toISOString(),
-            expiresAt: expiresAt.toISOString(),
-            claimsUsed: 0,
-            maxClaims: months * 2, // 2 claims per month
-            totalPaid: totalCost
-        };
-        
-        userData.stats.insurancePurchases = (userData.stats.insurancePurchases || 0) + 1;
-        userData.stats.commandsUsed++;
-        
-        await user.save(userData);
-        
-        const milestoneMessage = userData.stats.insurancePurchases >= 3 ? constants.MILESTONE_MESSAGES[Math.floor(Math.random() * constants.MILESTONE_MESSAGES.length)] : null;
-        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 30) + 20);
-        
-        const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Insurance Policy Activated!`)
-            .setDescription(`**${policy.name}** is now protecting your VEX!${milestoneMessage ? `\n\n${milestoneMessage}` : ''}\n\n${socialProof}`)
-            .addFields(
-                { name: '🛡️ Policy Type', value: policy.name, inline: true },
-                { name: '📊 Coverage', value: `${(policy.coverage * 100)}% of losses`, inline: true },
-                { name: '💰 Total Cost', value: `${totalCost.toFixed(2)} VEX`, inline: true },
-                { name: '📅 Duration', value: `${months} month${months > 1 ? 's' : ''}`, inline: true },
-                { name: '📋 Claims Available', value: `${userData.insurance.maxClaims} claims`, inline: true },
-                { name: '⏰ Expires', value: `<t:${Math.floor(expiresAt.getTime() / 1000)}:R>`, inline: true },
-                { name: '🔒 What\'s Covered', value: '• Entertainment game losses\n• Investment losses\n• Trading losses\n• System errors', inline: false },
-                { name: '💡 How to Claim', value: 'Use `/insurance claim` when you experience covered losses', inline: false }
-            )
-            .setColor(constants.COLORS.SUCCESS)
-            .setFooter({ text: 'Insurance policy terms and conditions apply' })
-            .setTimestamp();
-        
-        const claimButton = new ButtonBuilder()
-            .setCustomId('insurance_claim_guide')
-            .setLabel('Claim Guide')
-            .setStyle(ButtonStyle.Primary)
-            .setEmoji('📋');
-        
-        const statusButton = new ButtonBuilder()
-            .setCustomId('insurance_status')
-            .setLabel('Policy Status')
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji('📊');
-        
-        const row = new ActionRowBuilder().addComponents(claimButton, statusButton);
-        
-        const CanvasRenderer = require('../../utils/canvasRenderer');
-        const canvasRenderer = new CanvasRenderer();
-        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Insurance Coverage: ${(policy.coverage * 100)}%`,
-            policy.coverage,
-            constants.COLORS.SUCCESS
-        );
-        
-        await interaction.reply({ 
-            embeds: [embed], 
-            components: [row],
-            files: [{ attachment: progressBuffer, name: 'progress.png' }]
-        });
-    },
-    
+
     async handleClaim(interaction) {
+        const refTxId = interaction.options.getString('ref_tx_id');
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        if (!userData.insurance || !userData.insurance.active) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} No Active Policy`)
-                .setDescription('You don\'t have an active insurance policy.\n\nPurchase insurance first to file claims.')
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+        if (!userData.safetyFund || userData.safetyFund.length === 0) {
+            return interaction.editReply({ embeds: [ui.err('No coverage', 'Purchase Safety Fund coverage first.')] });
         }
         
-        if (new Date() > new Date(userData.insurance.expiresAt)) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Policy Expired`)
-                .setDescription('Your insurance policy has expired.\n\nPurchase a new policy to continue coverage.')
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+        const activeCoverage = userData.safetyFund.find(c => new Date(c.expiresAt) > new Date());
+        if (!activeCoverage) {
+            return interaction.editReply({ embeds: [ui.err('No active coverage', 'All coverage has expired.')] });
         }
         
-        if (userData.insurance.claimsUsed >= userData.insurance.maxClaims) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Claims Exhausted`)
-                .setDescription('You have used all available claims for this policy period.\n\nWait for renewal or purchase additional coverage.')
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+        const entries = await TransactionManager.getLedgerEntries(interaction.user.id, 50);
+        const referenceTx = entries.find(entry => entry.ref_tx_id === refTxId);
+        
+        if (!referenceTx) {
+            return interaction.editReply({ embeds: [ui.err('Transaction not found', 'Invalid ref_tx_id provided.')] });
         }
         
-        const lossAmount = interaction.options.getNumber('loss_amount');
-        const reason = interaction.options.getString('reason');
-        
-        const maxClaimAmount = 10000; // Maximum claim per incident
-        
-        if (lossAmount > maxClaimAmount) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.ERROR} Claim Too Large`)
-                .setDescription(`Maximum claim amount is ${maxClaimAmount.toFixed(2)} VEX per incident.\n\nFor larger losses, file multiple claims.`)
-                .setColor(constants.COLORS.ERROR);
-            
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+        if (!['casino_loss', 'invest_loss'].includes(referenceTx.type)) {
+            return interaction.editReply({ embeds: [ui.err('Invalid transaction type', 'Only casino/investment losses are covered.')] });
         }
         
-        const coverageAmount = lossAmount * userData.insurance.coverage;
-        const claimId = this.generateClaimId();
+        const txTime = new Date(referenceTx.timestamp);
+        const hoursSince = (Date.now() - txTime.getTime()) / (1000 * 60 * 60);
+        if (hoursSince > 24) {
+            return interaction.editReply({ embeds: [ui.err('Claim expired', 'Claims must be filed within 24 hours.')] });
+        }
         
-        await user.addVEX(coverageAmount, 'insurance_claim');
-        Economics.apply({ event: 'reward', amountVEX: coverageAmount, userId: interaction.user.id, meta: { command: 'insurance' } });
-        
-        userData.insurance.claimsUsed++;
-        
-        if (!userData.insurance.claims) userData.insurance.claims = [];
-        userData.insurance.claims.push({
-            id: claimId,
-            amount: lossAmount,
-            coverage: coverageAmount,
-            reason: reason,
-            filedAt: new Date().toISOString(),
-            status: 'approved'
-        });
-        
-        userData.stats.insuranceClaims = (userData.stats.insuranceClaims || 0) + 1;
-        userData.stats.commandsUsed++;
-        
-        await user.save(userData);
-        
-        const variableReward = Math.random() < 0.15 ? constants.VARIABLE_REWARDS[Math.floor(Math.random() * constants.VARIABLE_REWARDS.length)].replace('{amount}', (coverageAmount * 0.1).toFixed(2)) : null;
-        const socialProof = constants.SOCIAL_PROOF[Math.floor(Math.random() * constants.SOCIAL_PROOF.length)].replace('{count}', Math.floor(Math.random() * 12) + 8);
-        
-        const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.SUCCESS} Insurance Claim Approved!`)
-            .setDescription(`Your claim has been processed and approved.${variableReward ? `\n\n${variableReward}` : ''}\n\n${socialProof}`)
-            .addFields(
-                { name: '🆔 Claim ID', value: claimId, inline: true },
-                { name: '💸 Loss Amount', value: `${lossAmount.toFixed(2)} VEX`, inline: true },
-                { name: '💰 Coverage Paid', value: `${coverageAmount.toFixed(2)} VEX`, inline: true },
-                { name: '📋 Reason', value: reason.charAt(0).toUpperCase() + reason.slice(1), inline: true },
-                { name: '📊 Coverage Rate', value: `${(userData.insurance.coverage * 100)}%`, inline: true },
-                { name: '🔢 Claims Remaining', value: `${userData.insurance.maxClaims - userData.insurance.claimsUsed}`, inline: true },
-                { name: '💼 New Balance', value: `${userData.vexBalance.toFixed(2)} VEX`, inline: false }
-            )
-            .setColor(constants.COLORS.SUCCESS)
-            .setFooter({ text: `Claim #${claimId} • Funds have been added to your wallet` })
-            .setTimestamp();
-        
-        const statusButton = new ButtonBuilder()
-            .setCustomId('insurance_status')
-            .setLabel('Policy Status')
-            .setStyle(ButtonStyle.Primary)
-            .setEmoji('📊');
-        
-        const historyButton = new ButtonBuilder()
-            .setCustomId('insurance_claim_history')
-            .setLabel('Claim History')
-            .setStyle(ButtonStyle.Secondary)
-            .setEmoji('📋');
-        
-        const row = new ActionRowBuilder().addComponents(statusButton, historyButton);
-        
-        const CanvasRenderer = require('../../utils/canvasRenderer');
-        const canvasRenderer = new CanvasRenderer();
-        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Claim Processing: 100% Complete`,
-            1.0,
-            constants.COLORS.SUCCESS
+        const alreadyClaimed = userData.safetyFund.some(c => 
+            c.claims && c.claims.some(claim => claim.ref_tx_id === refTxId)
         );
+        if (alreadyClaimed) {
+            return interaction.editReply({ embeds: [ui.err('Already claimed', 'This transaction has already been claimed.')] });
+        }
         
-        await interaction.reply({ 
-            embeds: [embed], 
-            components: [row],
-            files: [{ attachment: progressBuffer, name: 'progress.png' }]
-        });
+        const lossAmount = Math.abs(referenceTx.deltaVEX);
+        const coverageAmount = Math.min(lossAmount * activeCoverage.coverageRate, 500);
+        
+        const dailyUsed = userData.safetyFund.reduce((total, coverage) => {
+            if (!coverage.claims) return total;
+            const todayClaims = coverage.claims.filter(claim => {
+                const claimDate = new Date(claim.date);
+                const today = new Date();
+                return claimDate.toDateString() === today.toDateString();
+            });
+            return total + todayClaims.reduce((sum, claim) => sum + claim.payout, 0);
+        }, 0);
+        
+        const remainingDaily = Math.max(0, 500 - dailyUsed);
+        const finalPayout = Math.min(coverageAmount, remainingDaily);
+        
+        if (finalPayout <= 0) {
+            return interaction.editReply({ embeds: [ui.err('Daily limit reached', 'Daily claim limit of 500 VEX exceeded.')] });
+        }
+        
+        try {
+            await user.addVEX(finalPayout, 'safety_fund_claim');
+            
+            if (!activeCoverage.claims) activeCoverage.claims = [];
+            activeCoverage.claims.push({
+                ref_tx_id: refTxId,
+                loss_amount: lossAmount,
+                payout: finalPayout,
+                date: new Date().toISOString()
+            });
+            
+            await user.save(userData);
+            
+            const embed = ui.ok('Claim approved', 
+                `Loss: ${ui.formatCurrency(lossAmount)}\n` +
+                `Payout: ${ui.formatCurrency(finalPayout)}\n` +
+                `Coverage: ${(activeCoverage.coverageRate * 100)}%\n` +
+                `Ref: ${refTxId}`
+            );
+            
+            await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+            await interaction.editReply({ embeds: [ui.err('Claim failed', error.message)] });
+        }
     },
-    
+
     async handleStatus(interaction) {
         const user = new User(interaction.user.id);
         const userData = await user.load();
         
-        if (!userData.insurance) {
-            const embed = new EmbedBuilder()
-                .setTitle(`${constants.EMOJIS.INSURANCE} Insurance Status`)
-                .setDescription('You don\'t have any insurance coverage.\n\nProtect your VEX with an insurance policy!')
-                .addFields(
-                    { name: '🛡️ Available Policies', value: '**Basic**: 25% coverage - $50/month\n**Premium**: 50% coverage - $100/month\n**Elite**: 75% coverage - $200/month', inline: false },
-                    { name: '💡 Benefits', value: '• Protection against losses\n• Peace of mind\n• Quick claim processing\n• Multiple coverage options', inline: false }
-                )
-                .setColor(constants.COLORS.INFO);
-            
-            const buyButton = new ButtonBuilder()
-                .setCustomId('insurance_buy_menu')
-                .setLabel('Buy Insurance')
-                .setStyle(ButtonStyle.Success)
-                .setEmoji('🛡️');
-            
-            const row = new ActionRowBuilder().addComponents(buyButton);
-            
-            return interaction.reply({ embeds: [embed], components: [row] });
-        }
+        const activeCoverage = userData.safetyFund?.filter(c => new Date(c.expiresAt) > new Date()) || [];
+        const totalCoverage = activeCoverage.reduce((sum, c) => sum + c.amount, 0);
         
-        const isActive = userData.insurance.active && new Date() < new Date(userData.insurance.expiresAt);
-        const statusEmoji = isActive ? '✅' : '❌';
-        const statusText = isActive ? 'Active' : 'Expired';
-        
-        const embed = new EmbedBuilder()
-            .setTitle(`${constants.EMOJIS.INSURANCE} Insurance Policy Status`)
-            .setDescription(`Your insurance policy overview`)
-            .addFields(
-                { name: '📊 Policy Status', value: `${statusEmoji} ${statusText}`, inline: true },
-                { name: '🛡️ Policy Type', value: userData.insurance.type.charAt(0).toUpperCase() + userData.insurance.type.slice(1), inline: true },
-                { name: '📈 Coverage Rate', value: `${(userData.insurance.coverage * 100)}%`, inline: true },
-                { name: '📅 Purchased', value: `<t:${Math.floor(new Date(userData.insurance.purchasedAt).getTime() / 1000)}:R>`, inline: true },
-                { name: '⏰ Expires', value: `<t:${Math.floor(new Date(userData.insurance.expiresAt).getTime() / 1000)}:R>`, inline: true },
-                { name: '💰 Total Paid', value: `${userData.insurance.totalPaid.toFixed(2)} VEX`, inline: true },
-                { name: '🔢 Claims Used', value: `${userData.insurance.claimsUsed}/${userData.insurance.maxClaims}`, inline: true },
-                { name: '💸 Total Claims', value: `${this.getTotalClaims(userData.insurance.claims || []).toFixed(2)} VEX`, inline: true },
-                { name: '📊 Claim Success Rate', value: '100%', inline: true }
-            )
-            .setColor(isActive ? constants.COLORS.SUCCESS : constants.COLORS.ERROR)
-            .setThumbnail(interaction.user.displayAvatarURL())
-            .setFooter({ text: 'Insurance protects your VEX investments' })
-            .setTimestamp();
-        
-        if (userData.insurance.claims && userData.insurance.claims.length > 0) {
-            const recentClaims = userData.insurance.claims
-                .sort((a, b) => new Date(b.filedAt) - new Date(a.filedAt))
-                .slice(0, 3)
-                .map(claim => `• ${claim.coverage.toFixed(2)} VEX - ${claim.reason}`)
-                .join('\n');
-            
-            embed.addFields({
-                name: '📋 Recent Claims',
-                value: recentClaims,
-                inline: false
+        const dailyUsed = userData.safetyFund?.reduce((total, coverage) => {
+            if (!coverage.claims) return total;
+            const todayClaims = coverage.claims.filter(claim => {
+                const claimDate = new Date(claim.date);
+                const today = new Date();
+                return claimDate.toDateString() === today.toDateString();
             });
-        }
+            return total + todayClaims.reduce((sum, claim) => sum + claim.payout, 0);
+        }, 0) || 0;
         
-        const renewButton = new ButtonBuilder()
-            .setCustomId('insurance_renew')
-            .setLabel('Renew Policy')
-            .setStyle(ButtonStyle.Success)
-            .setEmoji('🔄')
-            .setDisabled(isActive);
+        const remainingDaily = Math.max(0, 500 - dailyUsed);
         
-        const claimButton = new ButtonBuilder()
-            .setCustomId('insurance_claim_menu')
-            .setLabel('File Claim')
-            .setStyle(ButtonStyle.Primary)
-            .setEmoji('📋')
-            .setDisabled(!isActive || userData.insurance.claimsUsed >= userData.insurance.maxClaims);
-        
-        const cancelButton = new ButtonBuilder()
-            .setCustomId('insurance_cancel')
-            .setLabel('Cancel Policy')
-            .setStyle(ButtonStyle.Danger)
-            .setEmoji('❌')
-            .setDisabled(!isActive);
-        
-        const row = new ActionRowBuilder().addComponents(renewButton, claimButton, cancelButton);
-        
-        const CanvasRenderer = require('../../utils/canvasRenderer');
-        const canvasRenderer = new CanvasRenderer();
-        const coverageProgress = userData.insurance ? userData.insurance.coverage : 0;
-        const progressBuffer = await canvasRenderer.createAnimatedProgressBar(
-            `Policy Coverage Status`,
-            coverageProgress,
-            userData.insurance?.active ? constants.COLORS.SUCCESS : constants.COLORS.WARNING
+        const embed = ui.info('Safety Fund Status', 
+            `Active Coverage: ${ui.formatCurrency(totalCoverage)}\n` +
+            `Daily Used: ${ui.formatCurrency(dailyUsed)} / 500 VEX\n` +
+            `Remaining Today: ${ui.formatCurrency(remainingDaily)}\n` +
+            `Coverage Rate: 50% of verified losses`
         );
         
-        await interaction.reply({ 
-            embeds: [embed], 
-            components: [row],
-            files: [{ attachment: progressBuffer, name: 'progress.png' }]
-        });
-    },
-    
-    generateClaimId() {
-        return 'CLM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
-    },
-    
-    getTotalClaims(claims) {
-        return claims.reduce((total, claim) => total + claim.coverage, 0);
+        await interaction.editReply({ embeds: [embed] });
     }
 };
